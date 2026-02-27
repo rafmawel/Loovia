@@ -1,0 +1,41 @@
+// Composant d'état vide — affiché quand aucune donnée n'est disponible
+import type { ReactNode } from 'react'
+import type { LucideIcon } from 'lucide-react'
+
+/** Props du composant EmptyState */
+interface EmptyStateProps {
+  /** Icône optionnelle affichée au centre (type LucideIcon de lucide-react) */
+  icon?: LucideIcon
+  /** Titre principal du message */
+  title: string
+  /** Description secondaire expliquant le contexte */
+  description: string
+  /** Bouton d'action optionnel (ex. : créer un premier élément) */
+  action?: ReactNode
+}
+
+export function EmptyState({ icon: Icon, title, description, action }: EmptyStateProps) {
+  return (
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      {/* Icône dans un cercle arrondi */}
+      {Icon && (
+        <div className="rounded-full bg-stone-100 p-4 mb-4 text-stone-400">
+          <Icon className="h-6 w-6" />
+        </div>
+      )}
+
+      {/* Titre */}
+      <h3 className="text-lg font-semibold text-slate-900 mb-1">
+        {title}
+      </h3>
+
+      {/* Description */}
+      <p className="text-sm text-stone-500 max-w-sm mb-6">
+        {description}
+      </p>
+
+      {/* Bouton d'action optionnel */}
+      {action && <div>{action}</div>}
+    </div>
+  )
+}

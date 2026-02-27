@@ -1,0 +1,92 @@
+'use client';
+
+import React from 'react';
+
+// --- Types pour le composant Input ---
+
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  /** Libellé affiché au-dessus du champ */
+  label?: string;
+  /** Message d'erreur affiché sous le champ (en rouge) */
+  error?: string;
+  /** Texte d'aide affiché sous le champ (en gris) */
+  helperText?: string;
+}
+
+/**
+ * Champ de saisie — Design "Premium Minimaliste Naturel"
+ *
+ * Coins arrondis, bordure discrète, focus terracotta.
+ * Supporte un label, un message d'erreur et un texte d'aide.
+ * Compatible avec react-hook-form via forwardRef.
+ */
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ label, error, helperText, id, className = '', ...rest }, ref) => {
+    // Génération d'un id stable si non fourni (pour le lien label/input)
+    const inputId = id ?? React.useId();
+
+    return (
+      <div className="flex flex-col gap-1.5">
+        {/* Label */}
+        {label && (
+          <label
+            htmlFor={inputId}
+            className="text-sm font-medium text-slate-900"
+          >
+            {label}
+          </label>
+        )}
+
+        {/* Champ de saisie */}
+        <input
+          ref={ref}
+          id={inputId}
+          aria-invalid={!!error}
+          aria-describedby={
+            error
+              ? `${inputId}-error`
+              : helperText
+                ? `${inputId}-helper`
+                : undefined
+          }
+          className={[
+            // Style de base
+            'rounded-xl border bg-white px-4 py-2.5 text-sm text-slate-900',
+            'placeholder:text-stone-400',
+            'transition-all duration-200',
+            // Focus — anneau terracotta
+            'focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta',
+            // État d'erreur
+            error
+              ? 'border-red-400 focus:ring-red-200 focus:border-red-500'
+              : 'border-stone-200',
+            // État désactivé
+            'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-stone-50',
+            className,
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          {...rest}
+        />
+
+        {/* Message d'erreur */}
+        {error && (
+          <p id={`${inputId}-error`} className="text-xs text-red-600" role="alert">
+            {error}
+          </p>
+        )}
+
+        {/* Texte d'aide (masqué si une erreur est affichée) */}
+        {!error && helperText && (
+          <p id={`${inputId}-helper`} className="text-xs text-stone-500">
+            {helperText}
+          </p>
+        )}
+      </div>
+    );
+  }
+);
+
+Input.displayName = 'Input';
+
+export default Input;

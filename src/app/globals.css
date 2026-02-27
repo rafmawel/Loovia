@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Palette Loovia */
+  --color-terracotta: #e2725b;
+  --color-terracotta-light: #f0a899;
+  --color-terracotta-dark: #c45a44;
+  --color-off-white: #f7f5f3;
+  --color-slate-900: #0f172a;
+  --color-stone-500: #78716c;
+  --color-stone-200: #e7e5e0;
+  --color-stone-100: #f5f5f4;
+  --color-stone-300: #d6d3d1;
+
+  /* Polices */
+  --font-sans: var(--font-inter);
+
+  /* Animations */
+  --animate-in: in 0.3s ease-out;
+  --animate-slide-in: slide-in-from-top 0.3s ease-out;
+  --animate-fade-in: fade-in 0.2s ease-out;
+}
+
+/* Animations personnalisées */
+@keyframes in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-from-top {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-from-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-out-to-right {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Styles de base */
+body {
+  background: var(--color-off-white);
+  color: var(--color-slate-900);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Chiffres tabulaires pour les montants */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Scrollbar personnalisée */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-stone-300);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-stone-500);
+}
+
+/* Focus visible pour accessibilité */
+*:focus-visible {
+  outline: 2px solid var(--color-terracotta);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
