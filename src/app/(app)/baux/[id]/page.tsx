@@ -3,11 +3,12 @@ import { createClient } from '@/lib/supabase/server';
 import { PageHeader } from '@/components/ui/PageHeader';
 import Card from '@/components/ui/Card';
 import StatusBadge from '@/components/ui/StatusBadge';
+import LeaseDetailActions from '@/components/leases/LeaseDetailActions';
 import { ArrowLeft, FileText, PenTool, Calendar, Building2, User, Shield, Thermometer, Scale } from 'lucide-react';
 import { formatCurrency, formatDate, fullName } from '@/lib/utils';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import type { Lease, Payment } from '@/types';
+import type { Lease, Property, Tenant, Payment } from '@/types';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -66,6 +67,8 @@ export default async function BailDetailPage({ params }: Props) {
   }
 
   const lease = leaseRes.data as Lease;
+  const property = lease.property as Property;
+  const tenant = lease.tenant as Tenant;
   const payments = (paymentsRes.data as Payment[]) || [];
   const d = (lease.data || {}) as LeaseData;
 
@@ -100,6 +103,9 @@ export default async function BailDetailPage({ params }: Props) {
         description={lease.tenant ? fullName(lease.tenant.first_name, lease.tenant.last_name) : undefined}
       >
         <StatusBadge variant="lease" status={lease.status} />
+        {property && tenant && (
+          <LeaseDetailActions lease={lease} property={property} tenant={tenant} />
+        )}
       </PageHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

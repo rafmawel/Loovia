@@ -40,7 +40,8 @@ export async function POST(request: NextRequest) {
     const landlordName = `${user.user_metadata?.first_name || ''} ${user.user_metadata?.last_name || ''}`.trim() || user.email || 'Propriétaire';
 
     // Générer le PDF du bail
-    const pdfDataUri = generateLeasePdf(typedLease, property, tenant, landlordName);
+    const pdfDoc = generateLeasePdf(typedLease, property, tenant);
+    const pdfDataUri = pdfDoc.output('datauristring');
 
     // Envoyer pour signature via Firma
     const callbackUrl = `${request.nextUrl.origin}/api/webhooks/firma`;
