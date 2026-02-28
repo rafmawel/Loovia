@@ -10,6 +10,7 @@ import {
   Users,
   FileText,
   Wallet,
+  Wrench,
   FolderOpen,
   Settings,
   LogOut,
@@ -45,6 +46,7 @@ const navItems: NavItem[] = [
   { label: 'Locataires', href: '/locataires', icon: Users },
   { label: 'Baux', href: '/baux', icon: FileText },
   { label: 'Finances', href: '/finances', icon: Wallet },
+  { label: 'Travaux', href: '/maintenance', icon: Wrench },
   { label: 'Documents', href: '/documents', icon: FolderOpen },
   { label: 'Paramètres', href: '/parametres', icon: Settings },
 ]

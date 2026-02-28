@@ -5,16 +5,17 @@ import { StatCard } from '@/components/ui/StatCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import Card from '@/components/ui/Card';
 import StatusBadge from '@/components/ui/StatusBadge';
-import { Building2, Users, Wallet, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Building2, Users, Wallet, TrendingUp, AlertTriangle, Wrench } from 'lucide-react';
 import { formatCurrency, formatDate, fullName } from '@/lib/utils';
+import { priorityLabels, priorityColors } from '@/lib/design-system';
 import Link from 'next/link';
-import type { Property, Tenant, Payment, Lease } from '@/types';
+import type { Property, Tenant, Payment, Lease, MaintenanceRequest } from '@/types';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
 
   // Chargement des données en parallèle
-  const [propertiesRes, tenantsRes, paymentsRes, leasesRes] = await Promise.all([
+  const [propertiesRes, tenantsRes, paymentsRes, leasesRes, maintenanceRes] = await Promise.all([
     supabase.from('properties').select('*'),
     supabase.from('tenants').select('*'),
     supabase
@@ -26,12 +27,19 @@ export default async function DashboardPage() {
       .select('*, property:properties(*), tenant:tenants(*)')
       .order('created_at', { ascending: false })
       .limit(5),
+    supabase
+      .from('maintenance_requests')
+      .select('*, property:properties(name)')
+      .in('status', ['open', 'in_progress'])
+      .order('created_at', { ascending: false })
+      .limit(5),
   ]);
 
   const properties = (propertiesRes.data as Property[]) || [];
   const tenants = (tenantsRes.data as Tenant[]) || [];
   const payments = (paymentsRes.data as Payment[]) || [];
   const recentLeases = (leasesRes.data as Lease[]) || [];
+  const openMaintenance = (maintenanceRes.data as (MaintenanceRequest & { property?: { name: string } })[]) || [];
 
   // Calcul des KPIs
   const activeTenants = tenants.filter((t) => !t.end_date || new Date(t.end_date) > new Date());
@@ -146,6 +154,49 @@ export default async function DashboardPage() {
               Voir tous les retards →
             </Link>
           )}
+        </div>
+      )}
+
+      {/* Alerte — demandes de travaux ouvertes */}
+      {openMaintenance.length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <Wrench className="h-5 w-5 text-amber-600" />
+            <h2 className="text-lg font-bold text-amber-800">
+              {openMaintenance.length} demande{openMaintenance.length > 1 ? 's' : ''} de travaux en attente
+            </h2>
+          </div>
+          <div className="space-y-3">
+            {openMaintenance.map((req) => (
+              <div
+                key={req.id}
+                className="flex items-center justify-between bg-white rounded-xl p-4 border border-amber-100"
+              >
+                <div>
+                  <p className="text-sm font-medium text-slate-900">{req.title}</p>
+                  <p className="text-xs text-stone-500">
+                    {req.property?.name || '—'} — {formatDate(req.created_at)}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                      priorityColors[req.priority]?.bg || 'bg-stone-100'
+                    } ${priorityColors[req.priority]?.text || 'text-stone-600'}`}
+                  >
+                    {priorityLabels[req.priority] || req.priority}
+                  </span>
+                  <StatusBadge variant="maintenance" status={req.status} />
+                </div>
+              </div>
+            ))}
+          </div>
+          <Link
+            href="/maintenance"
+            className="inline-block mt-4 text-sm font-medium text-amber-700 hover:text-amber-800"
+          >
+            Voir toutes les demandes →
+          </Link>
         </div>
       )}
 

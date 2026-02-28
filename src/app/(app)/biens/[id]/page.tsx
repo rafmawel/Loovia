@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { PageHeader } from '@/components/ui/PageHeader';
 import Card from '@/components/ui/Card';
 import StatusBadge from '@/components/ui/StatusBadge';
+import PropertyMaintenanceSection from '@/components/maintenance/PropertyMaintenanceSection';
 import {
   Building2, MapPin, ArrowLeft, Home, Thermometer, Wallet, Shield, Utensils,
   Warehouse, FileText, User, Wrench, ChevronRight, ClipboardList, Plus,
@@ -299,25 +300,12 @@ export default async function BienDetailPage({ params }: Props) {
           </Card>
 
           {/* 11. Demandes de travaux */}
-          {maintenanceRequests.length > 0 && (
-            <Card>
-              <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                <Wrench className="h-5 w-5 text-terracotta" />
-                Demandes de travaux ({maintenanceRequests.length})
-              </h2>
-              <div className="space-y-3">
-                {maintenanceRequests.map((req) => (
-                  <div key={req.id} className="flex items-center justify-between p-3 rounded-xl bg-stone-50">
-                    <div>
-                      <p className="text-sm font-medium text-slate-900">{req.title}</p>
-                      <p className="text-xs text-stone-500">{formatDate(req.created_at)}</p>
-                    </div>
-                    <StatusBadge variant="maintenance" status={req.status} />
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
+          <Card>
+            <PropertyMaintenanceSection
+              propertyId={property.id}
+              tenantId={activeTenants.length > 0 ? activeTenants[0].id : null}
+            />
+          </Card>
         </div>
 
         {/* Colonne latérale */}
