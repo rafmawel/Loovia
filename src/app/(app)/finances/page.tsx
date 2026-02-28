@@ -11,9 +11,9 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import {
   Wallet, TrendingUp, TrendingDown, AlertTriangle, Landmark,
-  RefreshCw, Check, X, Tag, ChevronDown, Filter,
+  RefreshCw, Check, X, Tag, ChevronDown, Filter, FileText, Send,
 } from 'lucide-react';
-import { formatCurrency, formatDate, fullName } from '@/lib/utils';
+import { formatCurrency, formatDate, fullName, formatMonthYear } from '@/lib/utils';
 import { toast } from 'sonner';
 import type {
   Payment, Lease, Tenant, Property,
@@ -74,6 +74,15 @@ export default function FinancesPage() {
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
+
+    // ── Détection automatique des retards ───────────────────────────
+    // Passer les paiements "pending" dont la date d'échéance est dépassée à "late"
+    const now = new Date().toISOString().split('T')[0];
+    await supabase
+      .from('payments')
+      .update({ status: 'late' })
+      .eq('status', 'pending')
+      .lt('period_end', now);
 
     const [paymentsRes, txRes, connectionsRes] = await Promise.all([
       supabase
@@ -181,10 +190,94 @@ export default function FinancesPage() {
         body: JSON.stringify({ action: 'validate', transactionId: txId, paymentId }),
       });
       if (!res.ok) throw new Error('Erreur');
-      toast.success('Transaction validée comme loyer');
+
+      // Trouver le tenant associé pour le toast
+      const tx = transactions.find((t) => t.id === txId);
+      const tenant = tx?.payment?.lease?.tenant;
+      const tenantLabel = tenant
+        ? `${tenant.first_name} ${tenant.last_name}`
+        : 'Locataire';
+
+      // Toast interactif avec bouton quittance
+      toast.success(`Loyer de ${tenantLabel} validé !`, {
+        action: {
+          label: 'Générer la quittance',
+          onClick: () => handleSendReceipt(paymentId),
+        },
+        duration: 8000,
+      });
+
       fetchAll();
     } catch {
       toast.error('Erreur lors de la validation');
+    }
+  };
+
+  // ── Envoi de quittance ───────────────────────────────────────────
+
+  const handleSendReceipt = async (paymentId: string) => {
+    try {
+      const res = await fetch('/api/receipts/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payment_id: paymentId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      toast.success(`Quittance envoyée à ${data.email}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erreur lors de l\'envoi');
+    }
+  };
+
+  // ── Télécharger la quittance PDF ─────────────────────────────────
+
+  const handleDownloadReceipt = async (paymentId: string) => {
+    try {
+      const p = payments.find((pay) => pay.id === paymentId);
+      if (!p) return;
+
+      const { generateReceiptPdf, getReceiptFilename } = await import(
+        '@/lib/pdf/generate-receipt'
+      );
+
+      // On a besoin du lease, property, tenant complets
+      // Récupérons-les depuis l'API
+      const res = await supabase
+        .from('payments')
+        .select('*, lease:leases(*, property:properties(*), tenant:tenants(*))')
+        .eq('id', paymentId)
+        .single();
+
+      if (!res.data) throw new Error('Données introuvables');
+
+      const paymentFull = res.data as PaymentWithRelations & {
+        lease: { charges_amount: number; property: { address: string; postal_code: string; city: string }; tenant: { first_name: string; last_name: string } };
+      };
+
+      const period = formatMonthYear(paymentFull.period_start);
+      const tenant = paymentFull.lease?.tenant;
+      const property = paymentFull.lease?.property;
+
+      if (!tenant || !property) throw new Error('Données incomplètes');
+
+      const doc = generateReceiptPdf(
+        paymentFull as unknown as Parameters<typeof generateReceiptPdf>[0],
+        paymentFull.lease as unknown as Parameters<typeof generateReceiptPdf>[1],
+        property as unknown as Parameters<typeof generateReceiptPdf>[2],
+        tenant as unknown as Parameters<typeof generateReceiptPdf>[3],
+        'Propriétaire',
+      );
+
+      const filename = getReceiptFilename(
+        tenant as unknown as Parameters<typeof getReceiptFilename>[0],
+        period,
+      );
+      doc.save(filename);
+      toast.success('PDF téléchargé');
+    } catch (err) {
+      toast.error('Erreur lors de la génération du PDF');
+      console.error(err);
     }
   };
 
@@ -227,10 +320,11 @@ export default function FinancesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ paymentId }),
       });
-      if (!res.ok) throw new Error('Erreur');
-      toast.success('Rappel envoyé');
-    } catch {
-      toast.error("Erreur lors de l'envoi du rappel");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur');
+      toast.success(`Relance envoyée à ${data.email}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur lors de l'envoi du rappel");
     }
   };
 

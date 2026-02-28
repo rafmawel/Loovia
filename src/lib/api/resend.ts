@@ -76,30 +76,66 @@ export async function sendReceiptEmail(
   });
 }
 
-// Envoyer un rappel de loyer
+// Envoyer un rappel de loyer impayé
 export async function sendRentReminder(
   tenantEmail: string,
-  tenantName: string,
+  tenantFirstName: string,
+  tenantFullName: string,
   amount: string,
-  dueDate: string
+  dueDate: string,
+  propertyAddress: string,
+  landlordName: string,
 ): Promise<ResendResponse> {
   return sendEmail({
     to: tenantEmail,
-    subject: `Rappel — Loyer en attente`,
+    subject: `Rappel : Loyer impayé — ${propertyAddress}`,
     html: `
-      <div style="font-family: Inter, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #0f172a;">Bonjour ${tenantName},</h2>
-        <p style="color: #78716c;">
-          Nous vous rappelons que votre loyer de <strong>${amount}</strong> était attendu
-          pour le <strong>${dueDate}</strong>.
-        </p>
-        <p style="color: #78716c;">
-          Si le paiement a déjà été effectué, veuillez ignorer ce message.
-        </p>
-        <p style="color: #78716c;">
-          Cordialement,<br/>
-          <strong style="color: #e2725b;">Loovia</strong>
-        </p>
+      <div style="font-family: 'Segoe UI', Inter, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+        <!-- Header -->
+        <div style="background: #e2725b; padding: 24px 32px; border-radius: 12px 12px 0 0;">
+          <h1 style="color: #ffffff; font-size: 18px; margin: 0;">Rappel de loyer</h1>
+        </div>
+
+        <div style="padding: 32px;">
+          <!-- Salutation -->
+          <p style="color: #0f172a; font-size: 15px; margin-bottom: 16px;">
+            Bonjour <strong>${tenantFirstName}</strong>,
+          </p>
+
+          <!-- Corps -->
+          <p style="color: #57534e; font-size: 14px; line-height: 1.6; margin-bottom: 16px;">
+            Nous vous informons que le loyer de <strong style="color: #0f172a;">${amount}</strong>
+            pour le bien situé au <strong style="color: #0f172a;">${propertyAddress}</strong>
+            n'a pas été reçu à la date d'échéance.
+          </p>
+
+          <!-- Date en évidence -->
+          <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; text-align: center;">
+            <p style="color: #991b1b; font-size: 13px; margin: 0;">
+              Date d'échéance : <strong style="font-size: 15px;">${dueDate}</strong>
+            </p>
+          </div>
+
+          <p style="color: #57534e; font-size: 14px; line-height: 1.6; margin-bottom: 24px;">
+            Nous vous remercions de bien vouloir régulariser cette situation dans les meilleurs délais.
+            Si le paiement a déjà été effectué, veuillez ignorer ce message.
+          </p>
+
+          <!-- Signature -->
+          <p style="color: #57534e; font-size: 14px; margin-bottom: 4px;">
+            Cordialement,
+          </p>
+          <p style="color: #0f172a; font-size: 14px; font-weight: 600; margin: 0;">
+            ${landlordName}
+          </p>
+        </div>
+
+        <!-- Footer -->
+        <div style="background: #f7f5f3; padding: 16px 32px; border-radius: 0 0 12px 12px; border-top: 1px solid #e7e5e4;">
+          <p style="color: #a8a29e; font-size: 11px; margin: 0; text-align: center;">
+            Envoyé via <strong style="color: #e2725b;">Loovia</strong>
+          </p>
+        </div>
       </div>
     `,
   });
