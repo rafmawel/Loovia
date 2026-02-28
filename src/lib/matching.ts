@@ -1,106 +1,133 @@
-// Moteur de matching bancaire — rapprochement automatique des transactions
+// Moteur de matching — rapprochement automatique transactions ↔ paiements
 import type { BankTransaction, Payment, Tenant, Lease } from '@/types';
 
-interface MatchResult {
+// ── Types ──────────────────────────────────────────────────────────
+
+export interface MatchResult {
   transactionId: string;
-  paymentId: string;
-  confidence: number; // 0 à 1
-  reason: string;
+  paymentId: string | null;
+  score: number;
+  status: 'matched' | 'suggestion' | 'unmatched';
+  details: string[];
 }
 
-// Rapprocher une transaction bancaire avec un paiement en attente
-export function matchTransaction(
-  transaction: BankTransaction,
-  pendingPayments: (Payment & { lease: Lease & { tenant: Tenant } })[],
-): MatchResult | null {
-  let bestMatch: MatchResult | null = null;
-  let bestScore = 0;
+// ── Scoring d'un couple transaction/paiement ──────────────────────
 
-  for (const payment of pendingPayments) {
-    let score = 0;
-    const reasons: string[] = [];
+function scoreMatch(
+  tx: BankTransaction,
+  payment: Payment,
+  tenant: Tenant | undefined,
+): { score: number; details: string[] } {
+  let score = 0;
+  const details: string[] = [];
 
-    // Critère 1 : Montant exact (poids fort)
-    const expectedAmount = payment.amount_expected;
-    const txAmount = Math.abs(transaction.amount);
-    if (txAmount === expectedAmount) {
-      score += 0.5;
-      reasons.push('Montant exact');
-    } else if (Math.abs(txAmount - expectedAmount) <= 1) {
-      score += 0.35;
-      reasons.push('Montant approchant (±1€)');
-    } else if (Math.abs(txAmount - expectedAmount) / expectedAmount <= 0.05) {
-      score += 0.2;
-      reasons.push('Montant proche (±5%)');
-    }
+  // 1. MONTANT (+50 points) — écart < 1€
+  const amountDiff = Math.abs(Math.abs(tx.amount) - payment.amount_expected);
+  if (amountDiff < 1) {
+    score += 50;
+    details.push(`Montant exact (écart ${amountDiff.toFixed(2)}€)`);
+  } else if (amountDiff < 10) {
+    score += 25;
+    details.push(`Montant proche (écart ${amountDiff.toFixed(2)}€)`);
+  }
 
-    // Critère 2 : IBAN correspondant
-    if (
-      transaction.sender_iban &&
-      payment.lease.tenant.last_known_iban &&
-      transaction.sender_iban === payment.lease.tenant.last_known_iban
-    ) {
-      score += 0.3;
-      reasons.push('IBAN correspondant');
-    }
+  // 2. PÉRIODE (+20 points) — date dans [period_start - 5j, period_end + 10j]
+  const txDate = new Date(tx.date);
+  const periodStart = new Date(payment.period_start);
+  const periodEnd = new Date(payment.period_end);
+  periodStart.setDate(periodStart.getDate() - 5);
+  periodEnd.setDate(periodEnd.getDate() + 10);
 
-    // Critère 3 : Date dans la période attendue
-    const txDate = new Date(transaction.date);
-    const periodStart = new Date(payment.period_start);
-    const periodEnd = new Date(payment.period_end);
-    if (txDate >= periodStart && txDate <= periodEnd) {
-      score += 0.15;
-      reasons.push('Date dans la période');
-    }
+  if (txDate >= periodStart && txDate <= periodEnd) {
+    score += 20;
+    details.push('Date dans la période attendue');
+  }
 
-    // Critère 4 : Nom du locataire dans la description
-    if (transaction.description) {
-      const desc = transaction.description.toLowerCase();
-      const tenantName = `${payment.lease.tenant.first_name} ${payment.lease.tenant.last_name}`.toLowerCase();
-      if (desc.includes(tenantName) || desc.includes(payment.lease.tenant.last_name.toLowerCase())) {
-        score += 0.05;
-        reasons.push('Nom dans la description');
-      }
-    }
+  // 3. IBAN (+30 points) — hard match si IBAN dispo
+  if (
+    tx.sender_iban &&
+    tenant?.last_known_iban &&
+    tx.sender_iban.replace(/\s/g, '').toUpperCase() ===
+      tenant.last_known_iban.replace(/\s/g, '').toUpperCase()
+  ) {
+    score += 30;
+    details.push('IBAN correspondant');
+  }
 
-    if (score > bestScore) {
-      bestScore = score;
-      bestMatch = {
-        transactionId: transaction.id,
-        paymentId: payment.id,
-        confidence: Math.min(score, 1),
-        reason: reasons.join(', '),
-      };
+  // 4. NOM (+15 points) — description contient le nom du locataire
+  if (tenant?.last_name && tx.description) {
+    const lastName = tenant.last_name.toLowerCase();
+    const desc = tx.description.toLowerCase();
+    if (desc.includes(lastName)) {
+      score += 15;
+      details.push(`Nom "${tenant.last_name}" trouvé dans le libellé`);
     }
   }
 
-  // Seuil minimal de confiance pour proposer un rapprochement
-  if (bestMatch && bestMatch.confidence >= 0.4) {
-    return bestMatch;
-  }
-
-  return null;
+  return { score, details };
 }
 
-// Traiter un lot de transactions et retourner les suggestions
-export function batchMatch(
+// ── Matching d'un lot de transactions ──────────────────────────────
+
+export function matchTransactions(
   transactions: BankTransaction[],
-  pendingPayments: (Payment & { lease: Lease & { tenant: Tenant } })[],
+  pendingPayments: (Payment & { lease?: Lease & { tenant?: Tenant } })[],
+  tenants: Tenant[],
 ): MatchResult[] {
-  const results: MatchResult[] = [];
-  const usedPaymentIds = new Set<string>();
+  // Index rapide : tenant par lease_id
+  const tenantByLease = new Map<string, Tenant>();
+  for (const payment of pendingPayments) {
+    if (payment.lease?.tenant) {
+      tenantByLease.set(payment.lease_id, payment.lease.tenant as Tenant);
+    }
+  }
+  // Fallback : chercher dans la liste des tenants
+  for (const payment of pendingPayments) {
+    if (!tenantByLease.has(payment.lease_id) && payment.lease?.tenant_id) {
+      const tenant = tenants.find((t) => t.id === payment.lease!.tenant_id);
+      if (tenant) tenantByLease.set(payment.lease_id, tenant);
+    }
+  }
 
-  // Trier par montant pour commencer par les correspondances exactes
+  const matchedPaymentIds = new Set<string>();
+  const results: MatchResult[] = [];
+
+  // Trier par montant décroissant pour prioriser les gros montants
   const sorted = [...transactions].sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount));
 
   for (const tx of sorted) {
-    // Filtrer les paiements déjà utilisés
-    const available = pendingPayments.filter((p) => !usedPaymentIds.has(p.id));
-    const match = matchTransaction(tx, available);
-    if (match) {
-      results.push(match);
-      usedPaymentIds.add(match.paymentId);
+    let bestMatch: { payment: Payment; score: number; details: string[] } | null = null;
+
+    for (const payment of pendingPayments) {
+      if (matchedPaymentIds.has(payment.id)) continue;
+      if (payment.status === 'paid') continue;
+
+      const tenant = tenantByLease.get(payment.lease_id);
+      const { score, details } = scoreMatch(tx, payment, tenant);
+
+      if (score > 0 && (!bestMatch || score > bestMatch.score)) {
+        bestMatch = { payment, score, details };
+      }
     }
+
+    let status: MatchResult['status'] = 'unmatched';
+
+    if (bestMatch) {
+      if (bestMatch.score >= 90) {
+        status = 'matched';
+        matchedPaymentIds.add(bestMatch.payment.id);
+      } else if (bestMatch.score >= 70) {
+        status = 'suggestion';
+      }
+    }
+
+    results.push({
+      transactionId: tx.id,
+      paymentId: bestMatch?.payment.id ?? null,
+      score: bestMatch?.score ?? 0,
+      status,
+      details: bestMatch?.details ?? [],
+    });
   }
 
   return results;

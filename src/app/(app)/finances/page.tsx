@@ -1,62 +1,307 @@
 'use client';
 
-// Page Finances — vue d'ensemble des paiements et transactions
+// Page Finances — KPIs, alertes retards, connexion bancaire, transactions
 import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatCard } from '@/components/ui/StatCard';
 import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { Wallet, TrendingUp, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import {
+  Wallet, TrendingUp, TrendingDown, AlertTriangle, Landmark,
+  RefreshCw, Check, X, Tag, ChevronDown, Filter,
+} from 'lucide-react';
 import { formatCurrency, formatDate, fullName } from '@/lib/utils';
-import type { Payment, Lease } from '@/types';
+import { toast } from 'sonner';
+import type {
+  Payment, Lease, Tenant, Property,
+  BankConnection, BankTransaction, TransactionStatus,
+} from '@/types';
 
-type FilterStatus = 'all' | 'paid' | 'pending' | 'late' | 'partial';
+// ── Types étendus ──────────────────────────────────────────────────
+
+type PaymentWithRelations = Payment & {
+  lease?: Lease & {
+    tenant?: { first_name: string; last_name: string };
+    property?: { name: string; address: string };
+  };
+};
+
+type TransactionWithPayment = BankTransaction & {
+  payment?: Payment & {
+    lease?: Lease & {
+      tenant?: { first_name: string; last_name: string };
+    };
+  };
+};
+
+type FilterStatus = 'all' | TransactionStatus;
+type FilterCategory = 'all' | string;
+
+const CATEGORIES = [
+  'Loyer',
+  'Prêt',
+  'Charges Copro',
+  'Travaux',
+  'Assurance',
+  'Taxe/Impôt',
+  'Autre',
+];
+
+// ── Page ───────────────────────────────────────────────────────────
 
 export default function FinancesPage() {
-  const [payments, setPayments] = useState<(Payment & { lease?: Lease })[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<FilterStatus>('all');
   const supabase = createClient();
 
-  const fetchPayments = useCallback(async () => {
-    setLoading(true);
-    const { data } = await supabase
-      .from('payments')
-      .select('*, lease:leases(*, property:properties(name), tenant:tenants(first_name, last_name))')
-      .order('period_start', { ascending: false });
+  // Data
+  const [payments, setPayments] = useState<PaymentWithRelations[]>([]);
+  const [transactions, setTransactions] = useState<TransactionWithPayment[]>([]);
+  const [connections, setConnections] = useState<BankConnection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
 
-    setPayments((data as (Payment & { lease?: Lease })[]) || []);
+  // Filters
+  const [statusFilter, setStatusFilter] = useState<FilterStatus>('all');
+  const [categoryFilter, setCategoryFilter] = useState<FilterCategory>('all');
+  const [showCategoryMenu, setShowCategoryMenu] = useState<string | null>(null);
+
+  // Checkboxes
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  // ── Fetch ────────────────────────────────────────────────────────
+
+  const fetchAll = useCallback(async () => {
+    setLoading(true);
+
+    const [paymentsRes, txRes, connectionsRes] = await Promise.all([
+      supabase
+        .from('payments')
+        .select('*, lease:leases(*, property:properties(name, address), tenant:tenants(first_name, last_name))')
+        .order('period_start', { ascending: false }),
+      supabase
+        .from('bank_transactions')
+        .select('*, payment:payments(*, lease:leases(*, tenant:tenants(first_name, last_name)))')
+        .order('date', { ascending: false }),
+      supabase.from('bank_connections').select('*').order('created_at', { ascending: false }),
+    ]);
+
+    setPayments((paymentsRes.data as PaymentWithRelations[]) || []);
+    setTransactions((txRes.data as TransactionWithPayment[]) || []);
+    setConnections((connectionsRes.data as BankConnection[]) || []);
     setLoading(false);
   }, [supabase]);
 
   useEffect(() => {
-    fetchPayments();
-  }, [fetchPayments]);
+    fetchAll();
+  }, [fetchAll]);
 
-  // Calcul des KPIs
-  const totalExpected = payments.reduce((s, p) => s + p.amount_expected, 0);
-  const totalPaid = payments.reduce((s, p) => s + p.amount_paid, 0);
+  // ── KPIs ─────────────────────────────────────────────────────────
+
+  const incomes = transactions
+    .filter((tx) => tx.status === 'matched' || tx.category === 'Loyer')
+    .reduce((s, tx) => s + Math.abs(tx.amount), 0);
+
+  const expenses = transactions
+    .filter((tx) => tx.amount < 0 && tx.category !== 'Loyer' && tx.status !== 'matched')
+    .reduce((s, tx) => s + Math.abs(tx.amount), 0);
+
+  const cashflow = incomes - expenses;
+
+  // ── Retards ──────────────────────────────────────────────────────
+
   const latePayments = payments.filter((p) => p.status === 'late');
-  const lateTotal = latePayments.reduce((s, p) => s + (p.amount_expected - p.amount_paid), 0);
-  const recoveryRate = totalExpected > 0 ? Math.round((totalPaid / totalExpected) * 100) : 0;
 
-  // Filtrage
-  const filteredPayments = filter === 'all' ? payments : payments.filter((p) => p.status === filter);
+  // ── Transactions filtrées ────────────────────────────────────────
 
-  const filterButtons: { label: string; value: FilterStatus }[] = [
-    { label: 'Tous', value: 'all' },
-    { label: 'Payés', value: 'paid' },
-    { label: 'En attente', value: 'pending' },
-    { label: 'En retard', value: 'late' },
-    { label: 'Partiels', value: 'partial' },
-  ];
+  const filteredTransactions = transactions.filter((tx) => {
+    if (statusFilter !== 'all' && tx.status !== statusFilter) return false;
+    if (categoryFilter !== 'all' && tx.category !== categoryFilter) return false;
+    return true;
+  });
+
+  // ── Actions ──────────────────────────────────────────────────────
+
+  const handlePlaidLink = async () => {
+    try {
+      const res = await fetch('/api/plaid/create-link-token', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      // Charger Plaid Link dynamiquement
+      const { default: loadPlaidLink } = await import('@/lib/plaid-link');
+      await loadPlaidLink(data.link_token, async (publicToken: string, metadata: Record<string, unknown>) => {
+        const institution = metadata?.institution as { name?: string } | undefined;
+        const exchangeRes = await fetch('/api/plaid/exchange-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            publicToken,
+            institutionName: institution?.name || null,
+          }),
+        });
+        if (!exchangeRes.ok) throw new Error('Erreur lors de la connexion');
+        toast.success('Compte bancaire connecté');
+        fetchAll();
+      });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erreur');
+    }
+  };
+
+  const handleSync = async () => {
+    if (connections.length === 0) return;
+    setSyncing(true);
+    try {
+      const res = await fetch('/api/finance/sync-bank', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ connectionId: connections[0].id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      toast.success(
+        `Synchronisation terminée : ${data.added} nouvelles, ${data.matched} matchées, ${data.suggestions} suggestions`,
+      );
+      fetchAll();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erreur de synchronisation');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const handleValidate = async (txId: string, paymentId: string) => {
+    try {
+      const res = await fetch('/api/finance/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'validate', transactionId: txId, paymentId }),
+      });
+      if (!res.ok) throw new Error('Erreur');
+      toast.success('Transaction validée comme loyer');
+      fetchAll();
+    } catch {
+      toast.error('Erreur lors de la validation');
+    }
+  };
+
+  const handleIgnore = async (txId: string) => {
+    try {
+      const res = await fetch('/api/finance/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'ignore', transactionId: txId }),
+      });
+      if (!res.ok) throw new Error('Erreur');
+      toast.success('Suggestion ignorée');
+      fetchAll();
+    } catch {
+      toast.error('Erreur');
+    }
+  };
+
+  const handleCategorize = async (txIds: string[], category: string) => {
+    try {
+      const res = await fetch('/api/finance/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'categorize', transactionIds: txIds, category }),
+      });
+      if (!res.ok) throw new Error('Erreur');
+      toast.success(`${txIds.length} transaction(s) catégorisée(s)`);
+      setSelected(new Set());
+      setShowCategoryMenu(null);
+      fetchAll();
+    } catch {
+      toast.error('Erreur lors de la catégorisation');
+    }
+  };
+
+  const handleReminder = async (paymentId: string) => {
+    try {
+      const res = await fetch('/api/finance/send-reminder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentId }),
+      });
+      if (!res.ok) throw new Error('Erreur');
+      toast.success('Rappel envoyé');
+    } catch {
+      toast.error("Erreur lors de l'envoi du rappel");
+    }
+  };
+
+  // ── Toggle checkbox ──────────────────────────────────────────────
+
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selected.size === filteredTransactions.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(filteredTransactions.map((tx) => tx.id)));
+    }
+  };
+
+  // ── Status badge par transaction ─────────────────────────────────
+
+  const renderTxStatus = (tx: TransactionWithPayment) => {
+    const tenant = tx.payment?.lease?.tenant;
+    switch (tx.status) {
+      case 'matched':
+        return <StatusBadge variant="transaction" status="matched" label="Loyer confirmé" />;
+      case 'suggestion':
+        return (
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+              Loyer détecté ?
+            </span>
+            {tenant && (
+              <span className="text-xs text-stone-500">
+                {tenant.first_name} {tenant.last_name}
+              </span>
+            )}
+            <div className="flex items-center gap-1 ml-1">
+              <button
+                onClick={() => tx.matched_payment_id && handleValidate(tx.id, tx.matched_payment_id)}
+                className="p-1 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                title="Valider"
+              >
+                <Check className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={() => handleIgnore(tx.id)}
+                className="p-1 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                title="Ignorer"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+        );
+      case 'categorized':
+        return <StatusBadge variant="transaction" status="categorized" label={tx.category} />;
+      default:
+        return <StatusBadge variant="transaction" status="unmatched" label="Non identifié" />;
+    }
+  };
+
+  // ── Loading ──────────────────────────────────────────────────────
 
   if (loading) {
     return (
       <div>
-        <PageHeader title="Finances" description="Suivi des paiements et revenus" />
+        <PageHeader title="Finances" description="Suivi financier et rapprochement bancaire" />
         <div className="flex items-center justify-center py-20">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-stone-200 border-t-terracotta" />
         </div>
@@ -64,108 +309,288 @@ export default function FinancesPage() {
     );
   }
 
+  // ── Render ───────────────────────────────────────────────────────
+
   return (
     <div>
-      <PageHeader title="Finances" description="Suivi des paiements et revenus" />
+      <PageHeader title="Finances" description="Suivi financier et rapprochement bancaire" />
 
-      {/* KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard
-          icon={Wallet}
-          label="Total attendu"
-          value={formatCurrency(totalExpected)}
-        />
-        <StatCard
-          icon={CheckCircle}
-          label="Total reçu"
-          value={formatCurrency(totalPaid)}
-        />
-        <StatCard
-          icon={AlertTriangle}
-          label="En retard"
-          value={formatCurrency(lateTotal)}
-        />
+      {/* SECTION 1 — KPIs */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
         <StatCard
           icon={TrendingUp}
-          label="Taux de recouvrement"
-          value={`${recoveryRate}%`}
+          label="Entrées (Loyers)"
+          value={formatCurrency(incomes)}
+          className="!border-emerald-100"
+        />
+        <StatCard
+          icon={TrendingDown}
+          label="Sorties (Charges)"
+          value={formatCurrency(expenses)}
+          className="!border-red-100"
+        />
+        <StatCard
+          icon={Wallet}
+          label="Cashflow Net"
+          value={formatCurrency(cashflow)}
+          trend={cashflow >= 0 ? { value: 0, positive: true } : { value: 0, positive: false }}
         />
       </div>
 
-      {/* Filtres */}
-      <div className="flex items-center gap-2 mb-6">
-        {filterButtons.map((btn) => (
-          <button
-            key={btn.value}
-            onClick={() => setFilter(btn.value)}
-            className={`px-4 py-2 text-sm font-medium rounded-xl transition-all ${
-              filter === btn.value
-                ? 'bg-terracotta text-white'
-                : 'bg-white text-stone-500 border border-stone-200 hover:bg-stone-50'
-            }`}
-          >
-            {btn.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Liste des paiements */}
-      {filteredPayments.length === 0 ? (
-        <Card>
-          <EmptyState
-            icon={Clock}
-            title="Aucun paiement"
-            description="Les paiements apparaîtront ici une fois que vous aurez créé des baux."
-          />
-        </Card>
-      ) : (
-        <Card padding="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-stone-50">
-                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Locataire</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Bien</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Période</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Attendu</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Reçu</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredPayments.map((payment) => {
-                  const lease = payment.lease as Lease | undefined;
-                  const tenant = lease?.tenant;
-                  const property = lease?.property;
-
-                  return (
-                    <tr key={payment.id} className="border-b border-stone-100 hover:bg-stone-50/50 transition-colors">
-                      <td className="px-6 py-4 text-sm font-medium text-slate-900">
-                        {tenant ? fullName(tenant.first_name, tenant.last_name) : '—'}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-stone-500">
-                        {property?.name || '—'}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-stone-500">
-                        {formatDate(payment.period_start)} — {formatDate(payment.period_end)}
-                      </td>
-                      <td className="px-6 py-4 text-sm font-medium tabular-nums text-slate-900">
-                        {formatCurrency(payment.amount_expected)}
-                      </td>
-                      <td className="px-6 py-4 text-sm font-medium tabular-nums text-slate-900">
-                        {formatCurrency(payment.amount_paid)}
-                      </td>
-                      <td className="px-6 py-4">
-                        <StatusBadge variant="payment" status={payment.status} />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+      {/* SECTION 2 — Alertes retards */}
+      {latePayments.length > 0 && (
+        <Card className="mb-6 !border-red-200 !bg-red-50/50">
+          <div className="flex items-center gap-2 mb-4">
+            <AlertTriangle className="h-5 w-5 text-red-500" />
+            <h2 className="text-lg font-bold text-red-800">
+              Paiements en retard ({latePayments.length})
+            </h2>
+          </div>
+          <div className="space-y-3">
+            {latePayments.map((p) => {
+              const tenant = p.lease?.tenant;
+              const property = p.lease?.property;
+              return (
+                <div
+                  key={p.id}
+                  className="flex items-center justify-between p-3 rounded-xl bg-white border border-red-100"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">
+                      {tenant ? fullName(tenant.first_name, tenant.last_name) : '—'}
+                    </p>
+                    <p className="text-xs text-stone-500">
+                      {property?.address || '—'} · Échéance {formatDate(p.period_end)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-bold tabular-nums text-red-600">
+                      {formatCurrency(p.amount_expected - p.amount_paid)}
+                    </span>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => handleReminder(p.id)}
+                    >
+                      Relancer
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </Card>
       )}
+
+      {/* SECTION 3 — Connexion bancaire */}
+      <Card className="mb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-terracotta/10 p-3 text-terracotta">
+              <Landmark className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-slate-900">
+                {connections.length > 0
+                  ? connections[0].institution_name || 'Compte connecté'
+                  : 'Connexion bancaire'}
+              </h2>
+              <p className="text-xs text-stone-500">
+                {connections.length > 0
+                  ? `Connecté le ${formatDate(connections[0].created_at)}`
+                  : 'Connectez votre banque pour synchroniser vos transactions'}
+              </p>
+            </div>
+          </div>
+          <div>
+            {connections.length > 0 ? (
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<RefreshCw className={`h-3.5 w-3.5 ${syncing ? 'animate-spin' : ''}`} />}
+                onClick={handleSync}
+                loading={syncing}
+              >
+                Tout synchroniser
+              </Button>
+            ) : (
+              <Button variant="primary" size="sm" onClick={handlePlaidLink}>
+                Connecter mon compte bancaire
+              </Button>
+            )}
+          </div>
+        </div>
+      </Card>
+
+      {/* SECTION 4 — Tableau des transactions */}
+      <Card padding="p-0">
+        {/* Toolbar */}
+        <div className="p-4 border-b border-stone-100 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-stone-400" />
+            {/* Filtre par statut */}
+            <div className="flex items-center gap-1">
+              {(
+                [
+                  { label: 'Tous', value: 'all' },
+                  { label: 'Matchées', value: 'matched' },
+                  { label: 'Suggestions', value: 'suggestion' },
+                  { label: 'Catégorisées', value: 'categorized' },
+                  { label: 'Non identifiées', value: 'unmatched' },
+                ] as { label: string; value: FilterStatus }[]
+              ).map((btn) => (
+                <button
+                  key={btn.value}
+                  onClick={() => setStatusFilter(btn.value)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                    statusFilter === btn.value
+                      ? 'bg-terracotta text-white'
+                      : 'text-stone-500 hover:bg-stone-100'
+                  }`}
+                >
+                  {btn.label}
+                </button>
+              ))}
+            </div>
+            {/* Filtre par catégorie */}
+            <div className="relative">
+              <button
+                onClick={() => setCategoryFilter(categoryFilter === 'all' ? CATEGORIES[0] : 'all')}
+                className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg text-stone-500 hover:bg-stone-100"
+              >
+                <Tag className="h-3 w-3" />
+                {categoryFilter === 'all' ? 'Catégorie' : categoryFilter}
+                <ChevronDown className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
+
+          {/* Catégorisation groupée */}
+          {selected.size > 0 && (
+            <div className="relative">
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<Tag className="h-3.5 w-3.5" />}
+                onClick={() => setShowCategoryMenu(showCategoryMenu ? null : 'bulk')}
+              >
+                Catégoriser ({selected.size})
+              </Button>
+              {showCategoryMenu === 'bulk' && (
+                <div className="absolute right-0 top-full mt-1 z-10 bg-white border border-stone-200 rounded-xl shadow-lg py-1 w-48">
+                  {CATEGORIES.map((cat) => (
+                    <button
+                      key={cat}
+                      className="w-full text-left px-4 py-2 text-sm text-slate-900 hover:bg-stone-50 transition-colors"
+                      onClick={() => handleCategorize([...selected], cat)}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Tableau */}
+        <div className="overflow-x-auto">
+          {filteredTransactions.length === 0 ? (
+            <div className="p-8">
+              <EmptyState
+                icon={Wallet}
+                title="Aucune transaction"
+                description="Les transactions apparaîtront ici après la synchronisation bancaire."
+              />
+            </div>
+          ) : (
+            <table className="w-full">
+              <thead>
+                <tr className="bg-stone-50">
+                  <th className="px-4 py-3 w-10">
+                    <input
+                      type="checkbox"
+                      checked={selected.size === filteredTransactions.length && filteredTransactions.length > 0}
+                      onChange={toggleSelectAll}
+                      className="rounded border-stone-300 text-terracotta focus:ring-terracotta/30"
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                    Libellé
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-stone-500 uppercase tracking-wider">
+                    Montant
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                    Catégorie
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                    Statut
+                  </th>
+                  <th className="px-4 py-3 w-20"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredTransactions.map((tx) => (
+                  <tr
+                    key={tx.id}
+                    className="border-b border-stone-100 hover:bg-stone-50/50 transition-colors"
+                  >
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selected.has(tx.id)}
+                        onChange={() => toggleSelect(tx.id)}
+                        className="rounded border-stone-300 text-terracotta focus:ring-terracotta/30"
+                      />
+                    </td>
+                    <td className="px-4 py-3 text-sm text-stone-500 whitespace-nowrap">
+                      {formatDate(tx.date)}
+                    </td>
+                    <td className="px-4 py-3 text-sm font-medium text-slate-900 max-w-xs truncate">
+                      {tx.description || '—'}
+                    </td>
+                    <td className={`px-4 py-3 text-sm font-bold tabular-nums text-right whitespace-nowrap ${
+                      tx.amount >= 0 ? 'text-emerald-600' : 'text-red-500'
+                    }`}>
+                      {tx.amount >= 0 ? '+' : ''}{formatCurrency(tx.amount)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="relative">
+                        <button
+                          onClick={() => setShowCategoryMenu(showCategoryMenu === tx.id ? null : tx.id)}
+                          className="text-xs text-stone-500 hover:text-slate-900 flex items-center gap-1 transition-colors"
+                        >
+                          {tx.category || 'Autre'}
+                          <ChevronDown className="h-3 w-3" />
+                        </button>
+                        {showCategoryMenu === tx.id && (
+                          <div className="absolute left-0 top-full mt-1 z-10 bg-white border border-stone-200 rounded-xl shadow-lg py-1 w-44">
+                            {CATEGORIES.map((cat) => (
+                              <button
+                                key={cat}
+                                className="w-full text-left px-4 py-2 text-sm text-slate-900 hover:bg-stone-50 transition-colors"
+                                onClick={() => handleCategorize([tx.id], cat)}
+                              >
+                                {cat}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">{renderTxStatus(tx)}</td>
+                    <td className="px-4 py-3"></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </Card>
     </div>
   );
 }
