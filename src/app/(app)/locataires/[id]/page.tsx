@@ -4,9 +4,10 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import Card from '@/components/ui/Card';
 import StatusBadge from '@/components/ui/StatusBadge';
 import TenantDetailActions from '@/components/tenants/TenantDetailActions';
+import TenantDocumentsSection from '@/components/documents/TenantDocumentsSection';
 import {
   ArrowLeft, User, Mail, Phone, Calendar, Building2, Wallet,
-  Globe, Briefcase, CreditCard, Users, FileText, ClipboardList,
+  Globe, Briefcase, CreditCard, Users, ClipboardList,
 } from 'lucide-react';
 import { formatCurrency, formatDate, fullName } from '@/lib/utils';
 import Link from 'next/link';
@@ -259,16 +260,10 @@ export default async function LocataireDetailPage({ params }: Props) {
 
           {/* Documents */}
           <Card>
-            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <FileText className="h-5 w-5 text-terracotta" />
-              Documents
-            </h2>
-            <Link
-              href="/documents"
-              className="block text-sm text-terracotta hover:underline"
-            >
-              Voir les documents demandés
-            </Link>
+            <TenantDocumentsSection
+              tenantId={tenant.id}
+              tenantName={fullName(tenant.first_name, tenant.last_name)}
+            />
           </Card>
         </div>
       </div>
