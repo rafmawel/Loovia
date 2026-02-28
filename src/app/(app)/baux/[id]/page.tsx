@@ -246,17 +246,50 @@ export default async function BailDetailPage({ params }: Props) {
               <PenTool className="h-5 w-5 text-terracotta" />
               Signature
             </h2>
+
+            {/* Badge statut signature */}
+            {lease.status === 'pending_signature' && (
+              <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-medium">
+                <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                En attente de signatures
+              </div>
+            )}
+            {lease.status === 'signed' && (
+              <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium">
+                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+                Toutes les signatures reçues
+              </div>
+            )}
+            {lease.status === 'active' && (
+              <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-medium">
+                <span className="h-2 w-2 rounded-full bg-blue-500" />
+                Bail actif
+              </div>
+            )}
+
+            {lease.sent_for_signature_at && (
+              <p className="text-xs text-stone-500 mb-3">
+                Envoyé pour signature le {formatDate(lease.sent_for_signature_at)}
+              </p>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl bg-stone-50">
+              <div className={`p-4 rounded-xl ${lease.signature_landlord_status === 'signed' ? 'bg-emerald-50' : 'bg-stone-50'}`}>
                 <p className="text-xs text-stone-500 mb-1">Propriétaire</p>
-                <p className="text-sm font-medium text-slate-900 capitalize">{lease.signature_landlord_status}</p>
+                <p className={`text-sm font-medium capitalize ${lease.signature_landlord_status === 'signed' ? 'text-emerald-700' : 'text-slate-900'}`}>
+                  {lease.signature_landlord_status === 'signed' ? '✅ Signé' : lease.signature_landlord_status === 'pending' ? '⏳ En attente' : lease.signature_landlord_status}
+                </p>
                 {lease.signature_landlord_date && (
                   <p className="text-xs text-stone-500 mt-1">Signé le {formatDate(lease.signature_landlord_date)}</p>
                 )}
               </div>
-              <div className="p-4 rounded-xl bg-stone-50">
+              <div className={`p-4 rounded-xl ${lease.signature_tenant_status === 'signed' ? 'bg-emerald-50' : 'bg-stone-50'}`}>
                 <p className="text-xs text-stone-500 mb-1">Locataire</p>
-                <p className="text-sm font-medium text-slate-900 capitalize">{lease.signature_tenant_status}</p>
+                <p className={`text-sm font-medium capitalize ${lease.signature_tenant_status === 'signed' ? 'text-emerald-700' : 'text-slate-900'}`}>
+                  {lease.signature_tenant_status === 'signed' ? '✅ Signé' : lease.signature_tenant_status === 'pending' ? '⏳ En attente' : lease.signature_tenant_status}
+                </p>
                 {lease.signature_tenant_date && (
                   <p className="text-xs text-stone-500 mt-1">Signé le {formatDate(lease.signature_tenant_date)}</p>
                 )}
