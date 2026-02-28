@@ -5,13 +5,13 @@ import Card from '@/components/ui/Card';
 import StatusBadge from '@/components/ui/StatusBadge';
 import {
   Building2, MapPin, ArrowLeft, Home, Thermometer, Wallet, Shield, Utensils,
-  Warehouse, FileText, User, Wrench, ChevronRight,
+  Warehouse, FileText, User, Wrench, ChevronRight, ClipboardList, Plus,
 } from 'lucide-react';
 import { formatCurrency, formatDate, fullName } from '@/lib/utils';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import PropertyDetailActions from '@/components/properties/PropertyDetailActions';
-import type { Property, Tenant, Lease, MaintenanceRequest } from '@/types';
+import type { Property, Tenant, Lease, MaintenanceRequest, EdlReport } from '@/types';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -22,11 +22,12 @@ export default async function BienDetailPage({ params }: Props) {
   const supabase = await createClient();
 
   // Chargement en parallèle
-  const [propertyRes, tenantsRes, leasesRes, maintenanceRes] = await Promise.all([
+  const [propertyRes, tenantsRes, leasesRes, maintenanceRes, edlRes] = await Promise.all([
     supabase.from('properties').select('*').eq('id', id).single(),
     supabase.from('tenants').select('*').eq('property_id', id).order('start_date', { ascending: false }),
     supabase.from('leases').select('*, tenant:tenants(first_name, last_name)').eq('property_id', id).order('created_at', { ascending: false }),
     supabase.from('maintenance_requests').select('*').eq('property_id', id).order('created_at', { ascending: false }),
+    supabase.from('edl_reports').select('*, tenant:tenants(first_name, last_name)').eq('property_id', id).order('created_at', { ascending: false }),
   ]);
 
   if (propertyRes.error || !propertyRes.data) {
@@ -37,6 +38,7 @@ export default async function BienDetailPage({ params }: Props) {
   const tenants = (tenantsRes.data as Tenant[]) || [];
   const leases = (leasesRes.data as Lease[]) || [];
   const maintenanceRequests = (maintenanceRes.data as MaintenanceRequest[]) || [];
+  const edlReports = (edlRes.data as (EdlReport & { tenant?: { first_name: string; last_name: string } })[]) || [];
 
   // Locataires actifs vs anciens
   const activeTenants = tenants.filter((t) => !t.end_date || new Date(t.end_date) > new Date());
@@ -246,7 +248,57 @@ export default async function BienDetailPage({ params }: Props) {
             )}
           </Card>
 
-          {/* 10. Demandes de travaux */}
+          {/* 10. États des lieux */}
+          <Card>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <ClipboardList className="h-5 w-5 text-terracotta" />
+                États des lieux ({edlReports.length})
+              </h2>
+              {activeTenants.length > 0 && (
+                <Link
+                  href={`/edl/nouveau?property_id=${property.id}&tenant_id=${activeTenants[0].id}`}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-terracotta hover:text-terracotta/80 transition-colors"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Nouvel EDL
+                </Link>
+              )}
+            </div>
+            {edlReports.length === 0 ? (
+              <p className="text-sm text-stone-500">Aucun état des lieux enregistré.</p>
+            ) : (
+              <div className="space-y-3">
+                {edlReports.map((edl) => (
+                  <Link
+                    key={edl.id}
+                    href={`/edl/${edl.id}`}
+                    className="flex items-center justify-between p-3 rounded-xl bg-stone-50 hover:bg-stone-100 transition-colors"
+                  >
+                    <div>
+                      <p className="text-sm font-medium text-slate-900">
+                        {edl.type === 'entrance' ? "État des lieux d'entrée" : 'État des lieux de sortie'}
+                      </p>
+                      <p className="text-xs text-stone-500">
+                        {edl.tenant ? `${edl.tenant.first_name} ${edl.tenant.last_name}` : '—'}
+                        {' · '}{formatDate(edl.created_at)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {edl.signature_landlord && edl.signature_tenant ? (
+                        <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">Signé</span>
+                      ) : (
+                        <span className="text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Brouillon</span>
+                      )}
+                      <ChevronRight className="h-4 w-4 text-stone-400" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </Card>
+
+          {/* 11. Demandes de travaux */}
           {maintenanceRequests.length > 0 && (
             <Card>
               <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">

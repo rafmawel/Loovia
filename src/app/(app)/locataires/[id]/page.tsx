@@ -6,7 +6,7 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import TenantDetailActions from '@/components/tenants/TenantDetailActions';
 import {
   ArrowLeft, User, Mail, Phone, Calendar, Building2, Wallet,
-  Globe, Briefcase, CreditCard, Users, FileText,
+  Globe, Briefcase, CreditCard, Users, FileText, ClipboardList,
 } from 'lucide-react';
 import { formatCurrency, formatDate, fullName } from '@/lib/utils';
 import Link from 'next/link';
@@ -240,6 +240,22 @@ export default async function LocataireDetailPage({ params }: Props) {
               <p className="text-sm text-stone-500">Aucun bien associé.</p>
             )}
           </Card>
+
+          {/* État des lieux */}
+          {property && (
+            <Card>
+              <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <ClipboardList className="h-5 w-5 text-terracotta" />
+                État des lieux
+              </h2>
+              <Link
+                href={`/edl/nouveau?property_id=${property.id}&tenant_id=${tenant.id}`}
+                className="block text-sm text-terracotta hover:underline"
+              >
+                Faire un état des lieux
+              </Link>
+            </Card>
+          )}
 
           {/* Documents */}
           <Card>
