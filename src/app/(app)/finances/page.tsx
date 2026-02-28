@@ -11,7 +11,7 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import {
   Wallet, TrendingUp, TrendingDown, AlertTriangle, Landmark,
-  RefreshCw, Check, X, Tag, ChevronDown, Filter, FileText, Send,
+  RefreshCw, Check, X, Tag, ChevronDown, Filter, FileText, Send, Download,
 } from 'lucide-react';
 import { formatCurrency, formatDate, fullName, formatMonthYear } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -62,10 +62,19 @@ export default function FinancesPage() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
 
+  // Properties (for fiscal export)
+  const [properties, setProperties] = useState<Property[]>([]);
+
   // Filters
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all');
   const [categoryFilter, setCategoryFilter] = useState<FilterCategory>('all');
   const [showCategoryMenu, setShowCategoryMenu] = useState<string | null>(null);
+
+  // Export
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const currentYear = new Date().getFullYear();
+  const [exportDateFrom, setExportDateFrom] = useState(`${currentYear}-01-01`);
+  const [exportDateTo, setExportDateTo] = useState(new Date().toISOString().split('T')[0]);
 
   // Checkboxes
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -84,7 +93,7 @@ export default function FinancesPage() {
       .eq('status', 'pending')
       .lt('period_end', now);
 
-    const [paymentsRes, txRes, connectionsRes] = await Promise.all([
+    const [paymentsRes, txRes, connectionsRes, propertiesRes] = await Promise.all([
       supabase
         .from('payments')
         .select('*, lease:leases(*, property:properties(name, address), tenant:tenants(first_name, last_name))')
@@ -94,11 +103,13 @@ export default function FinancesPage() {
         .select('*, payment:payments(*, lease:leases(*, tenant:tenants(first_name, last_name)))')
         .order('date', { ascending: false }),
       supabase.from('bank_connections').select('*').order('created_at', { ascending: false }),
+      supabase.from('properties').select('*'),
     ]);
 
     setPayments((paymentsRes.data as PaymentWithRelations[]) || []);
     setTransactions((txRes.data as TransactionWithPayment[]) || []);
     setConnections((connectionsRes.data as BankConnection[]) || []);
+    setProperties((propertiesRes.data as Property[]) || []);
     setLoading(false);
   }, [supabase]);
 
@@ -328,6 +339,30 @@ export default function FinancesPage() {
     }
   };
 
+  // ── Export ──────────────────────────────────────────────────────
+
+  const handleExportCsv = async () => {
+    const { exportTransactionsCsv } = await import('@/lib/export/export-csv');
+    exportTransactionsCsv(transactions, exportDateFrom, exportDateTo);
+    toast.success('Export CSV téléchargé');
+    setShowExportMenu(false);
+  };
+
+  const handleExportAccountingPdf = async () => {
+    const { exportAccountingPdf } = await import('@/lib/export/export-accounting-pdf');
+    exportAccountingPdf(transactions, exportDateFrom, exportDateTo);
+    toast.success('PDF comptable téléchargé');
+    setShowExportMenu(false);
+  };
+
+  const handleExportFiscalPdf = async () => {
+    const year = new Date(exportDateFrom).getFullYear();
+    const { exportFiscalPdf } = await import('@/lib/export/export-fiscal-pdf');
+    exportFiscalPdf(transactions, properties, year);
+    toast.success('PDF fiscal téléchargé');
+    setShowExportMenu(false);
+  };
+
   // ── Toggle checkbox ──────────────────────────────────────────────
 
   const toggleSelect = (id: string) => {
@@ -516,7 +551,72 @@ export default function FinancesPage() {
         </div>
       </Card>
 
-      {/* SECTION 4 — Tableau des transactions */}
+      {/* SECTION 4 — Export comptable */}
+      <Card className="mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 className="text-sm font-bold text-slate-900">Export comptable</h2>
+            <p className="text-xs text-stone-500">
+              Exportez vos transactions en CSV ou PDF pour votre comptabilité
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-stone-500">Du</label>
+              <input
+                type="date"
+                value={exportDateFrom}
+                onChange={(e) => setExportDateFrom(e.target.value)}
+                className="text-sm border border-stone-200 rounded-lg px-2 py-1.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+              />
+              <label className="text-xs text-stone-500">au</label>
+              <input
+                type="date"
+                value={exportDateTo}
+                onChange={(e) => setExportDateTo(e.target.value)}
+                className="text-sm border border-stone-200 rounded-lg px-2 py-1.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+              />
+            </div>
+            <div className="relative">
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<Download className="h-3.5 w-3.5" />}
+                onClick={() => setShowExportMenu(!showExportMenu)}
+              >
+                Exporter
+              </Button>
+              {showExportMenu && (
+                <div className="absolute right-0 top-full mt-1 z-10 bg-white border border-stone-200 rounded-xl shadow-lg py-1 w-56">
+                  <button
+                    onClick={handleExportCsv}
+                    className="w-full text-left px-4 py-2.5 text-sm text-slate-900 hover:bg-stone-50 transition-colors flex items-center gap-2"
+                  >
+                    <FileText className="h-4 w-4 text-emerald-600" />
+                    Export CSV (Excel)
+                  </button>
+                  <button
+                    onClick={handleExportAccountingPdf}
+                    className="w-full text-left px-4 py-2.5 text-sm text-slate-900 hover:bg-stone-50 transition-colors flex items-center gap-2"
+                  >
+                    <FileText className="h-4 w-4 text-terracotta" />
+                    PDF Récapitulatif comptable
+                  </button>
+                  <button
+                    onClick={handleExportFiscalPdf}
+                    className="w-full text-left px-4 py-2.5 text-sm text-slate-900 hover:bg-stone-50 transition-colors flex items-center gap-2"
+                  >
+                    <FileText className="h-4 w-4 text-blue-600" />
+                    PDF Déclaration foncière
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* SECTION 5 — Tableau des transactions */}
       <Card padding="p-0">
         {/* Toolbar */}
         <div className="p-4 border-b border-stone-100 flex flex-wrap items-center justify-between gap-3">
