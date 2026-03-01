@@ -103,10 +103,16 @@ export const propertyTypes = [
   'Studio',
   'Loft',
   'Duplex',
-  'Local commercial',
+  'Parking',
+  'Box',
   'Garage',
   'Cave',
+  'Local commercial',
+  'Terrain',
 ] as const;
+
+// Types de bien qui sont des espaces de stationnement/stockage (pas d'habitation)
+export const storagePropertyTypes = ['Parking', 'Box', 'Garage', 'Cave', 'Terrain'] as const;
 
 // Types de location
 export const furnishedTypes = [

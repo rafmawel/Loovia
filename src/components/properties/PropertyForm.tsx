@@ -1,28 +1,44 @@
 'use client';
 
 // Formulaire multi-sections pour créer/modifier un bien immobilier
-import { useState } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { propertySchema, type PropertyFormData } from '@/lib/validators/property';
-import { propertyTypes, furnishedTypes } from '@/lib/design-system';
+import { propertyTypes, furnishedTypes, storagePropertyTypes } from '@/lib/design-system';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
+import AddressAutocomplete from '@/components/ui/AddressAutocomplete';
 import { toast } from 'sonner';
 import {
-  Home, MapPin, Utensils, Warehouse, Thermometer, Shield, Wallet, Image, Save, X,
+  Home, MapPin, Utensils, Warehouse, Thermometer, Shield, Wallet,
+  ImageIcon, Save, X, Upload, Trash2, Building2, Car, Box, Landmark,
 } from 'lucide-react';
 import type { Property } from '@/types';
 
+const MAX_PHOTOS_FREE = 3;
+
 interface PropertyFormProps {
-  /** Bien existant pour le mode édition (null = création) */
   property?: Property | null;
-  /** Callback de fermeture */
   onClose: () => void;
 }
 
-// Valeurs par défaut pour un nouveau bien
+// Icônes par type de bien
+const typeIcons: Record<string, React.ReactNode> = {
+  Appartement: <Building2 className="h-5 w-5" />,
+  Maison: <Home className="h-5 w-5" />,
+  Studio: <Building2 className="h-5 w-5" />,
+  Loft: <Building2 className="h-5 w-5" />,
+  Duplex: <Building2 className="h-5 w-5" />,
+  Parking: <Car className="h-5 w-5" />,
+  Box: <Box className="h-5 w-5" />,
+  Garage: <Car className="h-5 w-5" />,
+  Cave: <Warehouse className="h-5 w-5" />,
+  'Local commercial': <Landmark className="h-5 w-5" />,
+  Terrain: <MapPin className="h-5 w-5" />,
+};
+
 const defaultValues: PropertyFormData = {
   name: '',
   address: '',
@@ -67,7 +83,6 @@ const defaultValues: PropertyFormData = {
   images: [],
 };
 
-// Convertir un Property existant en PropertyFormData
 function propertyToFormData(p: Property): PropertyFormData {
   return {
     name: p.name,
@@ -118,6 +133,7 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
   const isEditing = !!property;
   const router = useRouter();
   const supabase = createClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<PropertyFormData>(
     property ? propertyToFormData(property) : defaultValues
@@ -125,11 +141,41 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [activeSection, setActiveSection] = useState(0);
+  const [photoFiles, setPhotoFiles] = useState<{ file: File; preview: string }[]>([]);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
 
-  // Mettre à jour un champ du formulaire
+  const isStorageType = (storagePropertyTypes as readonly string[]).includes(form.property_type);
+
+  // Dynamic sections based on property type
+  const sections = useMemo(() => {
+    const base = [
+      { icon: Home, label: 'Type de bien' },
+      { icon: MapPin, label: 'Localisation' },
+    ];
+
+    if (isStorageType) {
+      base.push(
+        { icon: Home, label: 'Description' },
+        { icon: Wallet, label: 'Finances' },
+        { icon: ImageIcon, label: 'Photos' },
+      );
+    } else {
+      base.push(
+        { icon: Home, label: 'Description' },
+        { icon: Utensils, label: 'Cuisine' },
+        { icon: Warehouse, label: 'Annexes' },
+        { icon: Thermometer, label: 'Énergie' },
+        { icon: Shield, label: 'Confort' },
+        { icon: Wallet, label: 'Finances' },
+        { icon: ImageIcon, label: 'Photos' },
+      );
+    }
+
+    return base;
+  }, [isStorageType]);
+
   function updateField<K extends keyof PropertyFormData>(key: K, value: PropertyFormData[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
-    // Effacer l'erreur du champ modifié
     if (errors[key]) {
       setErrors((prev) => {
         const next = { ...prev };
@@ -139,18 +185,95 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
     }
   }
 
-  // Toggle pour les booléens
   function toggleField(key: keyof PropertyFormData) {
     setForm((prev) => ({ ...prev, [key]: !prev[key] }));
   }
 
-  // Soumission du formulaire
+  function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files) return;
+
+    const currentCount = (form.images || []).length + photoFiles.length;
+    const remaining = MAX_PHOTOS_FREE - currentCount;
+
+    if (remaining <= 0) {
+      toast.error(`Maximum ${MAX_PHOTOS_FREE} photos sans abonnement`);
+      return;
+    }
+
+    const newFiles: { file: File; preview: string }[] = [];
+    const limit = Math.min(files.length, remaining);
+
+    for (let i = 0; i < limit; i++) {
+      const file = files[i];
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        toast.error(`${file.name} : format non supporté`);
+        continue;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(`${file.name} : dépasse 5 Mo`);
+        continue;
+      }
+      newFiles.push({ file, preview: URL.createObjectURL(file) });
+    }
+
+    setPhotoFiles((prev) => [...prev, ...newFiles]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
+
+  function removePhotoFile(index: number) {
+    setPhotoFiles((prev) => {
+      URL.revokeObjectURL(prev[index].preview);
+      return prev.filter((_, i) => i !== index);
+    });
+  }
+
+  function removeExistingImage(index: number) {
+    const updated = [...(form.images || [])];
+    updated.splice(index, 1);
+    updateField('images', updated);
+  }
+
+  async function uploadPhotos(): Promise<string[]> {
+    if (photoFiles.length === 0) return [];
+
+    const urls: string[] = [];
+    for (const { file } of photoFiles) {
+      const fd = new FormData();
+      fd.append('file', file);
+
+      const res = await fetch('/api/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || 'Erreur upload');
+      urls.push(data.url);
+    }
+    return urls;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setErrors({});
 
-    // Nettoyage des champs vides → null pour la BDD
+    let uploadedUrls: string[] = [];
+    if (photoFiles.length > 0) {
+      setUploadingPhotos(true);
+      try {
+        uploadedUrls = await uploadPhotos();
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Erreur upload photos';
+        toast.error(message);
+        setLoading(false);
+        setUploadingPhotos(false);
+        return;
+      }
+      setUploadingPhotos(false);
+    }
+
+    const allImages = [...(form.images || []), ...uploadedUrls];
+    const mainImage = form.image_url || allImages[0] || null;
+
     const cleaned = {
       ...form,
       building: form.building || null,
@@ -168,7 +291,8 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
       charges_other: form.charges_other || null,
       glazing_type: form.glazing_type || null,
       shutters_type: form.shutters_type || null,
-      image_url: form.image_url || null,
+      image_url: mainImage,
+      images: allImages,
       surface: form.surface || null,
       number_of_rooms: form.number_of_rooms || null,
       balcony_surface: form.balcony_surface || null,
@@ -176,7 +300,6 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
       garden_surface: form.garden_surface || null,
     };
 
-    // Validation Zod
     const result = propertySchema.safeParse(cleaned);
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
@@ -204,9 +327,12 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
         router.refresh();
         onClose();
       } else {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Vous devez être connecté pour ajouter un bien');
+
         const { data, error } = await supabase
           .from('properties')
-          .insert(result.data)
+          .insert({ ...result.data, user_id: user.id })
           .select()
           .single();
 
@@ -222,17 +348,8 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
     }
   }
 
-  // Sections du formulaire
-  const sections = [
-    { icon: MapPin, label: 'Localisation' },
-    { icon: Home, label: 'Description' },
-    { icon: Utensils, label: 'Cuisine' },
-    { icon: Warehouse, label: 'Annexes' },
-    { icon: Thermometer, label: 'Énergie' },
-    { icon: Shield, label: 'Confort' },
-    { icon: Wallet, label: 'Finances' },
-    { icon: Image, label: 'Photos' },
-  ];
+  const sectionKey = sections[activeSection]?.label || '';
+  const totalPhotos = (form.images || []).length + photoFiles.length;
 
   return (
     <form onSubmit={handleSubmit} className="max-h-[80vh] overflow-hidden flex flex-col">
@@ -259,10 +376,48 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
       </div>
 
       {/* Contenu de la section active */}
-      <div className="overflow-y-auto flex-1 pr-1">
-        {/* Section 0 : Localisation */}
-        {activeSection === 0 && (
-          <div className="space-y-4 animate-in">
+      <div className="overflow-y-auto flex-1 px-1">
+        {/* Section : Type de bien */}
+        {sectionKey === 'Type de bien' && (
+          <div className="space-y-5 animate-in">
+            <p className="text-sm text-stone-500">Quel type de bien souhaitez-vous ajouter ?</p>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+              {propertyTypes.map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => {
+                    updateField('property_type', type);
+                    setActiveSection(1);
+                  }}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                    form.property_type === type
+                      ? 'border-terracotta bg-terracotta/5 text-terracotta'
+                      : 'border-stone-200 text-stone-600 hover:border-stone-300 hover:bg-stone-50'
+                  }`}
+                >
+                  {typeIcons[type] || <Home className="h-5 w-5" />}
+                  <span className="text-xs font-medium">{type}</span>
+                </button>
+              ))}
+            </div>
+
+            {!isStorageType && (
+              <div className="pt-2">
+                <Select
+                  label="Type de location"
+                  options={furnishedTypes.map((t) => ({ value: t, label: t }))}
+                  value={form.furnished_type}
+                  onChange={(e) => updateField('furnished_type', e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Section : Localisation */}
+        {sectionKey === 'Localisation' && (
+          <div className="space-y-5 animate-in">
             <Input
               label="Nom du bien *"
               placeholder="Ex: Appartement Montmartre"
@@ -270,11 +425,19 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
               onChange={(e) => updateField('name', e.target.value)}
               error={errors.name}
             />
-            <Input
+            <AddressAutocomplete
               label="Adresse *"
-              placeholder="12 rue de la Paix"
+              placeholder="Commencez à taper une adresse..."
               value={form.address}
-              onChange={(e) => updateField('address', e.target.value)}
+              onChange={(val) => updateField('address', val)}
+              onSelect={(suggestion) => {
+                const street = suggestion.housenumber
+                  ? `${suggestion.housenumber} ${suggestion.street || ''}`
+                  : suggestion.street || suggestion.label;
+                updateField('address', street);
+                if (suggestion.city) updateField('city', suggestion.city);
+                if (suggestion.postcode) updateField('postal_code', suggestion.postcode);
+              }}
               error={errors.address}
             />
             <div className="grid grid-cols-2 gap-4">
@@ -293,70 +456,80 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
                 error={errors.postal_code}
               />
             </div>
-            <div className="grid grid-cols-3 gap-4">
-              <Input
-                label="Bâtiment"
-                placeholder="A"
-                value={form.building || ''}
-                onChange={(e) => updateField('building', e.target.value)}
-              />
-              <Input
-                label="Étage"
-                placeholder="3e"
-                value={form.floor || ''}
-                onChange={(e) => updateField('floor', e.target.value)}
-              />
-              <Input
-                label="Porte"
-                placeholder="302"
-                value={form.door || ''}
-                onChange={(e) => updateField('door', e.target.value)}
-              />
-            </div>
+            {!isStorageType && (
+              <div className="grid grid-cols-3 gap-4">
+                <Input
+                  label="Bâtiment"
+                  placeholder="A"
+                  value={form.building || ''}
+                  onChange={(e) => updateField('building', e.target.value)}
+                />
+                <Input
+                  label="Étage"
+                  placeholder="3e"
+                  value={form.floor || ''}
+                  onChange={(e) => updateField('floor', e.target.value)}
+                />
+                <Input
+                  label="Porte"
+                  placeholder="302"
+                  value={form.door || ''}
+                  onChange={(e) => updateField('door', e.target.value)}
+                />
+              </div>
+            )}
           </div>
         )}
 
-        {/* Section 1 : Description */}
-        {activeSection === 1 && (
-          <div className="space-y-4 animate-in">
-            <div className="grid grid-cols-2 gap-4">
-              <Select
-                label="Type de bien"
-                options={propertyTypes.map((t) => ({ value: t, label: t }))}
-                value={form.property_type}
-                onChange={(e) => updateField('property_type', e.target.value)}
-              />
-              <Select
-                label="Type de location"
-                options={furnishedTypes.map((t) => ({ value: t, label: t }))}
-                value={form.furnished_type}
-                onChange={(e) => updateField('furnished_type', e.target.value)}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Surface (m²)"
-                type="number"
-                placeholder="65"
-                value={form.surface ?? ''}
-                onChange={(e) => updateField('surface', e.target.value ? Number(e.target.value) : null)}
-                error={errors.surface}
-              />
-              <Input
-                label="Nombre de pièces"
-                type="number"
-                placeholder="3"
-                value={form.number_of_rooms ?? ''}
-                onChange={(e) => updateField('number_of_rooms', e.target.value ? Number(e.target.value) : null)}
-                error={errors.number_of_rooms}
-              />
-            </div>
+        {/* Section : Description */}
+        {sectionKey === 'Description' && (
+          <div className="space-y-5 animate-in">
+            {!isStorageType && (
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="Surface (m²)"
+                  type="number"
+                  placeholder="65"
+                  value={form.surface ?? ''}
+                  onChange={(e) => updateField('surface', e.target.value ? Number(e.target.value) : null)}
+                  error={errors.surface}
+                />
+                <Input
+                  label="Nombre de pièces"
+                  type="number"
+                  placeholder="3"
+                  value={form.number_of_rooms ?? ''}
+                  onChange={(e) => updateField('number_of_rooms', e.target.value ? Number(e.target.value) : null)}
+                  error={errors.number_of_rooms}
+                />
+              </div>
+            )}
+            {isStorageType && (
+              <div className="space-y-5">
+                <Input
+                  label="Surface (m²)"
+                  type="number"
+                  placeholder={form.property_type === 'Parking' ? '12' : '15'}
+                  value={form.surface ?? ''}
+                  onChange={(e) => updateField('surface', e.target.value ? Number(e.target.value) : null)}
+                  error={errors.surface}
+                />
+                {(form.property_type === 'Parking' || form.property_type === 'Box' || form.property_type === 'Garage') && (
+                  <Input
+                    label="Numéro d'emplacement"
+                    placeholder="P5"
+                    value={form.parking_number || ''}
+                    onChange={(e) => updateField('parking_number', e.target.value)}
+                  />
+                )}
+              </div>
+            )}
           </div>
         )}
 
-        {/* Section 2 : Cuisine */}
-        {activeSection === 2 && (
-          <div className="space-y-4 animate-in">
+        {/* Section : Cuisine */}
+        {sectionKey === 'Cuisine' && (
+          <div className="space-y-5 animate-in">
             <Select
               label="Type de cuisine"
               placeholder="Sélectionner..."
@@ -370,10 +543,10 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
               onChange={(e) => updateField('kitchen_type', e.target.value)}
             />
             <div>
-              <p className="text-sm font-medium text-slate-900 mb-2">Équipements de cuisine</p>
+              <p className="text-sm font-medium text-slate-900 mb-3">Équipements de cuisine</p>
               <div className="grid grid-cols-2 gap-2">
                 {['Réfrigérateur', 'Four', 'Micro-ondes', 'Lave-vaisselle', 'Plaques de cuisson', 'Hotte', 'Congélateur', 'Lave-linge'].map((equip) => (
-                  <label key={equip} className="flex items-center gap-2 p-2 rounded-lg hover:bg-stone-50 cursor-pointer">
+                  <label key={equip} className="flex items-center gap-2.5 p-2.5 rounded-lg hover:bg-stone-50 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={form.kitchen_equipment.includes(equip)}
@@ -394,32 +567,30 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
           </div>
         )}
 
-        {/* Section 3 : Annexes */}
-        {activeSection === 3 && (
+        {/* Section : Annexes */}
+        {sectionKey === 'Annexes' && (
           <div className="space-y-4 animate-in">
-            {/* Cave */}
-            <div className="p-4 rounded-xl border border-stone-200">
+            <div className="p-5 rounded-xl border border-stone-200">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={form.has_cellar} onChange={() => toggleField('has_cellar')}
                   className="rounded border-stone-300 text-terracotta focus:ring-terracotta" />
                 <span className="text-sm font-medium text-slate-900">Cave</span>
               </label>
               {form.has_cellar && (
-                <div className="mt-3 pl-7">
+                <div className="mt-4 pl-7">
                   <Input label="Numéro" placeholder="C12" value={form.cellar_number || ''} onChange={(e) => updateField('cellar_number', e.target.value)} />
                 </div>
               )}
             </div>
 
-            {/* Parking */}
-            <div className="p-4 rounded-xl border border-stone-200">
+            <div className="p-5 rounded-xl border border-stone-200">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={form.has_parking} onChange={() => toggleField('has_parking')}
                   className="rounded border-stone-300 text-terracotta focus:ring-terracotta" />
                 <span className="text-sm font-medium text-slate-900">Parking</span>
               </label>
               {form.has_parking && (
-                <div className="mt-3 pl-7 grid grid-cols-2 gap-3">
+                <div className="mt-4 pl-7 grid grid-cols-2 gap-4">
                   <Select label="Type" options={[{ value: 'Intérieur', label: 'Intérieur' }, { value: 'Extérieur', label: 'Extérieur' }, { value: 'Box', label: 'Box fermé' }]}
                     value={form.parking_type || ''} onChange={(e) => updateField('parking_type', e.target.value)} placeholder="Type..." />
                   <Input label="Numéro" placeholder="P5" value={form.parking_number || ''} onChange={(e) => updateField('parking_number', e.target.value)} />
@@ -427,43 +598,40 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
               )}
             </div>
 
-            {/* Balcon */}
-            <div className="p-4 rounded-xl border border-stone-200">
+            <div className="p-5 rounded-xl border border-stone-200">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={form.has_balcony} onChange={() => toggleField('has_balcony')}
                   className="rounded border-stone-300 text-terracotta focus:ring-terracotta" />
                 <span className="text-sm font-medium text-slate-900">Balcon</span>
               </label>
               {form.has_balcony && (
-                <div className="mt-3 pl-7">
+                <div className="mt-4 pl-7">
                   <Input label="Surface (m²)" type="number" value={form.balcony_surface ?? ''} onChange={(e) => updateField('balcony_surface', e.target.value ? Number(e.target.value) : null)} />
                 </div>
               )}
             </div>
 
-            {/* Terrasse */}
-            <div className="p-4 rounded-xl border border-stone-200">
+            <div className="p-5 rounded-xl border border-stone-200">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={form.has_terrace} onChange={() => toggleField('has_terrace')}
                   className="rounded border-stone-300 text-terracotta focus:ring-terracotta" />
                 <span className="text-sm font-medium text-slate-900">Terrasse</span>
               </label>
               {form.has_terrace && (
-                <div className="mt-3 pl-7">
+                <div className="mt-4 pl-7">
                   <Input label="Surface (m²)" type="number" value={form.terrace_surface ?? ''} onChange={(e) => updateField('terrace_surface', e.target.value ? Number(e.target.value) : null)} />
                 </div>
               )}
             </div>
 
-            {/* Jardin */}
-            <div className="p-4 rounded-xl border border-stone-200">
+            <div className="p-5 rounded-xl border border-stone-200">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={form.has_garden} onChange={() => toggleField('has_garden')}
                   className="rounded border-stone-300 text-terracotta focus:ring-terracotta" />
                 <span className="text-sm font-medium text-slate-900">Jardin</span>
               </label>
               {form.has_garden && (
-                <div className="mt-3 pl-7 grid grid-cols-2 gap-3">
+                <div className="mt-4 pl-7 grid grid-cols-2 gap-4">
                   <Input label="Surface (m²)" type="number" value={form.garden_surface ?? ''} onChange={(e) => updateField('garden_surface', e.target.value ? Number(e.target.value) : null)} />
                   <Select label="Type" options={[{ value: 'Privatif', label: 'Privatif' }, { value: 'Commun', label: 'Commun' }]}
                     value={form.garden_type || ''} onChange={(e) => updateField('garden_type', e.target.value)} placeholder="Type..." />
@@ -471,8 +639,7 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
               )}
             </div>
 
-            {/* Grenier */}
-            <div className="p-4 rounded-xl border border-stone-200">
+            <div className="p-5 rounded-xl border border-stone-200">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={form.has_attic} onChange={() => toggleField('has_attic')}
                   className="rounded border-stone-300 text-terracotta focus:ring-terracotta" />
@@ -482,9 +649,9 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
           </div>
         )}
 
-        {/* Section 4 : Énergie (chauffage + eau chaude) */}
-        {activeSection === 4 && (
-          <div className="space-y-4 animate-in">
+        {/* Section : Énergie */}
+        {sectionKey === 'Énergie' && (
+          <div className="space-y-5 animate-in">
             <div className="grid grid-cols-2 gap-4">
               <Select label="Type de chauffage" placeholder="Sélectionner..." options={[
                 { value: 'Individuel', label: 'Individuel' }, { value: 'Collectif', label: 'Collectif' },
@@ -508,9 +675,9 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
           </div>
         )}
 
-        {/* Section 5 : Confort */}
-        {activeSection === 5 && (
-          <div className="space-y-4 animate-in">
+        {/* Section : Confort */}
+        {sectionKey === 'Confort' && (
+          <div className="space-y-5 animate-in">
             <div className="grid grid-cols-2 gap-4">
               <Select label="Type de vitrage" placeholder="Sélectionner..." options={[
                 { value: 'Simple', label: 'Simple vitrage' }, { value: 'Double', label: 'Double vitrage' },
@@ -522,12 +689,12 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
               ]} value={form.shutters_type || ''} onChange={(e) => updateField('shutters_type', e.target.value)} />
             </div>
             <div className="space-y-3">
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-stone-200 cursor-pointer hover:bg-stone-50 transition-colors">
+              <label className="flex items-center gap-3 p-4 rounded-xl border border-stone-200 cursor-pointer hover:bg-stone-50 transition-colors">
                 <input type="checkbox" checked={form.has_intercom} onChange={() => toggleField('has_intercom')}
                   className="rounded border-stone-300 text-terracotta focus:ring-terracotta" />
                 <span className="text-sm font-medium text-slate-900">Interphone / Digicode</span>
               </label>
-              <label className="flex items-center gap-3 p-3 rounded-xl border border-stone-200 cursor-pointer hover:bg-stone-50 transition-colors">
+              <label className="flex items-center gap-3 p-4 rounded-xl border border-stone-200 cursor-pointer hover:bg-stone-50 transition-colors">
                 <input type="checkbox" checked={form.has_fiber} onChange={() => toggleField('has_fiber')}
                   className="rounded border-stone-300 text-terracotta focus:ring-terracotta" />
                 <span className="text-sm font-medium text-slate-900">Fibre optique disponible</span>
@@ -542,37 +709,39 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
           </div>
         )}
 
-        {/* Section 6 : Finances */}
-        {activeSection === 6 && (
-          <div className="space-y-4 animate-in">
+        {/* Section : Finances */}
+        {sectionKey === 'Finances' && (
+          <div className="space-y-5 animate-in">
             <Input
-              label="Loyer mensuel HC *"
+              label={isStorageType ? 'Loyer mensuel *' : 'Loyer mensuel HC *'}
               type="number"
-              placeholder="850"
+              placeholder={isStorageType ? '80' : '850'}
               value={form.rent_amount || ''}
               onChange={(e) => updateField('rent_amount', Number(e.target.value))}
               error={errors.rent_amount}
-              helperText="Hors charges, en euros"
+              helperText={isStorageType ? 'En euros par mois' : 'Hors charges, en euros'}
             />
-            <Input
-              label="Provisions sur charges"
-              type="number"
-              placeholder="50"
-              value={form.charges_amount || ''}
-              onChange={(e) => updateField('charges_amount', Number(e.target.value))}
-              error={errors.charges_amount}
-              helperText="Provision mensuelle sur charges"
-            />
+            {!isStorageType && (
+              <Input
+                label="Provisions sur charges"
+                type="number"
+                placeholder="50"
+                value={form.charges_amount || ''}
+                onChange={(e) => updateField('charges_amount', Number(e.target.value))}
+                error={errors.charges_amount}
+                helperText="Provision mensuelle sur charges"
+              />
+            )}
             <Input
               label="Dépôt de garantie"
               type="number"
-              placeholder="850"
+              placeholder={isStorageType ? '80' : '850'}
               value={form.deposit_amount || ''}
               onChange={(e) => updateField('deposit_amount', Number(e.target.value))}
               error={errors.deposit_amount}
             />
             {(form.rent_amount > 0 || form.charges_amount > 0) && (
-              <div className="p-4 rounded-xl bg-terracotta/5 border border-terracotta/20">
+              <div className="p-5 rounded-xl bg-terracotta/5 border border-terracotta/20">
                 <p className="text-sm text-stone-500">Total mensuel</p>
                 <p className="text-xl font-bold tabular-nums text-terracotta">
                   {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(
@@ -584,29 +753,82 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
           </div>
         )}
 
-        {/* Section 7 : Photos */}
-        {activeSection === 7 && (
-          <div className="space-y-4 animate-in">
-            <Input
-              label="URL de la photo principale"
-              type="url"
-              placeholder="https://example.com/photo.jpg"
-              value={form.image_url || ''}
-              onChange={(e) => updateField('image_url', e.target.value)}
-              error={errors.image_url}
-              helperText="Collez l'URL d'une image. Le stockage direct sera disponible prochainement."
-            />
-            {form.image_url && (
-              <div className="relative rounded-xl overflow-hidden border border-stone-200">
-                <img
-                  src={form.image_url}
-                  alt="Aperçu"
-                  className="w-full h-48 object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
+        {/* Section : Photos (upload direct) */}
+        {sectionKey === 'Photos' && (
+          <div className="space-y-5 animate-in">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-slate-900">Photos du bien</p>
+                <p className="text-xs text-stone-500 mt-1">
+                  {totalPhotos}/{MAX_PHOTOS_FREE} photos (max {MAX_PHOTOS_FREE} sans abonnement)
+                </p>
               </div>
+              <button
+                type="button"
+                disabled={totalPhotos >= MAX_PHOTOS_FREE}
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-slate-900 hover:bg-stone-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Upload className="h-4 w-4" />
+                Ajouter
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                className="hidden"
+                onChange={handlePhotoSelect}
+              />
+            </div>
+
+            {(form.images || []).length > 0 && (
+              <div className="grid grid-cols-3 gap-3">
+                {(form.images || []).map((url, i) => (
+                  <div key={url} className="relative group rounded-xl overflow-hidden border border-stone-200">
+                    <img src={url} alt={`Photo ${i + 1}`} className="w-full h-28 object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeExistingImage(i)}
+                      className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-lg text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {photoFiles.length > 0 && (
+              <div>
+                <p className="text-xs text-stone-500 mb-2">Nouvelles photos (seront uploadées à la sauvegarde)</p>
+                <div className="grid grid-cols-3 gap-3">
+                  {photoFiles.map((pf, i) => (
+                    <div key={i} className="relative group rounded-xl overflow-hidden border border-terracotta/30 border-dashed">
+                      <img src={pf.preview} alt={`Nouvelle ${i + 1}`} className="w-full h-28 object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removePhotoFile(i)}
+                        className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-lg text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {totalPhotos === 0 && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full py-12 border-2 border-dashed border-stone-200 rounded-xl text-stone-400 hover:border-terracotta/40 hover:text-terracotta transition-colors flex flex-col items-center gap-2"
+              >
+                <ImageIcon className="h-8 w-8" />
+                <span className="text-sm">Cliquez pour ajouter des photos</span>
+                <span className="text-xs">JPG, PNG ou WebP — max 5 Mo par photo</span>
+              </button>
             )}
           </div>
         )}
@@ -618,7 +840,6 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
           Annuler
         </Button>
         <div className="flex items-center gap-3">
-          {/* Indicateur de progression */}
           <span className="text-xs text-stone-400">
             {activeSection + 1}/{sections.length}
           </span>
@@ -627,8 +848,8 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
               Suivant
             </Button>
           )}
-          <Button type="submit" loading={loading} icon={<Save className="h-4 w-4" />}>
-            {isEditing ? 'Enregistrer' : 'Créer le bien'}
+          <Button type="submit" loading={loading || uploadingPhotos} icon={<Save className="h-4 w-4" />}>
+            {uploadingPhotos ? 'Upload...' : isEditing ? 'Enregistrer' : 'Créer le bien'}
           </Button>
         </div>
       </div>

@@ -41,8 +41,8 @@ export const propertySchema = z.object({
   rent_amount: z.coerce.number().min(0, 'Le loyer doit être un nombre positif'),
   charges_amount: z.coerce.number().min(0, 'Les charges doivent être un nombre positif').default(0),
   deposit_amount: z.coerce.number().min(0, 'Le dépôt doit être un nombre positif').default(0),
-  image_url: z.string().url('URL invalide').or(z.literal('')).optional().nullable(),
-  images: z.array(z.string()).default([]),
+  image_url: z.string().url('URL invalide').or(z.literal('')).or(z.null()).optional().nullable(),
+  images: z.array(z.string().url()).or(z.array(z.string())).default([]),
 });
 
 export type PropertyFormData = z.infer<typeof propertySchema>;
