@@ -84,8 +84,7 @@ export async function POST(request: NextRequest) {
       email: tenant.email,
       period,
     });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Erreur interne';
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: 'Erreur lors de l\'envoi de la quittance' }, { status: 500 });
   }
 }

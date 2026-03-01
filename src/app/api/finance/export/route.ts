@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/utils';
+import { safeErrorMessage } from '@/lib/sanitize';
 import type { Payment, Lease } from '@/types';
 
 export async function GET(request: NextRequest) {
@@ -23,6 +24,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('payments')
       .select('*, lease:leases(*, property:properties(name), tenant:tenants(first_name, last_name))')
+      .eq('user_id', user.id)
       .order('period_start', { ascending: false });
 
     if (status) query = query.eq('status', status);
@@ -32,7 +34,7 @@ export async function GET(request: NextRequest) {
     const { data: payments, error } = await query;
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Erreur lors de la récupération des données' }, { status: 500 });
     }
 
     // Génération CSV
@@ -64,7 +66,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Erreur interne';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: safeErrorMessage(err) }, { status: 500 });
   }
 }

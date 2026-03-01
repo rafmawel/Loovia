@@ -123,7 +123,7 @@ export default function ParametresPage() {
                 <p className="text-xs text-stone-500">Signature électronique des baux</p>
               </div>
               <span className="text-xs font-medium text-stone-500 bg-white px-3 py-1 rounded-full border border-stone-200">
-                {process.env.NEXT_PUBLIC_FIRMA_API_KEY ? 'Configuré' : 'Non configuré'}
+                Variable serveur
               </span>
             </div>
             <div className="flex items-center justify-between p-4 rounded-xl bg-stone-50">
@@ -132,7 +132,7 @@ export default function ParametresPage() {
                 <p className="text-xs text-stone-500">Synchronisation bancaire</p>
               </div>
               <span className="text-xs font-medium text-stone-500 bg-white px-3 py-1 rounded-full border border-stone-200">
-                {process.env.NEXT_PUBLIC_PLAID_CLIENT_ID ? 'Configuré' : 'Non configuré'}
+                Variable serveur
               </span>
             </div>
             <div className="flex items-center justify-between p-4 rounded-xl bg-stone-50">
@@ -141,7 +141,7 @@ export default function ParametresPage() {
                 <p className="text-xs text-stone-500">Envoi d&apos;emails et quittances</p>
               </div>
               <span className="text-xs font-medium text-stone-500 bg-white px-3 py-1 rounded-full border border-stone-200">
-                {process.env.NEXT_PUBLIC_RESEND_API_KEY ? 'Configuré' : 'Non configuré'}
+                Variable serveur
               </span>
             </div>
           </div>

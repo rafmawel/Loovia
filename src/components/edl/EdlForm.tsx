@@ -257,7 +257,7 @@ export default function EdlForm({
       toast.success('PDF généré');
     } catch (err) {
       toast.error('Erreur lors de la génération du PDF');
-      console.error(err);
+      void err;
     } finally {
       setGenerating(false);
     }

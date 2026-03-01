@@ -31,7 +31,7 @@ export default function LeaseDetailActions({ lease, property, tenant }: LeaseDet
       window.open(url, '_blank');
     } catch (err) {
       toast.error('Erreur lors de la génération du PDF');
-      console.error(err);
+      void err;
     }
   };
 
@@ -42,7 +42,7 @@ export default function LeaseDetailActions({ lease, property, tenant }: LeaseDet
       doc.save(filename);
     } catch (err) {
       toast.error('Erreur lors du téléchargement');
-      console.error(err);
+      void err;
     }
   };
 

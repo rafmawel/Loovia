@@ -112,8 +112,7 @@ export async function POST(request: NextRequest) {
       success: true,
       signingUrl: signingResponse.signing_url,
     });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Erreur interne';
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: 'Erreur lors de l\'envoi pour signature' }, { status: 500 });
   }
 }

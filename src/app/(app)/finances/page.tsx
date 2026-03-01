@@ -288,7 +288,7 @@ export default function FinancesPage() {
       toast.success('PDF téléchargé');
     } catch (err) {
       toast.error('Erreur lors de la génération du PDF');
-      console.error(err);
+      void err;
     }
   };
 

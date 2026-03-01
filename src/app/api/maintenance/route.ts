@@ -1,20 +1,24 @@
 // API Route — CRUD des demandes de maintenance / travaux
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { maintenanceSchema, maintenanceUpdateSchema } from '@/lib/validators/maintenance';
+import { safeErrorMessage } from '@/lib/sanitize';
 
 // ── Créer une demande ────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { property_id, tenant_id, title, description, priority, photos } = body;
+    const parsed = maintenanceSchema.safeParse(body);
 
-    if (!property_id || !title) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'property_id et title sont requis' },
+        { error: parsed.error.issues[0]?.message || 'Données invalides' },
         { status: 400 },
       );
     }
+
+    const { property_id, tenant_id, title, description, priority, photos } = parsed.data;
 
     const supabase = await createClient();
     const {
@@ -33,20 +37,20 @@ export async function POST(request: NextRequest) {
         tenant_id: tenant_id || null,
         title,
         description: description || null,
-        priority: priority || 'medium',
+        priority,
         status: 'open',
-        photos: photos || [],
+        photos,
       })
       .select('id')
       .single();
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Erreur lors de la création' }, { status: 500 });
     }
 
     return NextResponse.json({ id: req.id, success: true });
-  } catch {
-    return NextResponse.json({ error: 'Erreur interne' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: safeErrorMessage(err) }, { status: 500 });
   }
 }
 
@@ -55,11 +59,16 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, status, priority, title, description, photos } = body;
+    const parsed = maintenanceUpdateSchema.safeParse(body);
 
-    if (!id) {
-      return NextResponse.json({ error: 'id requis' }, { status: 400 });
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message || 'Données invalides' },
+        { status: 400 },
+      );
     }
+
+    const { id, status, priority, title, description, photos } = parsed.data;
 
     const supabase = await createClient();
     const {
@@ -84,12 +93,12 @@ export async function PUT(request: NextRequest) {
       .eq('user_id', user.id);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Erreur lors de la mise à jour' }, { status: 500 });
     }
 
     return NextResponse.json({ id, success: true });
-  } catch {
-    return NextResponse.json({ error: 'Erreur interne' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: safeErrorMessage(err) }, { status: 500 });
   }
 }
 
@@ -120,11 +129,11 @@ export async function DELETE(request: NextRequest) {
       .eq('user_id', user.id);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Erreur lors de la suppression' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
-  } catch {
-    return NextResponse.json({ error: 'Erreur interne' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: safeErrorMessage(err) }, { status: 500 });
   }
 }

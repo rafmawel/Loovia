@@ -62,8 +62,7 @@ export async function POST(request: NextRequest) {
     );
 
     return NextResponse.json({ success: true, email: tenant.email });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Erreur interne';
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: 'Erreur lors de l\'envoi de la relance' }, { status: 500 });
   }
 }

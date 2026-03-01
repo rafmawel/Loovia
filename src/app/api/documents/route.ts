@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Erreur interne' }, { status: 500 });
     }
 
     return NextResponse.json({ id: doc.id, success: true });
@@ -85,7 +85,7 @@ export async function PUT(request: NextRequest) {
       .eq('user_id', user.id);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Erreur interne' }, { status: 500 });
     }
 
     return NextResponse.json({ id, success: true });
@@ -121,7 +121,7 @@ export async function DELETE(request: NextRequest) {
       .eq('user_id', user.id);
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Erreur interne' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });

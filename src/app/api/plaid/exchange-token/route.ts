@@ -35,12 +35,11 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: 'Erreur lors de la sauvegarde de la connexion' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, connectionId: data.id });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Erreur interne';
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: 'Erreur lors de l\'échange du token bancaire' }, { status: 500 });
   }
 }

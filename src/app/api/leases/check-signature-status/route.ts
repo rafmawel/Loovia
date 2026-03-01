@@ -77,8 +77,7 @@ export async function POST(request: NextRequest) {
       status: signingStatus.status,
       recipients: signingStatus.recipients,
     });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Erreur interne';
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: 'Erreur lors de la vérification du statut' }, { status: 500 });
   }
 }

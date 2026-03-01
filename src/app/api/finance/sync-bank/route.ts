@@ -21,11 +21,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
-    // Récupérer la connexion bancaire
+    // Récupérer la connexion bancaire (ownership via RLS + filtre explicite)
     const { data: connection, error } = await supabase
       .from('bank_connections')
       .select('*')
       .eq('id', connectionId)
+      .eq('user_id', user.id)
       .single();
 
     if (error || !connection) {
@@ -141,8 +142,7 @@ export async function POST(request: NextRequest) {
       matched,
       suggestions,
     });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Erreur interne';
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: 'Erreur lors de la synchronisation bancaire' }, { status: 500 });
   }
 }

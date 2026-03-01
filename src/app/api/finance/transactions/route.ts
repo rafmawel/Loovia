@@ -116,8 +116,7 @@ export async function POST(request: NextRequest) {
       default:
         return NextResponse.json({ error: `Action "${action}" inconnue` }, { status: 400 });
     }
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Erreur interne';
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: 'Erreur lors du traitement de la transaction' }, { status: 500 });
   }
 }
