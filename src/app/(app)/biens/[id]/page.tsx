@@ -219,10 +219,19 @@ export default async function BienDetailPage({ params }: Props) {
 
           {/* 9. Baux associés */}
           <Card>
-            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <FileText className="h-5 w-5 text-terracotta" />
-              Baux associés ({leases.length})
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <FileText className="h-5 w-5 text-terracotta" />
+                Baux associés ({leases.length})
+              </h2>
+              <Link
+                href={`/baux?property_id=${property.id}${activeTenants.length > 0 ? `&tenant_id=${activeTenants[0].id}` : ''}`}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-terracotta hover:text-terracotta/80 transition-colors"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Créer un bail
+              </Link>
+            </div>
             {leases.length === 0 ? (
               <p className="text-sm text-stone-500">Aucun bail associé à ce bien.</p>
             ) : (

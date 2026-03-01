@@ -144,6 +144,8 @@ interface LeaseWizardProps {
   tenants: Tenant[];
   properties: Property[];
   userMetadata?: { first_name?: string; last_name?: string; [key: string]: unknown };
+  initialPropertyId?: string;
+  initialTenantId?: string;
 }
 
 export default function LeaseWizard({
@@ -152,9 +154,48 @@ export default function LeaseWizard({
   tenants,
   properties,
   userMetadata,
+  initialPropertyId,
+  initialTenantId,
 }: LeaseWizardProps) {
   const [step, setStep] = useState(1);
-  const [data, setData] = useState<LeaseWizardData>(INITIAL_DATA);
+
+  // Pré-remplissage depuis les props initiales
+  const buildInitialData = useCallback((): LeaseWizardData => {
+    const initial = { ...INITIAL_DATA };
+
+    if (initialPropertyId) {
+      const prop = properties.find((p) => p.id === initialPropertyId);
+      if (prop) {
+        initial.property_id = prop.id;
+        initial.property_address = prop.address;
+        initial.property_city = prop.city;
+        initial.property_postal_code = prop.postal_code;
+        initial.property_building = prop.building || '';
+        initial.property_floor = prop.floor || '';
+        initial.property_door = prop.door || '';
+        initial.property_surface = prop.surface || 0;
+        initial.property_rooms = prop.number_of_rooms || 0;
+        initial.location_type = prop.furnished_type || 'Location vide';
+        initial.monthly_rent = prop.rent_amount || 0;
+        initial.charges_amount = prop.charges_amount || 0;
+        initial.deposit_amount = prop.deposit_amount || 0;
+      }
+    }
+
+    if (initialTenantId) {
+      const tenant = tenants.find((t) => t.id === initialTenantId);
+      if (tenant) {
+        initial.tenant_id = tenant.id;
+        initial.tenant_first_name = tenant.first_name;
+        initial.tenant_last_name = tenant.last_name;
+        initial.tenant_date_of_birth = tenant.date_of_birth || '';
+      }
+    }
+
+    return initial;
+  }, [initialPropertyId, initialTenantId, properties, tenants]);
+
+  const [data, setData] = useState<LeaseWizardData>(buildInitialData);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();

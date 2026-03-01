@@ -14,6 +14,7 @@ import {
   RefreshCw, Check, X, Tag, ChevronDown, Filter, FileText, Send, Download,
 } from 'lucide-react';
 import { formatCurrency, formatDate, fullName, formatMonthYear } from '@/lib/utils';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import type {
   Payment, Lease, Tenant, Property,
@@ -485,11 +486,20 @@ export default function FinancesPage() {
                   className="flex items-center justify-between p-3 rounded-xl bg-white border border-red-100"
                 >
                   <div>
-                    <p className="text-sm font-medium text-slate-900">
-                      {tenant ? fullName(tenant.first_name, tenant.last_name) : '—'}
+                    <p className="text-sm font-medium">
+                      {tenant && p.lease?.tenant_id ? (
+                        <Link href={`/locataires/${p.lease.tenant_id}`} className="text-terracotta hover:underline">
+                          {fullName(tenant.first_name, tenant.last_name)}
+                        </Link>
+                      ) : '—'}
                     </p>
                     <p className="text-xs text-stone-500">
-                      {property?.address || '—'} · Échéance {formatDate(p.period_end)}
+                      {property && p.lease?.property_id ? (
+                        <Link href={`/biens/${p.lease.property_id}`} className="text-stone-500 hover:text-terracotta hover:underline">
+                          {property.address}
+                        </Link>
+                      ) : '—'}
+                      {' · Échéance '}{formatDate(p.period_end)}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">

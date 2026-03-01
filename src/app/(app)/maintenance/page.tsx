@@ -13,6 +13,7 @@ import {
   Wrench, Filter, Plus, Play, CheckCircle, XCircle, ChevronDown,
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import { priorityLabels, priorityColors } from '@/lib/design-system';
 import type { MaintenanceRequest, MaintenanceStatus, MaintenancePriority } from '@/types';
@@ -276,13 +277,19 @@ export default function MaintenancePage() {
                         </p>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-sm text-stone-500">
-                      {req.property?.name || '—'}
+                    <td className="px-4 py-3 text-sm">
+                      {req.property ? (
+                        <Link href={`/biens/${req.property_id}`} className="text-terracotta hover:underline">
+                          {req.property.name}
+                        </Link>
+                      ) : '—'}
                     </td>
-                    <td className="px-4 py-3 text-sm text-stone-500">
-                      {req.tenant
-                        ? `${req.tenant.first_name} ${req.tenant.last_name}`
-                        : '—'}
+                    <td className="px-4 py-3 text-sm">
+                      {req.tenant && req.tenant_id ? (
+                        <Link href={`/locataires/${req.tenant_id}`} className="text-terracotta hover:underline">
+                          {req.tenant.first_name} {req.tenant.last_name}
+                        </Link>
+                      ) : '—'}
                     </td>
                     <td className="px-4 py-3">
                       <span

@@ -204,7 +204,12 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Derniers paiements reçus */}
         <Card>
-          <h2 className="text-lg font-bold text-slate-900 mb-4">Derniers paiements</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-slate-900">Derniers paiements</h2>
+            <Link href="/finances" className="text-xs font-medium text-terracotta hover:text-terracotta/80">
+              Voir tous →
+            </Link>
+          </div>
           {recentPayments.length === 0 ? (
             <p className="text-sm text-stone-500">Aucun paiement reçu pour le moment.</p>
           ) : (
@@ -234,13 +239,18 @@ export default async function DashboardPage() {
 
         {/* Derniers baux créés */}
         <Card>
-          <h2 className="text-lg font-bold text-slate-900 mb-4">Derniers baux</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-slate-900">Derniers baux</h2>
+            <Link href="/baux" className="text-xs font-medium text-terracotta hover:text-terracotta/80">
+              Voir tous →
+            </Link>
+          </div>
           {recentLeases.length === 0 ? (
             <p className="text-sm text-stone-500">Aucun bail créé pour le moment.</p>
           ) : (
             <div className="space-y-3">
               {recentLeases.map((lease) => (
-                <div key={lease.id} className="flex items-center justify-between">
+                <Link key={lease.id} href={`/baux/${lease.id}`} className="flex items-center justify-between hover:bg-stone-50 rounded-lg p-1 -m-1 transition-colors">
                   <div>
                     <p className="text-sm font-medium text-slate-900">
                       {lease.property?.name || '—'}
@@ -252,7 +262,7 @@ export default async function DashboardPage() {
                     </p>
                   </div>
                   <StatusBadge variant="lease" status={lease.status} />
-                </div>
+                </Link>
               ))}
             </div>
           )}

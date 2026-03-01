@@ -16,9 +16,13 @@ export default function BauxPageClient({ tenants, properties, userMetadata }: Ba
   const [wizardOpen, setWizardOpen] = useState(false);
   const searchParams = useSearchParams();
 
-  // Ouvrir le wizard si ?action=create dans l'URL
+  // Pré-sélection depuis les query params
+  const initialPropertyId = searchParams.get('property_id') || undefined;
+  const initialTenantId = searchParams.get('tenant_id') || undefined;
+
+  // Ouvrir le wizard si ?action=create ou ?property_id dans l'URL
   useEffect(() => {
-    if (searchParams.get('action') === 'create') {
+    if (searchParams.get('action') === 'create' || searchParams.get('property_id')) {
       setWizardOpen(true);
     }
   }, [searchParams]);
@@ -43,6 +47,8 @@ export default function BauxPageClient({ tenants, properties, userMetadata }: Ba
         tenants={tenants}
         properties={properties}
         userMetadata={userMetadata}
+        initialPropertyId={initialPropertyId}
+        initialTenantId={initialTenantId}
       />
     </>
   );

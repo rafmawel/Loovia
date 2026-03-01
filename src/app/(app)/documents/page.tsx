@@ -11,6 +11,7 @@ import {
   FileText, Filter, ChevronDown, Eye, CheckCircle, XCircle, Upload,
 } from 'lucide-react';
 import { formatDate, fullName } from '@/lib/utils';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import type { TenantDocument, DocumentStatus } from '@/types';
 
@@ -216,13 +217,21 @@ export default function DocumentsPage() {
                       key={doc.id}
                       className="border-b border-stone-100 hover:bg-stone-50/50 transition-colors"
                     >
-                      <td className="px-4 py-3 text-sm font-medium text-slate-900">
-                        {tenant
-                          ? fullName(tenant.first_name, tenant.last_name)
-                          : '—'}
+                      <td className="px-4 py-3 text-sm font-medium">
+                        {tenant ? (
+                          <Link href={`/locataires/${doc.tenant_id}`} className="text-terracotta hover:underline">
+                            {fullName(tenant.first_name, tenant.last_name)}
+                          </Link>
+                        ) : '—'}
                       </td>
-                      <td className="px-4 py-3 text-sm text-stone-500">
-                        {doc.property_name}
+                      <td className="px-4 py-3 text-sm">
+                        {tenant?.property_id ? (
+                          <Link href={`/biens/${tenant.property_id}`} className="text-terracotta hover:underline">
+                            {doc.property_name}
+                          </Link>
+                        ) : (
+                          <span className="text-stone-500">{doc.property_name}</span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-sm text-slate-900">
                         {doc.document_type}

@@ -7,7 +7,7 @@ import TenantDetailActions from '@/components/tenants/TenantDetailActions';
 import TenantDocumentsSection from '@/components/documents/TenantDocumentsSection';
 import {
   ArrowLeft, User, Mail, Phone, Calendar, Building2, Wallet,
-  Globe, Briefcase, CreditCard, Users, ClipboardList,
+  Globe, Briefcase, CreditCard, Users, ClipboardList, FileText,
 } from 'lucide-react';
 import { formatCurrency, formatDate, fullName } from '@/lib/utils';
 import Link from 'next/link';
@@ -22,13 +22,18 @@ export default async function LocataireDetailPage({ params }: Props) {
   const { id } = await params;
   const supabase = await createClient();
 
-  const [tenantRes, propertyRes, paymentsRes] = await Promise.all([
+  const [tenantRes, propertyRes, paymentsRes, leasesRes] = await Promise.all([
     supabase.from('tenants').select('*').eq('id', id).single(),
     supabase.from('properties').select('*'),
     supabase
       .from('payments')
       .select('*, lease:leases(*)')
       .order('period_start', { ascending: false }),
+    supabase
+      .from('leases')
+      .select('*, property:properties(name)')
+      .eq('tenant_id', id)
+      .order('created_at', { ascending: false }),
   ]);
 
   if (tenantRes.error || !tenantRes.data) {
@@ -42,6 +47,9 @@ export default async function LocataireDetailPage({ params }: Props) {
   // Paiements liés au locataire via les baux
   const allPayments = (paymentsRes.data || []) as (Payment & { lease: Lease })[];
   const tenantPayments = allPayments.filter((p) => p.lease?.tenant_id === tenant.id);
+
+  // Baux associés
+  const tenantLeases = (leasesRes.data || []) as (Lease & { property?: { name: string } })[];
 
   const isActive = !tenant.end_date;
 
@@ -156,6 +164,38 @@ export default async function LocataireDetailPage({ params }: Props) {
               </div>
             </Card>
           )}
+
+          {/* Baux associés */}
+          <Card>
+            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <FileText className="h-5 w-5 text-terracotta" />
+              Baux ({tenantLeases.length})
+            </h2>
+            {tenantLeases.length === 0 ? (
+              <p className="text-sm text-stone-500">Aucun bail associé.</p>
+            ) : (
+              <div className="space-y-3">
+                {tenantLeases.map((lease) => (
+                  <Link
+                    key={lease.id}
+                    href={`/baux/${lease.id}`}
+                    className="flex items-center justify-between p-3 rounded-xl bg-stone-50 hover:bg-stone-100 transition-colors"
+                  >
+                    <div>
+                      <p className="text-sm font-medium text-slate-900">
+                        {lease.property?.name || '—'}
+                      </p>
+                      <p className="text-xs text-stone-500">
+                        {formatDate(lease.start_date)}{lease.end_date ? ` — ${formatDate(lease.end_date)}` : ' — En cours'}
+                        {' · '}{formatCurrency(lease.monthly_rent)}/mois
+                      </p>
+                    </div>
+                    <StatusBadge variant="lease" status={lease.status} />
+                  </Link>
+                ))}
+              </div>
+            )}
+          </Card>
 
           {/* Historique des paiements */}
           <Card>
