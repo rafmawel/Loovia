@@ -42,8 +42,29 @@ export interface Property {
   rent_amount: number;
   charges_amount: number;
   deposit_amount: number;
+  purchase_price?: number | null;
+  monthly_payment?: number | null;
+  payment_months?: number | null;
+  loan_rate?: number | null;
+  purchase_date?: string | null;
+  notary_fees?: number | null;
+  lot_id?: string | null;
   image_url?: string | null;
   images: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PropertyLot {
+  id: string;
+  user_id: string;
+  name: string;
+  purchase_price?: number | null;
+  monthly_payment?: number | null;
+  payment_months?: number | null;
+  loan_rate?: number | null;
+  purchase_date?: string | null;
+  notary_fees?: number | null;
   created_at: string;
   updated_at: string;
 }

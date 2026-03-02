@@ -1,7 +1,7 @@
 'use client';
 
 // Boutons d'action pour la page détail d'un bien (Modifier, Supprimer)
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Button from '@/components/ui/Button';
@@ -9,7 +9,7 @@ import Modal from '@/components/ui/Modal';
 import PropertyForm from '@/components/properties/PropertyForm';
 import { Pencil, Trash2, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
-import type { Property } from '@/types';
+import type { Property, PropertyLot } from '@/types';
 
 interface Props {
   property: Property;
@@ -19,8 +19,20 @@ export default function PropertyDetailActions({ property }: Props) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [lots, setLots] = useState<PropertyLot[]>([]);
   const router = useRouter();
   const supabase = createClient();
+
+  useEffect(() => {
+    if (!showEditModal) return;
+    supabase
+      .from('property_lots')
+      .select('*')
+      .order('name')
+      .then(({ data }) => {
+        if (data) setLots(data);
+      });
+  }, [showEditModal, supabase]);
 
   async function handleDelete() {
     setDeleting(true);
@@ -66,6 +78,7 @@ export default function PropertyDetailActions({ property }: Props) {
       >
         <PropertyForm
           property={property}
+          lots={lots}
           onClose={() => {
             setShowEditModal(false);
             router.refresh();

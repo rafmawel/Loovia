@@ -5,7 +5,7 @@ import { useState, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { propertySchema, type PropertyFormData } from '@/lib/validators/property';
-import { propertyTypes, furnishedTypes, storagePropertyTypes } from '@/lib/design-system';
+import { propertyTypes, furnishedTypes, storagePropertyTypes, commercialPropertyTypes } from '@/lib/design-system';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
@@ -15,12 +15,13 @@ import {
   Home, MapPin, Utensils, Warehouse, Thermometer, Shield, Wallet,
   ImageIcon, Save, X, Upload, Trash2, Building2, Car, Box, Landmark,
 } from 'lucide-react';
-import type { Property } from '@/types';
+import type { Property, PropertyLot } from '@/types';
 
 const MAX_PHOTOS_FREE = 3;
 
 interface PropertyFormProps {
   property?: Property | null;
+  lots?: PropertyLot[];
   onClose: () => void;
 }
 
@@ -28,14 +29,11 @@ interface PropertyFormProps {
 const typeIcons: Record<string, React.ReactNode> = {
   Appartement: <Building2 className="h-5 w-5" />,
   Maison: <Home className="h-5 w-5" />,
-  Studio: <Building2 className="h-5 w-5" />,
-  Loft: <Building2 className="h-5 w-5" />,
-  Duplex: <Building2 className="h-5 w-5" />,
+  'Local commercial': <Landmark className="h-5 w-5" />,
   Parking: <Car className="h-5 w-5" />,
   Box: <Box className="h-5 w-5" />,
   Garage: <Car className="h-5 w-5" />,
   Cave: <Warehouse className="h-5 w-5" />,
-  'Local commercial': <Landmark className="h-5 w-5" />,
   Terrain: <MapPin className="h-5 w-5" />,
 };
 
@@ -79,6 +77,13 @@ const defaultValues: PropertyFormData = {
   rent_amount: 0,
   charges_amount: 0,
   deposit_amount: 0,
+  purchase_price: null,
+  monthly_payment: null,
+  payment_months: null,
+  loan_rate: null,
+  purchase_date: null,
+  notary_fees: null,
+  lot_id: null,
   image_url: '',
   images: [],
 };
@@ -124,12 +129,19 @@ function propertyToFormData(p: Property): PropertyFormData {
     rent_amount: p.rent_amount,
     charges_amount: p.charges_amount,
     deposit_amount: p.deposit_amount,
+    purchase_price: p.purchase_price ?? null,
+    monthly_payment: p.monthly_payment ?? null,
+    payment_months: p.payment_months ?? null,
+    loan_rate: p.loan_rate ?? null,
+    purchase_date: p.purchase_date || null,
+    notary_fees: p.notary_fees ?? null,
+    lot_id: p.lot_id || null,
     image_url: p.image_url || '',
     images: p.images || [],
   };
 }
 
-export default function PropertyForm({ property, onClose }: PropertyFormProps) {
+export default function PropertyForm({ property, lots = [], onClose }: PropertyFormProps) {
   const isEditing = !!property;
   const router = useRouter();
   const supabase = createClient();
@@ -145,34 +157,43 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
 
   const isStorageType = (storagePropertyTypes as readonly string[]).includes(form.property_type);
+  const isCommercialType = (commercialPropertyTypes as readonly string[]).includes(form.property_type);
+  const [creatingLot, setCreatingLot] = useState(false);
+  const [newLotName, setNewLotName] = useState('');
 
   // Dynamic sections based on property type
   const sections = useMemo(() => {
     const base = [
       { icon: Home, label: 'Type de bien' },
       { icon: MapPin, label: 'Localisation' },
+      { icon: Home, label: 'Description' },
     ];
 
     if (isStorageType) {
+      // Storage types: pas de cuisine/annexes/énergie/confort
+    } else if (isCommercialType) {
+      // Local commercial: pas de cuisine, mais annexes simplifiées et énergie
       base.push(
-        { icon: Home, label: 'Description' },
-        { icon: Wallet, label: 'Finances' },
-        { icon: ImageIcon, label: 'Photos' },
+        { icon: Warehouse, label: 'Annexes' },
+        { icon: Thermometer, label: 'Énergie' },
       );
     } else {
+      // Habitable types: full form
       base.push(
-        { icon: Home, label: 'Description' },
         { icon: Utensils, label: 'Cuisine' },
         { icon: Warehouse, label: 'Annexes' },
         { icon: Thermometer, label: 'Énergie' },
         { icon: Shield, label: 'Confort' },
-        { icon: Wallet, label: 'Finances' },
-        { icon: ImageIcon, label: 'Photos' },
       );
     }
 
+    base.push(
+      { icon: Wallet, label: 'Finances' },
+      { icon: ImageIcon, label: 'Photos' },
+    );
+
     return base;
-  }, [isStorageType]);
+  }, [isStorageType, isCommercialType]);
 
   function updateField<K extends keyof PropertyFormData>(key: K, value: PropertyFormData[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -291,6 +312,13 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
       charges_other: form.charges_other || null,
       glazing_type: form.glazing_type || null,
       shutters_type: form.shutters_type || null,
+      purchase_price: form.purchase_price || null,
+      monthly_payment: form.monthly_payment || null,
+      payment_months: form.payment_months || null,
+      loan_rate: form.loan_rate || null,
+      purchase_date: form.purchase_date || null,
+      notary_fees: form.notary_fees || null,
+      lot_id: form.lot_id || null,
       image_url: mainImage,
       images: allImages,
       surface: form.surface || null,
@@ -330,9 +358,30 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('Vous devez être connecté pour ajouter un bien');
 
+        // Créer un lot si demandé
+        let lotId = result.data.lot_id;
+        if (creatingLot && newLotName.trim()) {
+          const { data: lot, error: lotError } = await supabase
+            .from('property_lots')
+            .insert({
+              user_id: user.id,
+              name: newLotName.trim(),
+              purchase_price: result.data.purchase_price,
+              monthly_payment: result.data.monthly_payment,
+              payment_months: result.data.payment_months,
+              loan_rate: result.data.loan_rate,
+              purchase_date: result.data.purchase_date,
+              notary_fees: result.data.notary_fees,
+            })
+            .select()
+            .single();
+          if (lotError) throw new Error(lotError.message);
+          lotId = lot.id;
+        }
+
         const { data, error } = await supabase
           .from('properties')
-          .insert({ ...result.data, user_id: user.id })
+          .insert({ ...result.data, user_id: user.id, lot_id: lotId })
           .select()
           .single();
 
@@ -388,7 +437,6 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
                   type="button"
                   onClick={() => {
                     updateField('property_type', type);
-                    setActiveSection(1);
                   }}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
                     form.property_type === type
@@ -402,7 +450,7 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
               ))}
             </div>
 
-            {!isStorageType && (
+            {!isStorageType && !isCommercialType && (
               <div className="pt-2">
                 <Select
                   label="Type de location"
@@ -712,6 +760,8 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
         {/* Section : Finances */}
         {sectionKey === 'Finances' && (
           <div className="space-y-5 animate-in">
+            {/* Location */}
+            <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Location</h3>
             <Input
               label={isStorageType ? 'Loyer mensuel *' : 'Loyer mensuel HC *'}
               type="number"
@@ -750,6 +800,127 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
                 </p>
               </div>
             )}
+
+            {/* Achat */}
+            <div className="border-t border-stone-100 pt-5">
+              <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Achat</h3>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <Input
+                    label="Prix d'achat"
+                    type="number"
+                    placeholder="200000"
+                    value={form.purchase_price ?? ''}
+                    onChange={(e) => updateField('purchase_price', e.target.value ? Number(e.target.value) : null)}
+                    helperText="En euros"
+                  />
+                  <Input
+                    label="Date d'achat"
+                    type="date"
+                    value={form.purchase_date || ''}
+                    onChange={(e) => updateField('purchase_date', e.target.value || null)}
+                  />
+                </div>
+                <Input
+                  label="Frais de notaire"
+                  type="number"
+                  placeholder="15000"
+                  value={form.notary_fees ?? ''}
+                  onChange={(e) => updateField('notary_fees', e.target.value ? Number(e.target.value) : null)}
+                  helperText="En euros"
+                />
+                <div className="grid grid-cols-3 gap-4">
+                  <Input
+                    label="Mensualité crédit"
+                    type="number"
+                    placeholder="900"
+                    value={form.monthly_payment ?? ''}
+                    onChange={(e) => updateField('monthly_payment', e.target.value ? Number(e.target.value) : null)}
+                    helperText="En euros"
+                  />
+                  <Input
+                    label="Durée (mois)"
+                    type="number"
+                    placeholder="240"
+                    value={form.payment_months ?? ''}
+                    onChange={(e) => updateField('payment_months', e.target.value ? Number(e.target.value) : null)}
+                  />
+                  <Input
+                    label="Taux (%)"
+                    type="number"
+                    step="0.01"
+                    placeholder="3.5"
+                    value={form.loan_rate ?? ''}
+                    onChange={(e) => updateField('loan_rate', e.target.value ? Number(e.target.value) : null)}
+                  />
+                </div>
+
+                {/* Achat en lot */}
+                <div className="p-5 rounded-xl border border-stone-200">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={!!form.lot_id || creatingLot}
+                      onChange={() => {
+                        if (form.lot_id) {
+                          updateField('lot_id', null);
+                          setCreatingLot(false);
+                        } else {
+                          setCreatingLot(true);
+                        }
+                      }}
+                      className="rounded border-stone-300 text-terracotta focus:ring-terracotta"
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-slate-900">Achat en lot</span>
+                      <p className="text-xs text-stone-500">Les infos d&apos;achat seront partagées entre tous les biens du lot</p>
+                    </div>
+                  </label>
+
+                  {(form.lot_id || creatingLot) && (
+                    <div className="mt-4 pl-7 space-y-3">
+                      {lots.length > 0 && !creatingLot && (
+                        <Select
+                          label="Lot existant"
+                          placeholder="Sélectionner un lot..."
+                          options={lots.map((l) => ({ value: l.id, label: l.name }))}
+                          value={form.lot_id || ''}
+                          onChange={(e) => {
+                            updateField('lot_id', e.target.value || null);
+                          }}
+                        />
+                      )}
+                      {lots.length > 0 && !creatingLot && (
+                        <button
+                          type="button"
+                          onClick={() => setCreatingLot(true)}
+                          className="text-xs text-terracotta hover:underline"
+                        >
+                          + Créer un nouveau lot
+                        </button>
+                      )}
+                      {(creatingLot || lots.length === 0) && (
+                        <Input
+                          label="Nom du nouveau lot"
+                          placeholder="Ex: Immeuble Rue de la Paix"
+                          value={newLotName}
+                          onChange={(e) => setNewLotName(e.target.value)}
+                        />
+                      )}
+                      {creatingLot && lots.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => { setCreatingLot(false); setNewLotName(''); }}
+                          className="text-xs text-stone-500 hover:underline"
+                        >
+                          Choisir un lot existant
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -843,14 +1014,15 @@ export default function PropertyForm({ property, onClose }: PropertyFormProps) {
           <span className="text-xs text-stone-400">
             {activeSection + 1}/{sections.length}
           </span>
-          {activeSection < sections.length - 1 && (
-            <Button type="button" variant="secondary" onClick={() => setActiveSection((s) => s + 1)}>
+          {activeSection < sections.length - 1 ? (
+            <Button type="button" variant="primary" onClick={() => setActiveSection((s) => s + 1)}>
               Suivant
             </Button>
+          ) : (
+            <Button type="submit" loading={loading || uploadingPhotos} icon={<Save className="h-4 w-4" />}>
+              {uploadingPhotos ? 'Upload...' : isEditing ? 'Enregistrer' : 'Créer le bien'}
+            </Button>
           )}
-          <Button type="submit" loading={loading || uploadingPhotos} icon={<Save className="h-4 w-4" />}>
-            {uploadingPhotos ? 'Upload...' : isEditing ? 'Enregistrer' : 'Créer le bien'}
-          </Button>
         </div>
       </div>
     </form>

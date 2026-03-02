@@ -1,14 +1,29 @@
 'use client';
 
 // Bouton "Ajouter un bien" — ouvre la modale de création
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import PropertyForm from '@/components/properties/PropertyForm';
+import { createClient } from '@/lib/supabase/client';
 import { Plus } from 'lucide-react';
+import type { PropertyLot } from '@/types';
 
 export default function AddPropertyButton() {
   const [open, setOpen] = useState(false);
+  const [lots, setLots] = useState<PropertyLot[]>([]);
+
+  useEffect(() => {
+    if (!open) return;
+    const supabase = createClient();
+    supabase
+      .from('property_lots')
+      .select('*')
+      .order('name')
+      .then(({ data }) => {
+        if (data) setLots(data);
+      });
+  }, [open]);
 
   return (
     <>
@@ -17,7 +32,7 @@ export default function AddPropertyButton() {
       </Button>
 
       <Modal open={open} onClose={() => setOpen(false)} title="Ajouter un bien" size="xl">
-        <PropertyForm onClose={() => setOpen(false)} />
+        <PropertyForm lots={lots} onClose={() => setOpen(false)} />
       </Modal>
     </>
   );

@@ -41,6 +41,13 @@ export const propertySchema = z.object({
   rent_amount: z.coerce.number().min(0, 'Le loyer doit être un nombre positif'),
   charges_amount: z.coerce.number().min(0, 'Les charges doivent être un nombre positif').default(0),
   deposit_amount: z.coerce.number().min(0, 'Le dépôt doit être un nombre positif').default(0),
+  purchase_price: z.coerce.number().min(0).optional().nullable(),
+  monthly_payment: z.coerce.number().min(0).optional().nullable(),
+  payment_months: z.coerce.number().int().min(0).optional().nullable(),
+  loan_rate: z.coerce.number().min(0).optional().nullable(),
+  purchase_date: z.string().optional().nullable(),
+  notary_fees: z.coerce.number().min(0).optional().nullable(),
+  lot_id: z.string().uuid().optional().nullable(),
   image_url: z.string().url('URL invalide').or(z.literal('')).or(z.null()).optional().nullable(),
   images: z.array(z.string().url()).or(z.array(z.string())).default([]),
 });

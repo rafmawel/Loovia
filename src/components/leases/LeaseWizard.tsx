@@ -26,6 +26,8 @@ export interface LeaseWizardData {
   tenant_first_name: string;
   tenant_last_name: string;
   tenant_date_of_birth: string;
+  tenant_email: string;
+  tenant_phone: string;
   has_cotenants: boolean;
   cotenants: { first_name: string; last_name: string; date_of_birth?: string }[];
 
@@ -84,6 +86,8 @@ const INITIAL_DATA: LeaseWizardData = {
   tenant_first_name: '',
   tenant_last_name: '',
   tenant_date_of_birth: '',
+  tenant_email: '',
+  tenant_phone: '',
   has_cotenants: false,
   cotenants: [],
 
@@ -219,7 +223,12 @@ export default function LeaseWizard({
     if (step === 1) {
       if (!data.landlord_name.trim()) errs.landlord_name = 'Nom requis';
       if (!data.landlord_address.trim()) errs.landlord_address = 'Adresse requise';
-      if (!data.tenant_id) errs.tenant_id = 'Sélectionnez un locataire';
+      // Soit un locataire existant, soit les infos pour en créer un nouveau
+      if (!data.tenant_id) {
+        if (!data.tenant_first_name.trim()) errs.tenant_first_name = 'Prénom requis';
+        if (!data.tenant_last_name.trim()) errs.tenant_last_name = 'Nom requis';
+        if (!data.tenant_email?.trim()) errs.tenant_email = 'Email requis';
+      }
     }
 
     if (step === 2) {
@@ -265,12 +274,38 @@ export default function LeaseWizard({
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error('Non authentifié');
 
+      // Créer le locataire automatiquement si c'est un nouveau
+      let tenantId = data.tenant_id;
+      if (!tenantId) {
+        const { data: newTenant, error: tenantError } = await supabase
+          .from('tenants')
+          .insert({
+            user_id: userData.user.id,
+            property_id: data.property_id || null,
+            first_name: data.tenant_first_name,
+            last_name: data.tenant_last_name,
+            email: data.tenant_email,
+            phone: data.tenant_phone || null,
+            date_of_birth: data.tenant_date_of_birth || null,
+            start_date: data.start_date || new Date().toISOString().split('T')[0],
+            rent_amount: data.monthly_rent || 0,
+            co_tenants: data.cotenants,
+            relationship_type: data.cotenants.length > 0 ? 'Colocation' : null,
+            payment_status: 'pending',
+          })
+          .select()
+          .single();
+
+        if (tenantError) throw new Error(tenantError.message);
+        tenantId = newTenant.id;
+      }
+
       const { data: lease, error } = await supabase
         .from('leases')
         .insert({
           user_id: userData.user.id,
           property_id: data.property_id,
-          tenant_id: data.tenant_id,
+          tenant_id: tenantId,
           status: 'draft',
           monthly_rent: data.monthly_rent,
           charges_amount: data.charges_amount,
