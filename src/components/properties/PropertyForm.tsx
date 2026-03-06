@@ -275,6 +275,13 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    // Si on n'est pas sur la dernière section, passer à la suivante au lieu de soumettre
+    if (activeSection < sections.length - 1) {
+      setActiveSection((s) => s + 1);
+      return;
+    }
+
     setLoading(true);
     setErrors({});
 
