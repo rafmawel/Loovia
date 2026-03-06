@@ -12,6 +12,7 @@ import { formatCurrency, formatDate, fullName } from '@/lib/utils';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import PropertyDetailActions from '@/components/properties/PropertyDetailActions';
+import AddTenantToPropertyButton from '@/components/properties/AddTenantToPropertyButton';
 import type { Property, Tenant, Lease, MaintenanceRequest, EdlReport } from '@/types';
 
 interface Props {
@@ -360,9 +361,12 @@ export default async function BienDetailPage({ params }: Props) {
               Locataire actuel
             </h2>
             {activeTenants.length === 0 ? (
-              <div className="text-center py-4">
+              <div className="text-center py-4 space-y-3">
                 <div className="inline-flex items-center gap-1 text-sm font-medium text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
                   Bien libre
+                </div>
+                <div>
+                  <AddTenantToPropertyButton propertyId={property.id} />
                 </div>
               </div>
             ) : (

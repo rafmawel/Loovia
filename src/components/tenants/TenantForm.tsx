@@ -14,6 +14,7 @@ import type { Property, Tenant, CoTenant } from '@/types';
 
 interface TenantFormProps {
   tenant?: Tenant | null;
+  propertyId?: string | null;
   onClose: () => void;
 }
 
@@ -62,13 +63,13 @@ function tenantToFormData(t: Tenant): TenantFormData {
   };
 }
 
-export default function TenantForm({ tenant, onClose }: TenantFormProps) {
+export default function TenantForm({ tenant, propertyId, onClose }: TenantFormProps) {
   const isEditing = !!tenant;
   const router = useRouter();
   const supabase = createClient();
 
   const [form, setForm] = useState<TenantFormData>(
-    tenant ? tenantToFormData(tenant) : defaultValues
+    tenant ? tenantToFormData(tenant) : { ...defaultValues, property_id: propertyId || null }
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -107,10 +108,18 @@ export default function TenantForm({ tenant, onClose }: TenantFormProps) {
 
       setAvailableProperties(available);
       setLoadingProperties(false);
+
+      // Auto-remplissage du loyer si propertyId pré-rempli
+      if (propertyId && !tenant) {
+        const prop = available.find((p) => p.id === propertyId);
+        if (prop) {
+          setForm((prev) => ({ ...prev, rent_amount: prop.rent_amount }));
+        }
+      }
     }
 
     fetchAvailableProperties();
-  }, [supabase, tenant?.id, tenant?.property_id]);
+  }, [supabase, tenant?.id, tenant?.property_id, propertyId, tenant]);
 
   function updateField<K extends keyof TenantFormData>(key: K, value: TenantFormData[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
