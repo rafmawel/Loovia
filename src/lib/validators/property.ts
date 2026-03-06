@@ -38,7 +38,7 @@ export const propertySchema = z.object({
   shutters_type: z.string().optional().nullable(),
   has_intercom: z.boolean().default(false),
   has_fiber: z.boolean().default(false),
-  rent_amount: z.coerce.number().min(0, 'Le loyer doit être un nombre positif'),
+  rent_amount: z.coerce.number().min(0, 'Le loyer doit être un nombre positif').default(0),
   charges_amount: z.coerce.number().min(0, 'Les charges doivent être un nombre positif').default(0),
   deposit_amount: z.coerce.number().min(0, 'Le dépôt doit être un nombre positif').default(0),
   purchase_price: z.coerce.number().min(0).optional().nullable(),

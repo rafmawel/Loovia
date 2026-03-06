@@ -20,8 +20,10 @@ export default function AddPropertyButton() {
       .from('property_lots')
       .select('*')
       .order('name')
-      .then(({ data }) => {
+      .then(({ data, error }) => {
         if (data) setLots(data);
+        // Si la table n'existe pas encore, on ignore silencieusement
+        if (error) console.warn('property_lots:', error.message);
       });
   }, [open]);
 

@@ -158,6 +158,7 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
 
   const isStorageType = (storagePropertyTypes as readonly string[]).includes(form.property_type);
   const isCommercialType = (commercialPropertyTypes as readonly string[]).includes(form.property_type);
+  const [lotEnabled, setLotEnabled] = useState(!!property?.lot_id);
   const [creatingLot, setCreatingLot] = useState(false);
   const [newLotName, setNewLotName] = useState('');
 
@@ -312,6 +313,9 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
       charges_other: form.charges_other || null,
       glazing_type: form.glazing_type || null,
       shutters_type: form.shutters_type || null,
+      rent_amount: form.rent_amount || 0,
+      charges_amount: form.charges_amount || 0,
+      deposit_amount: form.deposit_amount || 0,
       purchase_price: form.purchase_price || null,
       monthly_payment: form.monthly_payment || null,
       payment_months: form.payment_months || null,
@@ -767,7 +771,7 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
               type="number"
               placeholder={isStorageType ? '80' : '850'}
               value={form.rent_amount || ''}
-              onChange={(e) => updateField('rent_amount', Number(e.target.value))}
+              onChange={(e) => updateField('rent_amount', e.target.value ? Number(e.target.value) : 0)}
               error={errors.rent_amount}
               helperText={isStorageType ? 'En euros par mois' : 'Hors charges, en euros'}
             />
@@ -777,7 +781,7 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
                 type="number"
                 placeholder="50"
                 value={form.charges_amount || ''}
-                onChange={(e) => updateField('charges_amount', Number(e.target.value))}
+                onChange={(e) => updateField('charges_amount', e.target.value ? Number(e.target.value) : 0)}
                 error={errors.charges_amount}
                 helperText="Provision mensuelle sur charges"
               />
@@ -787,7 +791,7 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
               type="number"
               placeholder={isStorageType ? '80' : '850'}
               value={form.deposit_amount || ''}
-              onChange={(e) => updateField('deposit_amount', Number(e.target.value))}
+              onChange={(e) => updateField('deposit_amount', e.target.value ? Number(e.target.value) : 0)}
               error={errors.deposit_amount}
             />
             {(form.rent_amount > 0 || form.charges_amount > 0) && (
@@ -860,12 +864,15 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={!!form.lot_id || creatingLot}
+                      checked={lotEnabled}
                       onChange={() => {
-                        if (form.lot_id) {
+                        if (lotEnabled) {
+                          setLotEnabled(false);
                           updateField('lot_id', null);
                           setCreatingLot(false);
+                          setNewLotName('');
                         } else {
+                          setLotEnabled(true);
                           setCreatingLot(true);
                         }
                       }}
@@ -877,7 +884,7 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
                     </div>
                   </label>
 
-                  {(form.lot_id || creatingLot) && (
+                  {lotEnabled && (
                     <div className="mt-4 pl-7 space-y-3">
                       {lots.length > 0 && !creatingLot && (
                         <Select

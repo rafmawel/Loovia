@@ -29,8 +29,9 @@ export default function PropertyDetailActions({ property }: Props) {
       .from('property_lots')
       .select('*')
       .order('name')
-      .then(({ data }) => {
+      .then(({ data, error }) => {
         if (data) setLots(data);
+        if (error) console.warn('property_lots:', error.message);
       });
   }, [showEditModal, supabase]);
 
