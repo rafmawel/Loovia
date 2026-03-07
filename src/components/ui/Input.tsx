@@ -21,9 +21,18 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
  * Compatible avec react-hook-form via forwardRef.
  */
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, helperText, id, className = '', ...rest }, ref) => {
+  ({ label, error, helperText, id, className = '', onChange, ...rest }, ref) => {
     // Génération d'un id stable si non fourni (pour le lien label/input)
     const inputId = id ?? React.useId();
+
+    // Pour les champs date, bloquer les années > 4 chiffres
+    const handleChange = rest.type === 'date'
+      ? (e: React.ChangeEvent<HTMLInputElement>) => {
+          const year = e.target.value.split('-')[0];
+          if (year && year.length > 4) return;
+          onChange?.(e);
+        }
+      : onChange;
 
     return (
       <div className="flex flex-col gap-1.5">
@@ -66,6 +75,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           ]
             .filter(Boolean)
             .join(' ')}
+          onChange={handleChange}
+          {...(rest.type === 'date' && !rest.max ? { max: '9999-12-31' } : {})}
           {...rest}
         />
 
