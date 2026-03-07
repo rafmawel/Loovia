@@ -212,9 +212,12 @@ export default function TenantForm({ tenant, propertyId, onClose }: TenantFormPr
         router.refresh();
         onClose();
       } else {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Vous devez être connecté pour ajouter un locataire');
+
         const { data, error } = await supabase
           .from('tenants')
-          .insert(result.data)
+          .insert({ ...result.data, user_id: user.id })
           .select()
           .single();
 
