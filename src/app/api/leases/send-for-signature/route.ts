@@ -112,7 +112,9 @@ export async function POST(request: NextRequest) {
       success: true,
       signingUrl: signingResponse.signing_url,
     });
-  } catch {
-    return NextResponse.json({ error: 'Erreur lors de l\'envoi pour signature' }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Erreur inconnue';
+    console.error('Erreur envoi signature:', message);
+    return NextResponse.json({ error: `Erreur lors de l'envoi : ${message}` }, { status: 500 });
   }
 }
