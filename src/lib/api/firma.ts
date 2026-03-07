@@ -7,27 +7,34 @@ const FIRMA_API_KEY = process.env.FIRMA_API_KEY || '';
 // ── Types ────────────────────────────────────────────────────────────
 
 export interface FirmaRecipient {
+  id: string;          // ID temporaire (temp_1, temp_2, etc.)
   email: string;
-  firstname: string;
-  lastname: string;
-  designation: string; // "Bailleur" | "Locataire"
-  order: number;       // 1 = bailleur d'abord, 2 = locataire, 3+ = co-locataires
+  first_name: string;
+  last_name: string;
+  designation: string; // "Signer" | "CC" | "Approver"
+  order: number;
 }
 
 export interface FirmaCreateRequest {
   name: string;
-  description?: string;
   document: string;          // Base64 du PDF
   expiration_hours?: number; // défaut 168 (7 jours)
   recipients: FirmaRecipient[];
-  callback_url?: string;
   metadata?: Record<string, string>;
+}
+
+export interface FirmaField {
+  type: 'signature' | 'date' | 'text';
+  position: { x: number; y: number; width: number; height: number };
+  page_number: number;
+  recipient_id: string;
+  required: boolean;
 }
 
 export interface FirmaRecipientStatus {
   email: string;
-  firstname: string;
-  lastname: string;
+  first_name: string;
+  last_name: string;
   designation: string;
   order: number;
   status: 'pending' | 'signed' | 'declined';
@@ -35,8 +42,8 @@ export interface FirmaRecipientStatus {
 }
 
 export interface FirmaSigningResponse {
-  request_id: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'expired' | 'declined';
+  id: string;
+  status: string;
   recipients?: FirmaRecipientStatus[];
   signing_url?: string;
   document_url?: string;
@@ -67,20 +74,20 @@ async function firmaFetch<T>(
   return response.json() as Promise<T>;
 }
 
-// ── Créer une demande de signature ───────────────────────────────────
+// ── Créer et envoyer une demande de signature (endpoint atomique) ────
 
-export async function createSigningRequest(
+export async function createAndSendSigningRequest(
   data: FirmaCreateRequest,
+  fields: FirmaField[],
 ): Promise<FirmaSigningResponse> {
-  return firmaFetch<FirmaSigningResponse>('', {
+  return firmaFetch<FirmaSigningResponse>('/signing-requests/create-and-send', {
     method: 'POST',
     body: JSON.stringify({
       name: data.name,
-      description: data.description,
       document: data.document,
       expiration_hours: data.expiration_hours ?? 168,
       recipients: data.recipients,
-      callback_url: data.callback_url,
+      fields,
       metadata: data.metadata,
     }),
   });
@@ -91,7 +98,7 @@ export async function createSigningRequest(
 export async function getSigningStatus(
   requestId: string,
 ): Promise<FirmaSigningResponse> {
-  return firmaFetch<FirmaSigningResponse>(`/${requestId}`, {
+  return firmaFetch<FirmaSigningResponse>(`/signing-requests/${requestId}`, {
     method: 'GET',
   });
 }

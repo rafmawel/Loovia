@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { createSigningRequest, type FirmaRecipient } from '@/lib/api/firma';
+import { createAndSendSigningRequest, type FirmaRecipient, type FirmaField } from '@/lib/api/firma';
 import { generateLeasePdf } from '@/lib/pdf/generate-lease';
 import type { Lease, Property, Tenant } from '@/types';
 
@@ -50,22 +50,24 @@ export async function POST(request: NextRequest) {
 
     // Générer le PDF du bail en Base64
     const pdfDoc = generateLeasePdf(typedLease, property, tenant);
-    const pdfBase64 = pdfDoc.output('datauristring').split(',')[1]; // Retirer le préfixe data:…;base64,
+    const pdfBase64 = pdfDoc.output('datauristring').split(',')[1];
 
-    // Construire la liste des signataires
+    // Construire la liste des signataires avec IDs temporaires
     const recipients: FirmaRecipient[] = [
       {
+        id: 'temp_1',
         email: user.email!,
-        firstname: landlordFirstName || landlordName,
-        lastname: landlordLastName || '',
-        designation: 'Bailleur',
+        first_name: landlordFirstName || landlordName,
+        last_name: landlordLastName || '',
+        designation: 'Signer',
         order: 1,
       },
       {
+        id: 'temp_2',
         email: tenant.email,
-        firstname: tenant.first_name,
-        lastname: tenant.last_name,
-        designation: 'Locataire',
+        first_name: tenant.first_name,
+        last_name: tenant.last_name,
+        designation: 'Signer',
         order: 2,
       },
     ];
@@ -75,34 +77,45 @@ export async function POST(request: NextRequest) {
       tenant.co_tenants.forEach((co, index) => {
         if (co.email) {
           recipients.push({
+            id: `temp_${3 + index}`,
             email: co.email,
-            firstname: co.first_name,
-            lastname: co.last_name,
-            designation: 'Locataire',
+            first_name: co.first_name,
+            last_name: co.last_name,
+            designation: 'Signer',
             order: 3 + index,
           });
         }
       });
     }
 
-    // Envoyer pour signature via Firma
-    const callbackUrl = `${request.nextUrl.origin}/api/webhooks/firma`;
-    const signingResponse = await createSigningRequest({
-      name: `Bail — ${property.name}`,
-      description: `Contrat de location pour ${property.address}, ${property.city}`,
-      document: pdfBase64,
-      expiration_hours: 168,
-      recipients,
-      callback_url: callbackUrl,
-      metadata: { lease_id: typedLease.id },
-    });
+    // Champs de signature — un par signataire, sur la dernière page
+    // Position décalée verticalement pour chaque signataire
+    const fields: FirmaField[] = recipients.map((r, i) => ({
+      type: 'signature' as const,
+      position: { x: 50, y: 650 + i * 60, width: 200, height: 40 },
+      page_number: -1, // dernière page
+      recipient_id: r.id,
+      required: true,
+    }));
+
+    // Créer et envoyer via Firma (endpoint atomique)
+    const signingResponse = await createAndSendSigningRequest(
+      {
+        name: `Bail — ${property.name}`,
+        document: pdfBase64,
+        expiration_hours: 168,
+        recipients,
+        metadata: { lease_id: typedLease.id },
+      },
+      fields,
+    );
 
     // Mettre à jour le bail avec les informations Firma (admin bypass RLS)
     await admin
       .from('leases')
       .update({
         status: 'pending_signature',
-        firma_request_id: signingResponse.request_id,
+        firma_request_id: signingResponse.id,
         firma_status: signingResponse.status,
         sent_for_signature_at: new Date().toISOString(),
       })

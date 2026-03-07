@@ -121,14 +121,15 @@ export async function POST(request: NextRequest) {
 
     if (data.recipients) {
       for (const recipient of data.recipients) {
-        if (recipient.designation === 'Bailleur' && recipient.order === 1) {
+        // order 1 = Bailleur, order 2 = Locataire
+        if (recipient.order === 1) {
           updates.signature_landlord_status = recipient.status;
           if (recipient.signed_at) {
             updates.signature_landlord_date = recipient.signed_at;
           }
         }
 
-        if (recipient.designation === 'Locataire' && recipient.order === 2) {
+        if (recipient.order === 2) {
           updates.signature_tenant_status = recipient.status;
           if (recipient.signed_at) {
             updates.signature_tenant_date = recipient.signed_at;
