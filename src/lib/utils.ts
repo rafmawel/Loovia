@@ -1,5 +1,5 @@
 // Helpers utilitaires Loovia
-import { format, formatDistanceToNow, parseISO } from 'date-fns';
+import { format, formatDistanceToNow, parseISO, isValid } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 // Formatage des montants en euros
@@ -15,18 +15,21 @@ export function formatCurrency(amount: number): string {
 // Formatage d'une date au format français
 export function formatDate(date: string | Date): string {
   const d = typeof date === 'string' ? parseISO(date) : date;
+  if (!isValid(d)) return '—';
   return format(d, 'dd/MM/yyyy', { locale: fr });
 }
 
 // Formatage d'une date longue
 export function formatDateLong(date: string | Date): string {
   const d = typeof date === 'string' ? parseISO(date) : date;
+  if (!isValid(d)) return '—';
   return format(d, 'd MMMM yyyy', { locale: fr });
 }
 
 // Formatage relatif (il y a X jours)
 export function formatRelative(date: string | Date): string {
   const d = typeof date === 'string' ? parseISO(date) : date;
+  if (!isValid(d)) return '—';
   return formatDistanceToNow(d, { addSuffix: true, locale: fr });
 }
 

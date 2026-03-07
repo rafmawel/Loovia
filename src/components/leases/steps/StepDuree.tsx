@@ -17,6 +17,7 @@ const PERSONNES_MORALES = ['SCI de gestion', 'SAS', 'SARL', 'Autre personne mora
 function addYearsMonths(dateStr: string, years: number, months: number): string {
   if (!dateStr) return '';
   const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
   d.setFullYear(d.getFullYear() + years);
   d.setMonth(d.getMonth() + months);
   // Revenir au dernier jour du mois si on a dépassé
