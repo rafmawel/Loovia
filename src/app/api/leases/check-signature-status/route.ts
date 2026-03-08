@@ -42,6 +42,7 @@ export async function POST(request: NextRequest) {
 
     // Interroger Firma pour le statut à jour
     const signingStatus = await getSigningStatus(lease.firma_request_id);
+    console.log('Firma signing status response:', JSON.stringify(signingStatus, null, 2));
 
     // Mettre à jour le bail avec les données fraîches
     const admin = createAdminClient();
@@ -49,36 +50,59 @@ export async function POST(request: NextRequest) {
       firma_status: signingStatus.status,
     };
 
-    if (signingStatus.recipients) {
-      for (const recipient of signingStatus.recipients) {
+    // Extraire les recipients — supporter plusieurs formats de réponse
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const raw = signingStatus as any;
+    const recipients = signingStatus.recipients || raw.signers || [];
+
+    if (recipients && recipients.length > 0) {
+      for (const recipient of recipients) {
+        const status = recipient.status;
+        const signedAt = recipient.signed_at || recipient.signedAt;
+
         // order 1 = Bailleur, order 2 = Locataire
         if (recipient.order === 1) {
-          updates.signature_landlord_status = recipient.status;
-          if (recipient.signed_at) {
-            updates.signature_landlord_date = recipient.signed_at;
+          updates.signature_landlord_status = status;
+          if (signedAt) {
+            updates.signature_landlord_date = signedAt;
           }
         }
         if (recipient.order === 2) {
-          updates.signature_tenant_status = recipient.status;
-          if (recipient.signed_at) {
-            updates.signature_tenant_date = recipient.signed_at;
+          updates.signature_tenant_status = status;
+          if (signedAt) {
+            updates.signature_tenant_date = signedAt;
           }
         }
       }
     }
 
-    if (signingStatus.status === 'completed') {
+    // Si le statut global est "completed" ou "signed", marquer comme signé
+    const globalStatus = (signingStatus.status || '').toLowerCase();
+    if (globalStatus === 'completed' || globalStatus === 'signed') {
       updates.status = 'signed';
+      // Si pas de recipients détaillés mais le statut global est completé,
+      // marquer les deux parties comme signées
+      if (!updates.signature_landlord_status) {
+        updates.signature_landlord_status = 'signed';
+      }
+      if (!updates.signature_tenant_status) {
+        updates.signature_tenant_status = 'signed';
+      }
     }
+
+    console.log('Updating lease with:', JSON.stringify(updates, null, 2));
 
     await admin.from('leases').update(updates).eq('id', lease.id);
 
     return NextResponse.json({
       success: true,
       status: signingStatus.status,
-      recipients: signingStatus.recipients,
+      recipients,
+      updates,
     });
-  } catch {
-    return NextResponse.json({ error: 'Erreur lors de la vérification du statut' }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Erreur inconnue';
+    console.error('Erreur vérification statut signature:', message);
+    return NextResponse.json({ error: `Erreur lors de la vérification : ${message}` }, { status: 500 });
   }
 }

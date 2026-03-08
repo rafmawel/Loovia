@@ -80,12 +80,16 @@ export default function LeaseDetailActions({ lease, property, tenant }: LeaseDet
         body: JSON.stringify({ leaseId: lease.id }),
       });
 
+      const data = await res.json().catch(() => ({}));
+
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
         throw new Error(data.error || 'Erreur lors de la vérification');
       }
 
-      toast.success('Statut mis à jour');
+      const statusLabel = data.status === 'completed' || data.status === 'signed'
+        ? 'Toutes les signatures sont complètes !'
+        : 'Statut mis à jour';
+      toast.success(statusLabel);
       router.refresh();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erreur lors de la vérification');
