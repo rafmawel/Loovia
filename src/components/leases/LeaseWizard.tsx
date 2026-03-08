@@ -29,7 +29,7 @@ export interface LeaseWizardData {
   tenant_email: string;
   tenant_phone: string;
   has_cotenants: boolean;
-  cotenants: { first_name: string; last_name: string; date_of_birth?: string }[];
+  cotenants: { first_name: string; last_name: string; date_of_birth?: string; email?: string }[];
 
   // Étape 2 — Logement
   property_id: string;

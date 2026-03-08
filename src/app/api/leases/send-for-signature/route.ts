@@ -49,8 +49,7 @@ export async function POST(request: NextRequest) {
       `${landlordFirstName} ${landlordLastName}`.trim() || user.email || 'Propriétaire';
 
     // Générer le PDF du bail en Base64
-    const pdfDoc = generateLeasePdf(typedLease, property, tenant);
-    const totalPages = pdfDoc.getNumberOfPages();
+    const { doc: pdfDoc, signaturePositions } = generateLeasePdf(typedLease, property, tenant);
     const pdfBase64 = pdfDoc.output('datauristring').split(',')[1];
 
     // Construire la liste des signataires avec IDs temporaires
@@ -89,15 +88,23 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Champs de signature — un par signataire, sur la dernière page
+    // Champs de signature — positionnés selon les emplacements calculés dans le PDF
     // Positions en pourcentage (0-100) comme requis par l'API Firma
-    const fields: FirmaField[] = recipients.map((r, i) => ({
-      type: 'signature' as const,
-      position: { x: 10, y: 75 + i * 10, width: 30, height: 5 },
-      page_number: totalPages,
-      recipient_id: r.id,
-      required: true,
-    }));
+    const fields: FirmaField[] = recipients.map((r) => {
+      const pos = signaturePositions.find((sp) => sp.recipientId === r.id);
+      return {
+        type: 'signature' as const,
+        position: {
+          x: 5,
+          y: pos ? pos.yPercent : 80,
+          width: 40,
+          height: 6,
+        },
+        page_number: pos ? pos.page : pdfDoc.getNumberOfPages(),
+        recipient_id: r.id,
+        required: true,
+      };
+    });
 
     // Créer et envoyer via Firma (endpoint atomique)
     const signingResponse = await createAndSendSigningRequest(

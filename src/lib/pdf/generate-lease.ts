@@ -3,6 +3,19 @@ import { jsPDF } from 'jspdf';
 import type { Lease, Property, Tenant } from '@/types';
 import { formatDate, formatCurrency } from '@/lib/utils';
 
+// --- Types exportés pour la signature ---
+export interface SignaturePosition {
+  recipientId: string;
+  label: string;
+  page: number;
+  yPercent: number;
+}
+
+export interface LeaseGenerationResult {
+  doc: jsPDF;
+  signaturePositions: SignaturePosition[];
+}
+
 // --- Types pour les données JSONB du wizard ---
 interface LeaseData {
   landlord_type?: string;
@@ -32,7 +45,7 @@ interface LeaseData {
   solidarity_clause?: boolean;
   special_clauses?: string;
   has_cotenants?: boolean;
-  cotenants?: { first_name: string; last_name: string; date_of_birth?: string }[];
+  cotenants?: { first_name: string; last_name: string; date_of_birth?: string; email?: string }[];
   property_surface?: number;
   property_rooms?: number;
   property_address?: string;
@@ -66,7 +79,7 @@ export function generateLeasePdf(
   lease: Lease,
   property: Property,
   tenant: Tenant,
-): jsPDF {
+): LeaseGenerationResult {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const d = (lease.data || {}) as LeaseData;
   let y = MARGIN;
@@ -547,7 +560,15 @@ export function generateLeasePdf(
   // BLOC SIGNATURES
   // ====================================================================
 
-  checkPageBreak(80);
+  const signaturePositions: SignaturePosition[] = [];
+  const SIGNATURE_SPACE = 25; // mm reserved for each signature
+
+  // Compute how many signers we have
+  const totalSigners = 2 + cotenants.length; // bailleur + locataire + co-locataires
+  // Space needed: header (20) + each signer label+space (35 each) + footer (15)
+  const neededSpace = 30 + totalSigners * 35 + 15;
+
+  checkPageBreak(neededSpace);
   addBlankLine();
   addHorizontalRule();
   addBlankLine(0.5);
@@ -557,38 +578,36 @@ export function generateLeasePdf(
   addLabelValue('Date', formatDate(new Date().toISOString()));
   addBlankLine();
 
-  // Cases de signature
-  checkPageBreak(50);
-  const colW = CONTENT_WIDTH / 2 - 5;
+  // Helper: add a signature label + space and track position
+  const addSignatureSlot = (recipientId: string, roleLabel: string, name: string) => {
+    checkPageBreak(35);
+    setFont(10, 'bold', DARK);
+    doc.text(roleLabel, MARGIN, y);
+    y += LINE_HEIGHT;
+    setFont(9, 'normal', GRAY);
+    doc.text(name, MARGIN, y);
+    y += 3;
+
+    // Track signature position (Y as percentage of page height)
+    const currentPage = doc.getNumberOfPages();
+    const yPercent = (y / PAGE_HEIGHT) * 100;
+    signaturePositions.push({ recipientId, label: roleLabel, page: currentPage, yPercent });
+
+    y += SIGNATURE_SPACE;
+  };
 
   // Bailleur
-  doc.setDrawColor(...GRAY);
-  doc.setLineWidth(0.3);
-  doc.roundedRect(MARGIN, y, colW, 40, 2, 2, 'S');
-  setFont(10, 'bold', DARK);
-  doc.text('Le Bailleur', MARGIN + colW / 2, y + 8, { align: 'center' });
-  setFont(9, 'normal', GRAY);
-  doc.text(d.landlord_name || '—', MARGIN + colW / 2, y + 15, { align: 'center' });
-  setFont(8, 'italic', GRAY);
-  doc.text('Signature électronique', MARGIN + colW / 2, y + 35, { align: 'center' });
+  addSignatureSlot('temp_1', 'Le Bailleur', d.landlord_name || '—');
 
   // Locataire
-  const col2X = MARGIN + colW + 10;
-  doc.setDrawColor(...GRAY);
-  doc.roundedRect(col2X, y, colW, 40, 2, 2, 'S');
-  setFont(10, 'bold', DARK);
-  doc.text('Le Locataire', col2X + colW / 2, y + 8, { align: 'center' });
-  setFont(9, 'normal', GRAY);
-  doc.text(
-    `${d.tenant_first_name || tenant.first_name} ${d.tenant_last_name || tenant.last_name}`,
-    col2X + colW / 2,
-    y + 15,
-    { align: 'center' },
-  );
-  setFont(8, 'italic', GRAY);
-  doc.text('Signature électronique', col2X + colW / 2, y + 35, { align: 'center' });
+  const tenantName = `${d.tenant_first_name || tenant.first_name} ${d.tenant_last_name || tenant.last_name}`;
+  addSignatureSlot('temp_2', cotenants.length > 0 ? 'Le(s) Locataire(s)' : 'Le Locataire', tenantName);
 
-  y += 45;
+  // Co-locataires
+  cotenants.forEach((co, index) => {
+    const coName = `${co.first_name} ${co.last_name}`;
+    addSignatureSlot(`temp_${3 + index}`, 'Co-locataire', coName);
+  });
 
   // Mention « Lu et approuvé »
   addBlankLine(0.3);
@@ -597,7 +616,7 @@ export function generateLeasePdf(
   // --- Pieds de page ---
   addFooters();
 
-  return doc;
+  return { doc, signaturePositions };
 }
 
 /**

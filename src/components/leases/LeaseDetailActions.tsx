@@ -25,7 +25,7 @@ export default function LeaseDetailActions({ lease, property, tenant }: LeaseDet
 
   const handlePreview = () => {
     try {
-      const doc = generateLeasePdf(lease, property, tenant);
+      const { doc } = generateLeasePdf(lease, property, tenant);
       const blob = doc.output('blob');
       const url = URL.createObjectURL(blob);
       window.open(url, '_blank');
@@ -37,7 +37,7 @@ export default function LeaseDetailActions({ lease, property, tenant }: LeaseDet
 
   const handleDownload = () => {
     try {
-      const doc = generateLeasePdf(lease, property, tenant);
+      const { doc } = generateLeasePdf(lease, property, tenant);
       const filename = getLeasePdfFilename(tenant, property);
       doc.save(filename);
     } catch (err) {

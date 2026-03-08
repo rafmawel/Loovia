@@ -299,28 +299,38 @@ export default function StepParties({ data, errors, tenants, userMetadata, onCha
                 {data.cotenants.length > 0 && (
                   <div className="space-y-3">
                     {data.cotenants.map((co, i) => (
-                      <div key={i} className="flex items-start gap-2 p-3 rounded-xl bg-stone-50">
-                        <div className="flex-1 grid grid-cols-2 gap-2">
-                          <Input
-                            label="Prénom"
-                            value={co.first_name}
-                            onChange={(e) => updateCotenant(i, 'first_name', e.target.value)}
-                            placeholder="Prénom"
-                          />
-                          <Input
-                            label="Nom"
-                            value={co.last_name}
-                            onChange={(e) => updateCotenant(i, 'last_name', e.target.value)}
-                            placeholder="Nom"
-                          />
+                      <div key={i} className="p-3 rounded-xl bg-stone-50 space-y-2">
+                        <div className="flex items-start gap-2">
+                          <div className="flex-1 grid grid-cols-2 gap-2">
+                            <Input
+                              label="Prénom"
+                              value={co.first_name}
+                              onChange={(e) => updateCotenant(i, 'first_name', e.target.value)}
+                              placeholder="Prénom"
+                            />
+                            <Input
+                              label="Nom"
+                              value={co.last_name}
+                              onChange={(e) => updateCotenant(i, 'last_name', e.target.value)}
+                              placeholder="Nom"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeCotenant(i)}
+                            className="mt-7 p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => removeCotenant(i)}
-                          className="mt-7 p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        <Input
+                          label="Email *"
+                          type="email"
+                          value={co.email || ''}
+                          onChange={(e) => updateCotenant(i, 'email', e.target.value)}
+                          placeholder="email@exemple.com"
+                          helperText="Nécessaire pour la signature du bail"
+                        />
                       </div>
                     ))}
                   </div>
