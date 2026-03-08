@@ -331,6 +331,26 @@ export default function StepParties({ data, errors, tenants, userMetadata, onCha
                           placeholder="email@exemple.com"
                           helperText="Nécessaire pour la signature du bail"
                         />
+                        <div className="grid grid-cols-2 gap-2">
+                          <Input
+                            label="Téléphone"
+                            type="tel"
+                            value={co.phone || ''}
+                            onChange={(e) => updateCotenant(i, 'phone', e.target.value)}
+                            placeholder="06 12 34 56 78"
+                          />
+                          <Select
+                            label="Relation"
+                            placeholder="Type..."
+                            options={[
+                              { value: 'Colocation', label: 'Colocation' },
+                              { value: 'Couple', label: 'Couple' },
+                              { value: 'Famille', label: 'Famille' },
+                            ]}
+                            value={co.relationship_type || ''}
+                            onChange={(e) => updateCotenant(i, 'relationship_type', e.target.value || '')}
+                          />
+                        </div>
                       </div>
                     ))}
                   </div>

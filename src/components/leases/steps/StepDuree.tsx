@@ -20,37 +20,47 @@ function addYearsMonths(dateStr: string, years: number, months: number): string 
   if (isNaN(d.getTime())) return '';
   d.setFullYear(d.getFullYear() + years);
   d.setMonth(d.getMonth() + months);
-  // Revenir au dernier jour du mois si on a dépassé
   return d.toISOString().split('T')[0];
 }
 
 export default function StepDuree({ data, errors, onChange }: Props) {
-  const isMeuble = data.location_type === 'Location meublée';
-  const isMobilite = data.location_type === 'Bail mobilité';
+  const leaseType = data.lease_type;
   const isPersonneMorale = PERSONNES_MORALES.includes(data.landlord_type);
-  const isVide = data.location_type === 'Location vide';
+  const isMobilite = leaseType === 'mobilite';
+  const isEtudiant = leaseType === 'etudiant';
 
-  // Calcul automatique de la durée selon les règles
+  // Calcul automatique de la durée selon le type de bail
   useEffect(() => {
     let years = 3;
     let months = 0;
     let mobility = false;
     let tacit = true;
 
-    if (isMobilite) {
-      years = 0;
-      months = data.duration_months || 1; // Saisie libre, entre 1 et 10
-      mobility = true;
-      tacit = false;
-    } else if (isMeuble) {
-      years = 1;
-      months = 0;
-    } else if (isVide) {
-      if (isPersonneMorale) {
-        years = 6;
-      } else {
-        years = 3;
-      }
+    switch (leaseType) {
+      case 'vide':
+        years = isPersonneMorale ? 6 : 3;
+        months = 0;
+        break;
+      case 'meuble':
+        years = 1;
+        months = 0;
+        break;
+      case 'colocation':
+        // Colocation meublée = 1 an, vide = 3 ans
+        years = data.location_type === 'Location vide' ? (isPersonneMorale ? 6 : 3) : 1;
+        months = 0;
+        break;
+      case 'etudiant':
+        years = 0;
+        months = 9;
+        tacit = false;
+        break;
+      case 'mobilite':
+        years = 0;
+        months = data.duration_months || 1;
+        mobility = true;
+        tacit = false;
+        break;
     }
 
     const endDate = addYearsMonths(data.start_date, years, months);
@@ -63,24 +73,34 @@ export default function StepDuree({ data, errors, onChange }: Props) {
       tacit_renewal: tacit,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.landlord_type, data.location_type, data.start_date, isMobilite && data.duration_months]);
+  }, [data.landlord_type, leaseType, data.location_type, data.start_date, isMobilite && data.duration_months]);
 
   // Label de durée calculée
   const durationLabel = isMobilite
     ? `${data.duration_months} mois`
-    : isMeuble
-      ? '1 an'
-      : isPersonneMorale && isVide
-        ? '6 ans'
-        : '3 ans';
+    : isEtudiant
+      ? '9 mois'
+      : leaseType === 'meuble'
+        ? '1 an'
+        : leaseType === 'colocation'
+          ? data.location_type === 'Location vide'
+            ? isPersonneMorale ? '6 ans' : '3 ans'
+            : '1 an'
+          : isPersonneMorale ? '6 ans' : '3 ans';
 
   const durationReason = isMobilite
     ? 'Bail mobilité — durée libre (1 à 10 mois)'
-    : isMeuble
-      ? 'Location meublée — 1 an'
-      : isPersonneMorale && isVide
-        ? `${data.landlord_type} + Location vide — 6 ans`
-        : `${data.landlord_type} + Location vide — 3 ans`;
+    : isEtudiant
+      ? 'Bail étudiant — 9 mois, non renouvelable'
+      : leaseType === 'meuble'
+        ? 'Location meublée — 1 an'
+        : leaseType === 'colocation'
+          ? data.location_type === 'Location vide'
+            ? `Colocation vide — ${isPersonneMorale ? '6 ans (personne morale)' : '3 ans'}`
+            : 'Colocation meublée — 1 an'
+          : isPersonneMorale
+            ? `${data.landlord_type} + Location vide — 6 ans`
+            : 'Location vide — 3 ans';
 
   return (
     <div className="space-y-6">
@@ -140,13 +160,24 @@ export default function StepDuree({ data, errors, onChange }: Props) {
       )}
 
       {/* Tacite reconduction */}
-      {!isMobilite && (
+      {!isMobilite && !isEtudiant && (
         <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 border border-emerald-200">
           <svg className="h-5 w-5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
           </svg>
           <p className="text-sm text-emerald-800">
             Renouvellement par tacite reconduction
+          </p>
+        </div>
+      )}
+
+      {isEtudiant && (
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-blue-50 border border-blue-200">
+          <svg className="h-5 w-5 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342" />
+          </svg>
+          <p className="text-sm text-blue-800">
+            Bail étudiant — 9 mois, pas de tacite reconduction
           </p>
         </div>
       )}

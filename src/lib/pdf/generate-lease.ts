@@ -17,7 +17,10 @@ export interface LeaseGenerationResult {
 }
 
 // --- Types pour les données JSONB du wizard ---
+type LeaseType = 'vide' | 'meuble' | 'colocation' | 'etudiant' | 'mobilite';
+
 interface LeaseData {
+  lease_type?: LeaseType;
   landlord_type?: string;
   landlord_name?: string;
   landlord_address?: string;
@@ -45,7 +48,7 @@ interface LeaseData {
   solidarity_clause?: boolean;
   special_clauses?: string;
   has_cotenants?: boolean;
-  cotenants?: { first_name: string; last_name: string; date_of_birth?: string; email?: string }[];
+  cotenants?: { first_name: string; last_name: string; date_of_birth?: string; email?: string; phone?: string; relationship_type?: string }[];
   property_surface?: number;
   property_rooms?: number;
   property_address?: string;
@@ -209,26 +212,38 @@ export function generateLeasePdf(
   }
 
   // --- Données dérivées ---
+  const leaseType: LeaseType = d.lease_type || 'vide';
   const locationType = d.location_type || property.furnished_type || 'Location vide';
-  const isMeuble = locationType === 'Location meublée';
-  const isMobilite = locationType === 'Bail mobilité' || d.is_mobility_lease;
+  const isMeuble = leaseType === 'meuble' || leaseType === 'colocation' || leaseType === 'etudiant' || locationType === 'Location meublée';
+  const isMobilite = leaseType === 'mobilite' || d.is_mobility_lease;
+  const isEtudiant = leaseType === 'etudiant';
+  const isColocation = leaseType === 'colocation';
   const cotenants = d.cotenants || [];
   const hasCo = d.has_cotenants && cotenants.length > 0;
-  const nbExemplaires = 2 + cotenants.length; // bailleur + locataire principal + co-locataires
+  const nbExemplaires = 2 + cotenants.length;
 
   // ====================================================================
   // SECTION 1 — EN-TÊTE
   // ====================================================================
 
-  addCenteredText('BAIL D\'HABITATION', 18, 'bold', TERRACOTTA);
+  const titleMap: Record<LeaseType, string> = {
+    vide: 'BAIL D\'HABITATION',
+    meuble: 'BAIL D\'HABITATION MEUBLÉE',
+    colocation: 'BAIL DE COLOCATION',
+    etudiant: 'BAIL ÉTUDIANT MEUBLÉ',
+    mobilite: 'BAIL MOBILITÉ',
+  };
+  addCenteredText(titleMap[leaseType], 18, 'bold', TERRACOTTA);
   addBlankLine(0.3);
 
-  const subtitle = isMobilite
-    ? 'Bail mobilité — Loi ELAN du 23 novembre 2018'
-    : isMeuble
-      ? 'Location meublée — Loi n° 89-462 du 6 juillet 1989'
-      : 'Location vide — Loi n° 89-462 du 6 juillet 1989';
-  addCenteredText(subtitle, 11, 'normal', GRAY);
+  const subtitleMap: Record<LeaseType, string> = {
+    vide: 'Location vide — Loi n° 89-462 du 6 juillet 1989',
+    meuble: 'Location meublée — Loi n° 89-462 du 6 juillet 1989',
+    colocation: 'Bail de colocation — Loi n° 89-462 du 6 juillet 1989',
+    etudiant: 'Bail étudiant meublé — Article 25-7 de la loi du 6 juillet 1989',
+    mobilite: 'Bail mobilité — Loi ELAN du 23 novembre 2018 — Article 25-12 et suivants',
+  };
+  addCenteredText(subtitleMap[leaseType], 11, 'normal', GRAY);
   addBlankLine(0.3);
   addHorizontalRule();
 
@@ -259,14 +274,19 @@ export function generateLeasePdf(
     for (const co of cotenants) {
       addLabelValue('Nom', `${co.first_name} ${co.last_name}`);
       if (co.date_of_birth) addLabelValue('Date de naissance', formatDate(co.date_of_birth));
+      if (co.email) addLabelValue('Email', co.email);
+      if (co.phone) addLabelValue('Téléphone', co.phone);
+      if (co.relationship_type) addLabelValue('Type de relation', co.relationship_type);
+      addBlankLine(0.3);
     }
-    addBlankLine(0.3);
-    addColorBox(
-      'CLAUSE DE SOLIDARITÉ : Les locataires sont tenus solidairement et indivisiblement au paiement des loyers, charges et à l\'exécution des obligations du présent bail. Cette solidarité subsiste pendant toute la durée du bail et ses renouvellements.',
-      [219, 234, 254],
-      [29, 78, 216],
-      true,
-    );
+    if (d.solidarity_clause !== false) {
+      addColorBox(
+        'CLAUSE DE SOLIDARITÉ : Les locataires sont tenus solidairement et indivisiblement au paiement des loyers, charges et à l\'exécution des obligations du présent bail. Cette solidarité subsiste pendant toute la durée du bail et ses renouvellements, et jusqu\'à 6 mois après le départ d\'un des colocataires.',
+        [219, 234, 254],
+        [29, 78, 216],
+        true,
+      );
+    }
   }
 
   // ====================================================================
@@ -326,6 +346,18 @@ export function generateLeasePdf(
     true,
   );
 
+  // Inventaire du mobilier (baux meublés)
+  if (isMeuble) {
+    addBlankLine(0.5);
+    addText('Mobilier et équipements :', 10, 'bold');
+    addText(
+      'Conformément au décret n° 2015-981 du 31 juillet 2015, le logement est équipé du mobilier minimum obligatoire dont l\'inventaire détaillé est annexé au présent bail. Le locataire s\'engage à restituer l\'ensemble du mobilier et des équipements en bon état, sous réserve de la vétusté normale.',
+      10,
+      'normal',
+      GRAY,
+    );
+  }
+
   // ====================================================================
   // SECTION 4 — DURÉE ET PRISE D'EFFET
   // ====================================================================
@@ -336,6 +368,8 @@ export function generateLeasePdf(
 
   if (isMobilite) {
     addLabelValue('Durée', `${d.duration_months || 0} mois (Bail mobilité)`);
+  } else if (isEtudiant) {
+    addLabelValue('Durée', '9 mois (Bail étudiant)');
   } else if (d.duration_years) {
     addLabelValue('Durée', `${d.duration_years} an${d.duration_years > 1 ? 's' : ''}`);
   }
@@ -344,10 +378,20 @@ export function generateLeasePdf(
     addLabelValue('Date de fin', formatDate(lease.end_date));
   }
 
-  if (d.tacit_renewal && !isMobilite) {
+  if (d.tacit_renewal && !isMobilite && !isEtudiant) {
     addBlankLine(0.3);
     addText(
       'À défaut de congé délivré dans les conditions et délais prévus par la loi, le présent bail sera reconduit tacitement pour une durée identique.',
+      10,
+      'normal',
+      GRAY,
+    );
+  }
+
+  if (isEtudiant) {
+    addBlankLine(0.3);
+    addText(
+      'Conformément à l\'article 25-7 de la loi du 6 juillet 1989, le bail étudiant est conclu pour une durée de neuf mois et n\'est pas reconduit tacitement à son terme. Le locataire peut donner congé à tout moment avec un préavis d\'un mois.',
       10,
       'normal',
       GRAY,
@@ -358,6 +402,16 @@ export function generateLeasePdf(
     addBlankLine(0.3);
     addText(
       'Le bail mobilité n\'est pas renouvelable et ne fait l\'objet d\'aucune reconduction tacite. Le locataire peut donner congé à tout moment avec un préavis d\'un mois.',
+      10,
+      'normal',
+      GRAY,
+    );
+  }
+
+  if (isColocation) {
+    addBlankLine(0.3);
+    addText(
+      'En cas de départ d\'un colocataire, celui-ci reste tenu au paiement de sa part de loyer et des charges pendant un délai de 6 mois à compter de la date d\'effet du congé, sauf si un nouveau colocataire le remplace dans ce délai.',
       10,
       'normal',
       GRAY,
@@ -380,8 +434,8 @@ export function generateLeasePdf(
   addBlankLine(0.3);
   addText('Le loyer est payable mensuellement, d\'avance, le 1er de chaque mois, par virement bancaire ou tout autre moyen convenu entre les parties.', 10, 'normal', GRAY);
 
-  // IRL
-  if (d.irl_enabled) {
+  // IRL (pas applicable pour bail mobilité ni bail étudiant de 9 mois)
+  if (d.irl_enabled && !isMobilite && !isEtudiant) {
     addBlankLine(0.5);
     addText('Clause d\'indexation (IRL) :', 10, 'bold');
     addText(

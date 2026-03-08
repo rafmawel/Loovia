@@ -8,6 +8,7 @@ import Button from '@/components/ui/Button';
 import { createClient } from '@/lib/supabase/client';
 import type { Property, Tenant } from '@/types';
 
+import StepTypeBail from './steps/StepTypeBail';
 import StepParties from './steps/StepParties';
 import StepLogement from './steps/StepLogement';
 import StepFinances from './steps/StepFinances';
@@ -17,7 +18,12 @@ import StepDiagnostics from './steps/StepDiagnostics';
 
 // --- Types pour le wizard ---
 
+export type LeaseType = 'vide' | 'meuble' | 'colocation' | 'etudiant' | 'mobilite';
+
 export interface LeaseWizardData {
+  // Étape 0 — Type de bail
+  lease_type: LeaseType;
+
   // Étape 1 — Parties
   landlord_type: string;
   landlord_name: string;
@@ -29,7 +35,7 @@ export interface LeaseWizardData {
   tenant_email: string;
   tenant_phone: string;
   has_cotenants: boolean;
-  cotenants: { first_name: string; last_name: string; date_of_birth?: string; email?: string }[];
+  cotenants: { first_name: string; last_name: string; date_of_birth?: string; email?: string; phone?: string; relationship_type?: string }[];
 
   // Étape 2 — Logement
   property_id: string;
@@ -79,6 +85,7 @@ export interface LeaseWizardData {
 }
 
 const INITIAL_DATA: LeaseWizardData = {
+  lease_type: 'vide',
   landlord_type: 'Personne physique',
   landlord_name: '',
   landlord_address: '',
@@ -134,12 +141,13 @@ const INITIAL_DATA: LeaseWizardData = {
 };
 
 const STEPS = [
-  { number: 1, label: 'Parties' },
-  { number: 2, label: 'Logement' },
-  { number: 3, label: 'Finances' },
-  { number: 4, label: 'Durée' },
-  { number: 5, label: 'IRL' },
-  { number: 6, label: 'Diagnostics' },
+  { number: 1, label: 'Type' },
+  { number: 2, label: 'Parties' },
+  { number: 3, label: 'Logement' },
+  { number: 4, label: 'Finances' },
+  { number: 5, label: 'Durée' },
+  { number: 6, label: 'IRL' },
+  { number: 7, label: 'Diagnostics' },
 ];
 
 interface LeaseWizardProps {
@@ -220,10 +228,11 @@ export default function LeaseWizard({
   const validateStep = useCallback((): boolean => {
     const errs: Record<string, string> = {};
 
-    if (step === 1) {
+    // Step 1 = Type (always valid)
+
+    if (step === 2) {
       if (!data.landlord_name.trim()) errs.landlord_name = 'Nom requis';
       if (!data.landlord_address.trim()) errs.landlord_address = 'Adresse requise';
-      // Soit un locataire existant, soit les infos pour en créer un nouveau
       if (!data.tenant_id) {
         if (!data.tenant_first_name.trim()) errs.tenant_first_name = 'Prénom requis';
         if (!data.tenant_last_name.trim()) errs.tenant_last_name = 'Nom requis';
@@ -231,20 +240,20 @@ export default function LeaseWizard({
       }
     }
 
-    if (step === 2) {
+    if (step === 3) {
       if (!data.property_id) errs.property_id = 'Sélectionnez un bien';
     }
 
-    if (step === 3) {
+    if (step === 4) {
       if (data.monthly_rent <= 0) errs.monthly_rent = 'Le loyer doit être positif';
     }
 
-    if (step === 4) {
+    if (step === 5) {
       if (!data.start_date) errs.start_date = 'Date requise';
-      if (data.is_mobility_lease && data.duration_months < 1) {
+      if (data.lease_type === 'mobilite' && data.duration_months < 1) {
         errs.duration_months = 'Minimum 1 mois';
       }
-      if (data.is_mobility_lease && data.duration_months > 10) {
+      if (data.lease_type === 'mobilite' && data.duration_months > 10) {
         errs.duration_months = 'Maximum 10 mois';
       }
     }
@@ -256,7 +265,7 @@ export default function LeaseWizard({
   // Navigation
   const goNext = useCallback(() => {
     if (validateStep()) {
-      setStep((s) => Math.min(s + 1, 6));
+      setStep((s) => Math.min(s + 1, 7));
     }
   }, [validateStep]);
 
@@ -312,6 +321,7 @@ export default function LeaseWizard({
           start_date: data.start_date,
           end_date: data.end_date || null,
           data: {
+            lease_type: data.lease_type,
             landlord_type: data.landlord_type,
             landlord_name: data.landlord_name,
             landlord_address: data.landlord_address,
@@ -419,6 +429,9 @@ export default function LeaseWizard({
       {/* Contenu de l'étape */}
       <div className="min-h-[400px]">
         {step === 1 && (
+          <StepTypeBail data={data} onChange={updateData} />
+        )}
+        {step === 2 && (
           <StepParties
             data={data}
             errors={errors}
@@ -427,7 +440,7 @@ export default function LeaseWizard({
             onChange={updateData}
           />
         )}
-        {step === 2 && (
+        {step === 3 && (
           <StepLogement
             data={data}
             errors={errors}
@@ -436,16 +449,16 @@ export default function LeaseWizard({
             onChange={updateData}
           />
         )}
-        {step === 3 && (
+        {step === 4 && (
           <StepFinances data={data} errors={errors} onChange={updateData} />
         )}
-        {step === 4 && (
+        {step === 5 && (
           <StepDuree data={data} errors={errors} onChange={updateData} />
         )}
-        {step === 5 && (
+        {step === 6 && (
           <StepIRL data={data} onChange={updateData} />
         )}
-        {step === 6 && (
+        {step === 7 && (
           <StepDiagnostics data={data} onChange={updateData} />
         )}
       </div>
@@ -460,7 +473,7 @@ export default function LeaseWizard({
           Précédent
         </Button>
 
-        {step < 6 ? (
+        {step < 7 ? (
           <Button variant="primary" onClick={goNext}>
             Suivant
           </Button>

@@ -13,7 +13,7 @@ interface Props {
 
 export default function StepFinances({ data, errors, onChange }: Props) {
   const isMeuble = data.location_type === 'Location meublée';
-  const isMobilite = data.location_type === 'Bail mobilité';
+  const isMobilite = data.lease_type === 'mobilite';
 
   // Calcul automatique du dépôt de garantie
   useEffect(() => {
