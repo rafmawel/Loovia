@@ -89,10 +89,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Champs de signature — un par signataire, sur la dernière page
-    // Position décalée verticalement pour chaque signataire
+    // Positions en pourcentage (0-100) comme requis par l'API Firma
     const fields: FirmaField[] = recipients.map((r, i) => ({
       type: 'signature' as const,
-      position: { x: 50, y: 650 + i * 60, width: 200, height: 40 },
+      position: { x: 10, y: 75 + i * 10, width: 30, height: 5 },
       page_number: -1, // dernière page
       recipient_id: r.id,
       required: true,
