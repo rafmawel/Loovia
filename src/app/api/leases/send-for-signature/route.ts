@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
 
     // Générer le PDF du bail en Base64
     const pdfDoc = generateLeasePdf(typedLease, property, tenant);
+    const totalPages = pdfDoc.getNumberOfPages();
     const pdfBase64 = pdfDoc.output('datauristring').split(',')[1];
 
     // Construire la liste des signataires avec IDs temporaires
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
     const fields: FirmaField[] = recipients.map((r, i) => ({
       type: 'signature' as const,
       position: { x: 10, y: 75 + i * 10, width: 30, height: 5 },
-      page_number: -1, // dernière page
+      page_number: totalPages,
       recipient_id: r.id,
       required: true,
     }));
