@@ -404,6 +404,23 @@ export default function TenantForm({ tenant, propertyId, onClose }: TenantFormPr
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <Input
+                        label="Email *"
+                        type="email"
+                        placeholder="email@exemple.com"
+                        value={co.email || ''}
+                        onChange={(e) => updateCoTenant(index, 'email', e.target.value || null)}
+                        error={errors[`co_tenants.${index}.email`]}
+                      />
+                      <Input
+                        label="Téléphone"
+                        type="tel"
+                        placeholder="06 12 34 56 78"
+                        value={co.phone || ''}
+                        onChange={(e) => updateCoTenant(index, 'phone', e.target.value || null)}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Input
                         label="Date de naissance"
                         type="date"
                         value={co.date_of_birth || ''}
