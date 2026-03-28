@@ -1,6 +1,7 @@
 // Webhook Firma.dev — réception des événements de signature
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { parseFirmaStatus } from '@/lib/api/firma';
 import { createHmac } from 'crypto';
 
 // ── Types webhook Firma ──────────────────────────────────────────────
@@ -19,7 +20,7 @@ interface FirmaWebhookPayload {
   event: 'recipient_signed' | 'signing_completed' | 'signing_expired' | 'signing_declined';
   data: {
     request_id: string;
-    status: string;
+    status: string | Record<string, boolean>;
     recipients?: FirmaWebhookRecipient[];
     metadata?: Record<string, string>;
   };
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
 
     // 6. Construire les mises à jour
     const updates: Record<string, unknown> = {
-      firma_status: data.status,
+      firma_status: parseFirmaStatus(data.status),
     };
 
     if (data.recipients) {
