@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getSigningStatus } from '@/lib/api/firma';
+import { getSigningStatus, parseFirmaStatus } from '@/lib/api/firma';
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,8 +46,9 @@ export async function POST(request: NextRequest) {
 
     // Mettre à jour le bail avec les données fraîches
     const admin = createAdminClient();
+    const firmaStatus = parseFirmaStatus(signingStatus.status);
     const updates: Record<string, unknown> = {
-      firma_status: signingStatus.status,
+      firma_status: firmaStatus,
     };
 
     // Extraire les recipients — supporter plusieurs formats de réponse
@@ -76,9 +77,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Si le statut global est "completed" ou "signed", marquer comme signé
-    const globalStatus = (signingStatus.status || '').toLowerCase();
-    if (globalStatus === 'completed' || globalStatus === 'signed') {
+    // Si le statut global est "completed", "finished" ou "signed", marquer comme signé
+    const globalStatus = firmaStatus.toLowerCase();
+    if (globalStatus === 'completed' || globalStatus === 'signed' || globalStatus === 'finished') {
       updates.status = 'signed';
       // Si pas de recipients détaillés mais le statut global est completé,
       // marquer les deux parties comme signées
@@ -96,7 +97,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      status: signingStatus.status,
+      status: firmaStatus,
       recipients,
       updates,
     });

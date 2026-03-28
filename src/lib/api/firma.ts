@@ -41,12 +41,36 @@ export interface FirmaRecipientStatus {
   signed_at?: string;
 }
 
+export interface FirmaStatusObject {
+  sent?: boolean;
+  finished?: boolean;
+  cancelled?: boolean;
+  declined?: boolean;
+  expired?: boolean;
+}
+
 export interface FirmaSigningResponse {
   id: string;
-  status: string;
+  status: string | FirmaStatusObject;
   recipients?: FirmaRecipientStatus[];
   signing_url?: string;
   document_url?: string;
+}
+
+/**
+ * Normalise le champ `status` de Firma : si c'est un objet {sent, finished, …},
+ * retourne la clé active sous forme de string. Si c'est déjà une string, la retourne telle quelle.
+ */
+export function parseFirmaStatus(status: string | FirmaStatusObject): string {
+  if (typeof status === 'string') return status;
+  if (status && typeof status === 'object') {
+    if (status.finished) return 'finished';
+    if (status.cancelled) return 'cancelled';
+    if (status.declined) return 'declined';
+    if (status.expired) return 'expired';
+    if (status.sent) return 'sent';
+  }
+  return 'unknown';
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────

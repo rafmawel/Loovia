@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { createAndSendSigningRequest, type FirmaRecipient, type FirmaField } from '@/lib/api/firma';
+import { createAndSendSigningRequest, parseFirmaStatus, type FirmaRecipient, type FirmaField } from '@/lib/api/firma';
 import { generateLeasePdf } from '@/lib/pdf/generate-lease';
 import type { Lease, Property, Tenant } from '@/types';
 
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
       .update({
         status: 'pending_signature',
         firma_request_id: signingResponse.id,
-        firma_status: signingResponse.status,
+        firma_status: parseFirmaStatus(signingResponse.status),
         sent_for_signature_at: new Date().toISOString(),
       })
       .eq('id', leaseId);
