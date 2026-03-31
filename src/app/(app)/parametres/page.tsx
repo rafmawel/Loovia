@@ -8,8 +8,9 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import { Settings, User, Plug, LogOut, Save } from 'lucide-react';
+import { Settings, User, Plug, LogOut, Save, Crown, Check, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import type { Subscription } from '@/types';
 
 export default function ParametresPage() {
   const [firstName, setFirstName] = useState('');
@@ -17,6 +18,8 @@ export default function ParametresPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [upgrading, setUpgrading] = useState(false);
 
   const supabase = createClient();
   const router = useRouter();
@@ -29,6 +32,13 @@ export default function ParametresPage() {
         setEmail(user.email || '');
         setFirstName(user.user_metadata?.first_name || '');
         setLastName(user.user_metadata?.last_name || '');
+
+        const { data: sub } = await supabase
+          .from('subscriptions')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+        setSubscription(sub as Subscription | null);
       }
       setInitialLoading(false);
     }
@@ -51,6 +61,32 @@ export default function ParametresPage() {
       toast.error('Erreur lors de la mise à jour du profil');
     } finally {
       setLoading(false);
+    }
+  }
+
+  // Upgrade vers Pro
+  async function handleUpgrade() {
+    setUpgrading(true);
+    try {
+      const res = await fetch('/api/stripe/checkout', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      window.location.href = data.url;
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erreur lors de la mise à niveau');
+      setUpgrading(false);
+    }
+  }
+
+  // Gérer l'abonnement via Stripe Portal
+  async function handleManageSubscription() {
+    try {
+      const res = await fetch('/api/stripe/portal', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      window.location.href = data.url;
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erreur');
     }
   }
 
@@ -108,6 +144,69 @@ export default function ParametresPage() {
               Sauvegarder
             </Button>
           </form>
+        </Card>
+
+        {/* Abonnement */}
+        <Card>
+          <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <Crown className="h-5 w-5 text-terracotta" />
+            Abonnement
+          </h2>
+
+          {subscription?.plan === 'pro' && subscription?.status === 'active' ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-terracotta/10 to-amber-50 border border-terracotta/20">
+                <Sparkles className="h-5 w-5 text-terracotta shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-slate-900">Plan Pro</p>
+                  <p className="text-xs text-stone-500">
+                    {subscription.cancel_at_period_end
+                      ? `Actif jusqu'au ${new Date(subscription.current_period_end!).toLocaleDateString('fr-FR')}`
+                      : `Prochain renouvellement le ${new Date(subscription.current_period_end!).toLocaleDateString('fr-FR')}`}
+                  </p>
+                </div>
+              </div>
+              <Button variant="secondary" size="sm" onClick={handleManageSubscription}>
+                Gérer mon abonnement
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-stone-50 border border-stone-200">
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-slate-900">Plan Gratuit</p>
+                  <p className="text-xs text-stone-500">Fonctionnalités limitées avec publicités</p>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl border border-terracotta/30 bg-gradient-to-r from-terracotta/5 to-amber-50">
+                <p className="text-sm font-bold text-slate-900 mb-3">Passez au Pro</p>
+                <ul className="space-y-2 mb-4">
+                  {[
+                    'Aucune publicité',
+                    'Tableau de bord analytique',
+                    'Révision IRL automatique',
+                    'Export fiscal avancé',
+                    'Photos illimitées',
+                  ].map((feature) => (
+                    <li key={feature} className="flex items-center gap-2 text-xs text-stone-600">
+                      <Check className="h-3.5 w-3.5 text-terracotta shrink-0" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={<Crown className="h-4 w-4" />}
+                  onClick={handleUpgrade}
+                  loading={upgrading}
+                >
+                  Passer au Pro
+                </Button>
+              </div>
+            </div>
+          )}
         </Card>
 
         {/* Intégrations */}

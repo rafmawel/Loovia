@@ -13,6 +13,7 @@ import {
   Wallet, TrendingUp, TrendingDown, AlertTriangle, Landmark,
   RefreshCw, Check, X, Tag, ChevronDown, Filter, FileText, Send, Download,
 } from 'lucide-react';
+import AdVideo from '@/components/ui/AdVideo';
 import { formatCurrency, formatDate, fullName, formatMonthYear } from '@/lib/utils';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -65,6 +66,9 @@ export default function FinancesPage() {
 
   // Properties (for fiscal export)
   const [properties, setProperties] = useState<Property[]>([]);
+
+  // Ad video avant quittance
+  const [adPaymentId, setAdPaymentId] = useState<string | null>(null);
 
   // Filters
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all');
@@ -214,7 +218,7 @@ export default function FinancesPage() {
       toast.success(`Loyer de ${tenantLabel} validé !`, {
         action: {
           label: 'Générer la quittance',
-          onClick: () => handleSendReceipt(paymentId),
+          onClick: () => setAdPaymentId(paymentId),
         },
         duration: 8000,
       });
@@ -795,6 +799,14 @@ export default function FinancesPage() {
           )}
         </div>
       </Card>
+
+      {/* Vidéo pub avant envoi de quittance */}
+      {adPaymentId && (
+        <AdVideo
+          onComplete={() => { const id = adPaymentId; setAdPaymentId(null); handleSendReceipt(id); }}
+          onCancel={() => setAdPaymentId(null)}
+        />
+      )}
     </div>
   );
 }

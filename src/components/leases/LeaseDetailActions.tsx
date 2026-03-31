@@ -8,6 +8,7 @@ import Card from '@/components/ui/Card';
 import { Eye, Download, Send, RefreshCw, CheckCircle2, Clock, FileCheck } from 'lucide-react';
 import { generateLeasePdf, getLeasePdfFilename } from '@/lib/pdf/generate-lease';
 import { formatDate } from '@/lib/utils';
+import AdVideo from '@/components/ui/AdVideo';
 import type { Lease, Property, Tenant } from '@/types';
 
 interface LeaseDetailActionsProps {
@@ -19,6 +20,7 @@ interface LeaseDetailActionsProps {
 export default function LeaseDetailActions({ lease, property, tenant }: LeaseDetailActionsProps) {
   const [sending, setSending] = useState(false);
   const [checking, setChecking] = useState(false);
+  const [showAd, setShowAd] = useState<'signature' | null>(null);
   const router = useRouter();
 
   // ── PDF Actions ──────────────────────────────────────────────────
@@ -47,6 +49,10 @@ export default function LeaseDetailActions({ lease, property, tenant }: LeaseDet
   };
 
   // ── Signature Actions ────────────────────────────────────────────
+
+  const handleSendForSignatureWithAd = () => {
+    setShowAd('signature');
+  };
 
   const handleSendForSignature = async () => {
     setSending(true);
@@ -125,18 +131,26 @@ export default function LeaseDetailActions({ lease, property, tenant }: LeaseDet
   // ── Draft ────────────────────────────────────────────────────────
   if (lease.status === 'draft') {
     return (
-      <div className="flex items-center gap-2">
-        {pdfButtons}
-        <Button
-          variant="primary"
-          size="sm"
-          icon={<Send className="h-4 w-4" />}
-          onClick={handleSendForSignature}
-          loading={sending}
-        >
-          Envoyer pour signature
-        </Button>
-      </div>
+      <>
+        <div className="flex items-center gap-2">
+          {pdfButtons}
+          <Button
+            variant="primary"
+            size="sm"
+            icon={<Send className="h-4 w-4" />}
+            onClick={handleSendForSignatureWithAd}
+            loading={sending}
+          >
+            Envoyer pour signature
+          </Button>
+        </div>
+        {showAd === 'signature' && (
+          <AdVideo
+            onComplete={() => { setShowAd(null); handleSendForSignature(); }}
+            onCancel={() => setShowAd(null)}
+          />
+        )}
+      </>
     );
   }
 

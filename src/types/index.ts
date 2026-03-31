@@ -232,6 +232,23 @@ export type LeaseUpdate = Partial<LeaseInsert>;
 export type PaymentInsert = Omit<Payment, 'id' | 'user_id' | 'created_at' | 'lease'>;
 export type PaymentUpdate = Partial<PaymentInsert>;
 
+// Types pour les abonnements Stripe
+export type SubscriptionPlan = 'free' | 'pro';
+export type SubscriptionStatus = 'inactive' | 'active' | 'past_due' | 'canceled' | 'trialing';
+
+export interface Subscription {
+  id: string;
+  user_id: string;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  plan: SubscriptionPlan;
+  status: SubscriptionStatus;
+  current_period_end: string | null;
+  cancel_at_period_end: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 // Types pour les statistiques du dashboard
 export interface DashboardStats {
   totalProperties: number;
