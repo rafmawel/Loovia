@@ -10,6 +10,7 @@ import { formatCurrency, formatDate, fullName } from '@/lib/utils';
 import { priorityLabels, priorityColors } from '@/lib/design-system';
 import Link from 'next/link';
 import type { Property, Tenant, Payment, Lease, MaintenanceRequest } from '@/types';
+import AdBanner from '@/components/ui/AdBanner';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -111,6 +112,9 @@ export default async function DashboardPage() {
           value={`${occupancyRate}%`}
         />
       </div>
+
+      {/* Bannière publicitaire — utilisateurs gratuits uniquement */}
+      <AdBanner className="mb-8" />
 
       {/* Alertes — paiements en retard */}
       {latePayments.length > 0 && (
