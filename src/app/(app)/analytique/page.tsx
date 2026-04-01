@@ -23,6 +23,9 @@ import {
 } from 'recharts';
 import type { Payment, Lease, Property } from '@/types';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const fmt = (fn: unknown) => fn as any;
+
 // ── Types locaux ──────────────────────────────────────────────────
 
 type PaymentWithLease = Payment & {
@@ -292,7 +295,7 @@ export default function AnalytiquePage() {
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#78716c' }} />
                 <YAxis tick={{ fontSize: 11, fill: '#78716c' }} tickFormatter={(v) => `${v / 1000}k`} />
                 <Tooltip
-                  formatter={(value: number) => formatCurrency(value)}
+                  formatter={fmt((v: number) => formatCurrency(v))}
                   contentStyle={{ borderRadius: 12, border: '1px solid #e7e5e0', fontSize: 12 }}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
@@ -317,7 +320,7 @@ export default function AnalytiquePage() {
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#78716c' }} />
                 <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#78716c' }} tickFormatter={(v) => `${v}%`} />
                 <Tooltip
-                  formatter={(value: number) => `${value}%`}
+                  formatter={fmt((v: number) => `${v}%`)}
                   contentStyle={{ borderRadius: 12, border: '1px solid #e7e5e0', fontSize: 12 }}
                 />
                 <Line
@@ -356,7 +359,7 @@ export default function AnalytiquePage() {
                     outerRadius={80}
                     paddingAngle={3}
                     dataKey="value"
-                    label={({ name, percent }) => `${name} ${Math.round(percent * 100)}%`}
+                    label={fmt(({ name, percent }: { name: string; percent: number }) => `${name} ${Math.round(percent * 100)}%`)}
                     style={{ fontSize: 11 }}
                   >
                     {paymentStatusDistribution.map((_, i) => (
@@ -389,7 +392,7 @@ export default function AnalytiquePage() {
                   <XAxis type="number" tick={{ fontSize: 11, fill: '#78716c' }} tickFormatter={(v) => `${v}€`} />
                   <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: '#78716c' }} width={120} />
                   <Tooltip
-                    formatter={(value: number) => formatCurrency(value)}
+                    formatter={fmt((v: number) => formatCurrency(v))}
                     contentStyle={{ borderRadius: 12, border: '1px solid #e7e5e0', fontSize: 12 }}
                   />
                   <Legend wrapperStyle={{ fontSize: 12 }} />

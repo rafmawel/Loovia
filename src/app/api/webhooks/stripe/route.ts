@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
 
     case 'customer.subscription.updated': {
       const sub = event.data.object as Stripe.Subscription;
+      const periodEnd = (sub as unknown as Record<string, number>).current_period_end;
 
       const statusMap: Record<string, string> = {
         active: 'active',
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
         .from('subscriptions')
         .update({
           status: statusMap[sub.status] || 'inactive',
-          current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+          current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
           cancel_at_period_end: sub.cancel_at_period_end,
         })
         .eq('stripe_subscription_id', sub.id);
@@ -81,11 +82,12 @@ export async function POST(request: NextRequest) {
 
     case 'invoice.payment_failed': {
       const invoice = event.data.object as Stripe.Invoice;
-      if (invoice.subscription) {
+      const subId = (invoice as unknown as Record<string, unknown>).subscription as string | null;
+      if (subId) {
         await supabase
           .from('subscriptions')
           .update({ status: 'past_due' })
-          .eq('stripe_subscription_id', invoice.subscription as string);
+          .eq('stripe_subscription_id', subId);
       }
       break;
     }
