@@ -12,6 +12,7 @@ import {
   Wallet,
   Wrench,
   FolderOpen,
+  BarChart3,
   Settings,
   LogOut,
 } from 'lucide-react'
@@ -48,6 +49,7 @@ const navItems: NavItem[] = [
   { label: 'Finances', href: '/finances', icon: Wallet },
   { label: 'Travaux', href: '/maintenance', icon: Wrench },
   { label: 'Documents', href: '/documents', icon: FolderOpen },
+  { label: 'Analytique', href: '/analytique', icon: BarChart3 },
   { label: 'Paramètres', href: '/parametres', icon: Settings },
 ]
 
