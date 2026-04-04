@@ -10,8 +10,8 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { useRouter } from 'next/navigation';
 import {
-  BarChart3, TrendingUp, PieChart, Wallet, Building2,
-  Crown, Lock, Calendar,
+  BarChart3, TrendingUp, TrendingDown, PieChart, Wallet, Building2,
+  Crown, Lock, Calendar, Receipt,
 } from 'lucide-react';
 import { formatCurrency, formatMonthYear } from '@/lib/utils';
 import {
@@ -21,7 +21,7 @@ import {
   PieChart as RechartsPie, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from 'recharts';
-import type { Payment, Lease, Property } from '@/types';
+import type { Payment, Lease, Property, BankTransaction } from '@/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const fmt = (fn: unknown) => fn as any;
@@ -49,6 +49,7 @@ const COLORS = {
 };
 
 const PIE_COLORS = [COLORS.emerald, COLORS.amber, COLORS.red, COLORS.stone];
+const EXPENSE_COLORS = [COLORS.red, COLORS.amber, COLORS.blue, COLORS.purple, COLORS.stone, COLORS.terracotta];
 
 // ── Page ──────────────────────────────────────────────────────────
 
@@ -60,22 +61,25 @@ export default function AnalytiquePage() {
   const [payments, setPayments] = useState<PaymentWithLease[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
   const [leases, setLeases] = useState<Lease[]>([]);
+  const [transactions, setTransactions] = useState<BankTransaction[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
-      const [paymentsRes, propertiesRes, leasesRes] = await Promise.all([
+      const [paymentsRes, propertiesRes, leasesRes, txRes] = await Promise.all([
         supabase
           .from('payments')
           .select('*, lease:leases(*, property:properties(*), tenant:tenants(first_name, last_name))')
           .order('period_start', { ascending: true }),
         supabase.from('properties').select('*'),
         supabase.from('leases').select('*, property:properties(*), tenant:tenants(first_name, last_name)'),
+        supabase.from('bank_transactions').select('*').order('date', { ascending: true }),
       ]);
 
       setPayments((paymentsRes.data as PaymentWithLease[]) || []);
       setProperties((propertiesRes.data as Property[]) || []);
       setLeases((leasesRes.data as Lease[]) || []);
+      setTransactions((txRes.data as BankTransaction[]) || []);
       setLoading(false);
     }
     fetchData();
@@ -83,10 +87,10 @@ export default function AnalytiquePage() {
 
   // ── Données calculées ─────────────────────────────────────────
 
-  // Revenus par mois (12 derniers mois)
+  // Revenus et dépenses par mois (12 derniers mois)
   const revenueByMonth = useMemo(() => {
     const now = new Date();
-    const months: { month: string; attendu: number; recu: number }[] = [];
+    const months: { month: string; attendu: number; recu: number; depenses: number }[] = [];
 
     for (let i = 11; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -103,10 +107,19 @@ export default function AnalytiquePage() {
         }
       }
 
-      months.push({ month: label, attendu, recu });
+      // Dépenses du mois (transactions négatives hors loyer)
+      let depenses = 0;
+      for (const tx of transactions) {
+        const txMonth = tx.date.slice(0, 7);
+        if (txMonth === key && tx.amount < 0 && tx.category !== 'Loyer') {
+          depenses += Math.abs(tx.amount);
+        }
+      }
+
+      months.push({ month: label, attendu, recu, depenses });
     }
     return months;
-  }, [payments]);
+  }, [payments, transactions]);
 
   // Taux de recouvrement global
   const collectionRate = useMemo(() => {
@@ -128,6 +141,27 @@ export default function AnalytiquePage() {
       { name: 'Partiel', value: counts.partial },
     ].filter((d) => d.value > 0);
   }, [payments]);
+
+  // Répartition des dépenses par catégorie
+  const expensesByCategory = useMemo(() => {
+    const catMap: Record<string, number> = {};
+    for (const tx of transactions) {
+      if (tx.amount < 0 && tx.category !== 'Loyer') {
+        const cat = tx.category || 'Autre';
+        catMap[cat] = (catMap[cat] || 0) + Math.abs(tx.amount);
+      }
+    }
+    return Object.entries(catMap)
+      .map(([name, value]) => ({ name, value: Math.round(value * 100) / 100 }))
+      .sort((a, b) => b.value - a.value);
+  }, [transactions]);
+
+  // Total des dépenses mensuelles (moyenne sur les mois avec données)
+  const monthlyExpenses = useMemo(() => {
+    const monthsWithExpenses = revenueByMonth.filter((m) => m.depenses > 0);
+    if (monthsWithExpenses.length === 0) return 0;
+    return Math.round(monthsWithExpenses.reduce((s, m) => s + m.depenses, 0) / monthsWithExpenses.length);
+  }, [revenueByMonth]);
 
   // Rentabilité par bien
   const profitabilityByProperty = useMemo(() => {
@@ -200,10 +234,14 @@ export default function AnalytiquePage() {
       ? Math.round(((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100)
       : 0;
 
-    const totalCashflow = profitabilityByProperty.reduce((s, p) => s + p.cashflow, 0);
+    // Cashflow réel du mois : revenus reçus - toutes les dépenses (crédit + charges + copro + ...)
+    const thisMonthExpenses = revenueByMonth.length > 0
+      ? revenueByMonth[revenueByMonth.length - 1].depenses
+      : 0;
+    const totalCashflow = thisMonthRevenue - thisMonthExpenses;
 
-    return { thisMonthRevenue, revenueTrend, totalCashflow, collectionRate };
-  }, [payments, profitabilityByProperty, collectionRate]);
+    return { thisMonthRevenue, revenueTrend, totalCashflow, monthlyExpenses: thisMonthExpenses, collectionRate };
+  }, [payments, revenueByMonth, collectionRate]);
 
   // ── Gate Pro (désactivé temporairement pour tests) ───────────────
 
@@ -273,9 +311,9 @@ export default function AnalytiquePage() {
           value={`${kpis.collectionRate}%`}
         />
         <StatCard
-          icon={Building2}
-          label="Biens en portefeuille"
-          value={properties.length}
+          icon={TrendingDown}
+          label="Dépenses ce mois"
+          value={formatCurrency(kpis.monthlyExpenses)}
         />
       </div>
 
@@ -285,9 +323,9 @@ export default function AnalytiquePage() {
         <Card>
           <h3 className="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
             <Calendar className="h-4 w-4 text-terracotta" />
-            Revenus mensuels
+            Revenus &amp; dépenses mensuels
           </h3>
-          <p className="text-xs text-stone-500 mb-4">Attendu vs reçu — 12 derniers mois</p>
+          <p className="text-xs text-stone-500 mb-4">Loyers reçus vs dépenses totales — 12 derniers mois</p>
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={revenueByMonth} barGap={2}>
@@ -299,8 +337,8 @@ export default function AnalytiquePage() {
                   contentStyle={{ borderRadius: 12, border: '1px solid #e7e5e0', fontSize: 12 }}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="attendu" name="Attendu" fill={COLORS.stone} radius={[4, 4, 0, 0]} />
-                <Bar dataKey="recu" name="Reçu" fill={COLORS.terracotta} radius={[4, 4, 0, 0]} />
+                <Bar dataKey="recu" name="Loyers reçus" fill={COLORS.emerald} radius={[4, 4, 0, 0]} />
+                <Bar dataKey="depenses" name="Dépenses" fill={COLORS.red} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -338,8 +376,8 @@ export default function AnalytiquePage() {
         </Card>
       </div>
 
-      {/* Graphiques — ligne 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      {/* Graphiques — ligne 2 : pies */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Répartition des paiements */}
         <Card>
           <h3 className="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
@@ -377,8 +415,51 @@ export default function AnalytiquePage() {
           </div>
         </Card>
 
+        {/* Répartition des dépenses par catégorie */}
+        <Card>
+          <h3 className="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+            <Receipt className="h-4 w-4 text-terracotta" />
+            Dépenses par catégorie
+          </h3>
+          <p className="text-xs text-stone-500 mb-4">Copro, crédit, assurance, travaux...</p>
+          <div className="h-[240px]">
+            {expensesByCategory.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsPie>
+                  <Pie
+                    data={expensesByCategory}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    paddingAngle={3}
+                    dataKey="value"
+                    label={fmt(({ name, percent }: { name: string; percent: number }) => `${name} ${Math.round(percent * 100)}%`)}
+                    style={{ fontSize: 11 }}
+                  >
+                    {expensesByCategory.map((_, i) => (
+                      <Cell key={i} fill={EXPENSE_COLORS[i % EXPENSE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={fmt((v: number) => formatCurrency(v))}
+                    contentStyle={{ borderRadius: 12, border: '1px solid #e7e5e0', fontSize: 12 }}
+                  />
+                </RechartsPie>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full text-xs text-stone-400">
+                Aucune dépense catégorisée
+              </div>
+            )}
+          </div>
+        </Card>
+      </div>
+
+      {/* Graphiques — ligne 3 : rentabilité */}
+      <div className="grid grid-cols-1 gap-6 mb-6">
         {/* Rentabilité par bien */}
-        <Card className="lg:col-span-2">
+        <Card>
           <h3 className="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
             <TrendingUp className="h-4 w-4 text-terracotta" />
             Rentabilité par bien
