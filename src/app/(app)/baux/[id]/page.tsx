@@ -4,6 +4,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import Card from '@/components/ui/Card';
 import StatusBadge from '@/components/ui/StatusBadge';
 import LeaseDetailActions from '@/components/leases/LeaseDetailActions';
+import IrlRevisionLoader from '@/components/leases/IrlRevisionLoader';
 import { ArrowLeft, FileText, PenTool, Calendar, Building2, User, Shield, Thermometer, Scale } from 'lucide-react';
 import { formatCurrency, formatDate, fullName } from '@/lib/utils';
 import Link from 'next/link';
@@ -107,6 +108,13 @@ export default async function BailDetailPage({ params }: Props) {
           <LeaseDetailActions lease={lease} property={property} tenant={tenant} />
         )}
       </PageHeader>
+
+      {/* Alerte révision IRL */}
+      {d.irl_enabled && ['active', 'signed'].includes(lease.status) && (
+        <div className="mb-6">
+          <IrlRevisionLoader leaseId={lease.id} />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Colonne principale */}

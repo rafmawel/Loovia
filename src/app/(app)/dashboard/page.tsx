@@ -11,6 +11,7 @@ import { priorityLabels, priorityColors } from '@/lib/design-system';
 import Link from 'next/link';
 import type { Property, Tenant, Payment, Lease, MaintenanceRequest } from '@/types';
 import AdBanner from '@/components/ui/AdBanner';
+import IrlAlert from '@/components/dashboard/IrlAlert';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -112,6 +113,9 @@ export default async function DashboardPage() {
           value={`${occupancyRate}%`}
         />
       </div>
+
+      {/* Alerte IRL — baux éligibles à une révision */}
+      <IrlAlert />
 
       {/* Bannière publicitaire — utilisateurs gratuits uniquement */}
       <AdBanner className="mb-8" />
