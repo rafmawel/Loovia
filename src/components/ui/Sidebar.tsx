@@ -15,6 +15,7 @@ import {
   BarChart3,
   Settings,
   LogOut,
+  X,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -29,7 +30,7 @@ interface NavItem {
 }
 
 /** Props du composant Sidebar */
-interface SidebarProps {
+export interface SidebarProps {
   /** Informations utilisateur connecté */
   user: {
     email?: string
@@ -38,6 +39,8 @@ interface SidebarProps {
       [key: string]: unknown
     }
   }
+  /** Callback pour fermer la sidebar sur mobile */
+  onClose?: () => void
 }
 
 /** Liste des liens de navigation principaux */
@@ -59,7 +62,7 @@ const navItems: NavItem[] = [
  * Affiche le logo, les liens de navigation avec état actif,
  * et les informations utilisateur avec bouton de déconnexion en bas.
  */
-export function Sidebar({ user }: SidebarProps) {
+export function Sidebar({ user, onClose }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
 
@@ -90,14 +93,19 @@ export function Sidebar({ user }: SidebarProps) {
 
   return (
     <aside className="fixed left-0 top-0 w-[260px] h-screen bg-white border-r border-stone-200 flex flex-col z-20">
-      {/* Logo */}
-      <div className="px-6 py-6 border-b border-stone-100">
-        <Link href="/dashboard" className="flex items-center gap-2.5">
+      {/* Logo + bouton fermer mobile */}
+      <div className="px-6 py-6 border-b border-stone-100 flex items-center justify-between">
+        <Link href="/dashboard" className="flex items-center gap-2.5" onClick={onClose}>
           <Home className="h-6 w-6 text-terracotta" />
           <span className="text-xl font-bold text-terracotta">
             Loovia
           </span>
         </Link>
+        {onClose && (
+          <button onClick={onClose} className="md:hidden rounded-lg p-1 text-stone-400 hover:bg-stone-100" aria-label="Fermer le menu">
+            <X className="h-5 w-5" />
+          </button>
+        )}
       </div>
 
       {/* Navigation principale */}
@@ -110,6 +118,7 @@ export function Sidebar({ user }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onClose}
               className={[
                 'flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all',
                 active

@@ -232,6 +232,21 @@ export type LeaseUpdate = Partial<LeaseInsert>;
 export type PaymentInsert = Omit<Payment, 'id' | 'user_id' | 'created_at' | 'lease'>;
 export type PaymentUpdate = Partial<PaymentInsert>;
 
+// Types pour les notifications
+export type NotificationType = 'payment_received' | 'payment_late' | 'lease_expiring' | 'irl_revision' | 'signature_completed';
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  link: string | null;
+  read: boolean;
+  data: Record<string, unknown>;
+  created_at: string;
+}
+
 // Types pour les abonnements Stripe
 export type SubscriptionPlan = 'free' | 'pro';
 export type SubscriptionStatus = 'inactive' | 'active' | 'past_due' | 'canceled' | 'trialing';
