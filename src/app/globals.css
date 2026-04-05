@@ -107,3 +107,26 @@ body {
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* PWA standalone mode — ajustements quand l'app est installée */
+@media (display-mode: standalone) {
+  /* Safe area pour les encoches (notch) sur mobile */
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Empêcher le pull-to-refresh natif */
+  html {
+    overscroll-behavior-y: contain;
+  }
+}
+
+/* Mobile — sidebar cachée, layout plein écran */
+@media (max-width: 768px) {
+  main.ml-\[260px\] {
+    margin-left: 0 !important;
+  }
+}

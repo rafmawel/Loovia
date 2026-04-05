@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { Toaster } from 'sonner'
 import './globals.css'
@@ -10,19 +10,38 @@ const inter = Inter({
   display: 'swap',
 })
 
-// Métadonnées SEO de l'application
+// Viewport et thème PWA
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#e2725b',
+}
+
+// Métadonnées SEO + PWA
 export const metadata: Metadata = {
   title: 'Loovia — Gestion Locative',
   description:
     'Plateforme SaaS de gestion locative pour propriétaires bailleurs',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Loovia',
+  },
+  icons: {
+    icon: [
+      { url: '/icons/icon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [
+      { url: '/icons/icon.svg' },
+    ],
+  },
 }
 
 /**
  * Layout racine de l'application Loovia.
- *
- * - Applique la police Inter et la classe antialiased au body.
- * - Intègre le Toaster de Sonner pour les notifications toast.
- * - Langue définie en français (lang="fr").
  */
 export default function RootLayout({
   children,
@@ -33,9 +52,26 @@ export default function RootLayout({
     <html lang="fr">
       <body className={`${inter.variable} antialiased`}>
         {children}
-        {/* Toaster Sonner — notifications positionnées en haut à droite */}
         <Toaster richColors position="top-right" />
+        <ServiceWorkerRegistration />
       </body>
     </html>
   )
+}
+
+/** Enregistrement du service worker côté client */
+function ServiceWorkerRegistration() {
+  return (
+    <script
+      dangerouslySetInnerHTML={{
+        __html: `
+          if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+              navigator.serviceWorker.register('/sw.js');
+            });
+          }
+        `,
+      }}
+    />
+  );
 }
