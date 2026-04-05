@@ -123,10 +123,3 @@ body {
     overscroll-behavior-y: contain;
   }
 }
-
-/* Mobile — sidebar cachée, layout plein écran */
-@media (max-width: 768px) {
-  main.ml-\[260px\] {
-    margin-left: 0 !important;
-  }
-}
