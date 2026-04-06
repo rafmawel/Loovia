@@ -58,10 +58,12 @@ export default function LoginPage() {
     <div className="bg-off-white min-h-screen flex items-center justify-center px-4">
       {/* Carte de connexion */}
       <div className="bg-white rounded-2xl shadow-sm border border-stone-200/50 p-8 w-full max-w-md">
-        {/* Logo */}
+        {/* Logo — lien retour vers le site */}
         <div className="flex items-center justify-center gap-2 mb-6">
-          <Home className="h-6 w-6 text-terracotta" />
-          <span className="text-2xl font-bold text-terracotta">Loovia</span>
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <Home className="h-6 w-6 text-terracotta" />
+            <span className="text-2xl font-bold text-terracotta">Loovia</span>
+          </Link>
         </div>
 
         {/* Titre et sous-titre */}
@@ -119,6 +121,13 @@ export default function LoginPage() {
             className="text-terracotta font-medium hover:underline"
           >
             Créer un compte
+          </Link>
+        </p>
+
+        {/* Retour au site */}
+        <p className="text-xs text-stone-400 text-center mt-4">
+          <Link href="/" className="hover:text-terracotta transition-colors">
+            &larr; Retour au site
           </Link>
         </p>
       </div>
