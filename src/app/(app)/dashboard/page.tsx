@@ -117,6 +117,7 @@ export default async function DashboardPage() {
       {/* Alerte IRL — baux éligibles à une révision */}
       <IrlAlert />
 
+
       {/* Bannière publicitaire — utilisateurs gratuits uniquement */}
       <AdBanner className="mb-8" />
 

@@ -4,7 +4,8 @@
 import { useState, useEffect, type ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import { Sidebar } from '@/components/ui/Sidebar'
-import { Menu, X } from 'lucide-react'
+import { NotificationBell } from '@/components/ui/NotificationBell'
+import { Menu } from 'lucide-react'
 
 /** Informations utilisateur transmises au layout */
 interface AppUser {
@@ -55,16 +56,19 @@ export function AppLayout({ children, user }: AppLayoutProps) {
       <main className="md:ml-[260px] min-h-screen">
         {/* Header mobile avec hamburger */}
         <header className="sticky top-0 z-10 backdrop-blur bg-white/80 border-b border-stone-200/50 px-4 md:px-8 py-3 md:py-4">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="md:hidden rounded-lg p-2 text-stone-500 hover:bg-stone-100 transition-colors"
-              aria-label="Ouvrir le menu"
-            >
-              <Menu className="h-5 w-5" />
-            </button>
-            {/* Titre mobile */}
-            <span className="md:hidden text-sm font-bold text-terracotta">Loovia</span>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="md:hidden rounded-lg p-2 text-stone-500 hover:bg-stone-100 transition-colors"
+                aria-label="Ouvrir le menu"
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+              {/* Titre mobile */}
+              <span className="md:hidden text-sm font-bold text-terracotta">Loovia</span>
+            </div>
+            <NotificationBell />
           </div>
         </header>
 

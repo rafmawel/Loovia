@@ -1,6 +1,6 @@
-// Page racine — redirige vers /dashboard ou /login
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { LandingPage } from '@/components/landing/LandingPage';
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -8,7 +8,7 @@ export default async function HomePage() {
 
   if (user) {
     redirect('/dashboard');
-  } else {
-    redirect('/login');
   }
+
+  return <LandingPage />;
 }

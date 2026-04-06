@@ -25,7 +25,9 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>
 }
 
-interface SidebarProps {
+/** Props du composant Sidebar */
+export interface SidebarProps {
+  /** Informations utilisateur connecté */
   user: {
     email?: string
     user_metadata?: {
@@ -33,6 +35,7 @@ interface SidebarProps {
       [key: string]: unknown
     }
   }
+  /** Callback pour fermer la sidebar sur mobile */
   onClose?: () => void
 }
 
@@ -48,6 +51,12 @@ const navItems: NavItem[] = [
   { label: 'Paramètres', href: '/parametres', icon: Settings },
 ]
 
+/**
+ * Barre latérale de navigation fixe
+ *
+ * Affiche le logo, les liens de navigation avec état actif,
+ * et les informations utilisateur avec bouton de déconnexion en bas.
+ */
 export function Sidebar({ user, onClose }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
