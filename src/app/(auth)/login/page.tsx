@@ -34,6 +34,7 @@ export default function LoginPage() {
       }
 
       toast.success('Connexion réussie !');
+      router.refresh();
       router.push('/dashboard');
     } catch {
       setError('Une erreur inattendue est survenue. Veuillez réessayer.');
