@@ -64,7 +64,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             'placeholder:text-stone-400',
             'transition-all duration-200',
             // Focus — anneau terracotta
-            'focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta',
+            'focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent',
             // État d'erreur
             error
               ? 'border-red-400 focus:ring-red-200 focus:border-red-500'

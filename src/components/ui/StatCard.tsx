@@ -27,11 +27,11 @@ interface StatCardProps {
 export function StatCard({ icon: Icon, label, value, trend, className = '' }: StatCardProps) {
   return (
     <div
-      className={`bg-white rounded-2xl shadow-sm border border-stone-200/50 p-6 ${className}`}
+      className={`bg-white rounded-2xl border border-stone-200/60 shadow-xs p-6 ${className}`}
     >
       <div className="flex items-start justify-between">
         {/* Icône dans un cercle terracotta */}
-        <div className="rounded-full bg-terracotta/10 p-3 text-terracotta">
+        <div className="rounded-full bg-accent/10 p-3 text-accent">
           <Icon className="h-5 w-5" />
         </div>
 

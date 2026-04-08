@@ -23,7 +23,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 // --- Classes par variante ---
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    'bg-terracotta text-white hover:bg-terracotta-dark active:bg-terracotta-dark',
+    'bg-accent text-white hover:bg-accent-light active:bg-accent-light',
   secondary:
     'border border-stone-200 bg-white text-slate-900 hover:bg-stone-100 active:bg-stone-200',
   danger:
@@ -99,7 +99,7 @@ export default function Button({
         variantClasses[variant],
         sizeClasses[size],
         // Focus visible pour l'accessibilité
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terracotta/40 focus-visible:ring-offset-2',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2',
         className,
       ]
         .filter(Boolean)

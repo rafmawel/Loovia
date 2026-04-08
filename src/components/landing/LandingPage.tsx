@@ -7,6 +7,7 @@ import { FeaturesSection } from './sections/FeaturesSection'
 import { MockupSection } from './sections/MockupSection'
 import { StepsSection } from './sections/StepsSection'
 import { PricingSection } from './sections/PricingSection'
+import { FAQSection } from './sections/FAQSection'
 import { CTASection } from './sections/CTASection'
 import { FooterSection } from './sections/FooterSection'
 
@@ -20,6 +21,7 @@ export function LandingPage() {
       <MockupSection />
       <StepsSection />
       <PricingSection />
+      <FAQSection />
       <CTASection />
       <FooterSection />
     </div>

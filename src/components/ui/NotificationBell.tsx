@@ -91,12 +91,12 @@ export function NotificationBell() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="relative rounded-lg p-2 text-stone-500 hover:bg-stone-100 transition-colors"
+        className="relative rounded-lg p-2 text-text-dark/60 hover:bg-stone-200/50 transition-colors"
         aria-label="Notifications"
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-terracotta text-[10px] font-bold text-white">
+          <span className="absolute -top-0.5 -right-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-white">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -110,7 +110,7 @@ export function NotificationBell() {
             {unreadCount > 0 && (
               <button
                 onClick={markAllRead}
-                className="text-xs text-terracotta hover:text-terracotta-dark font-medium transition-colors"
+                className="text-xs text-accent hover:text-accent-dark font-medium transition-colors"
               >
                 Tout marquer comme lu
               </button>
@@ -131,7 +131,7 @@ export function NotificationBell() {
                   onClick={() => setOpen(false)}
                   className={[
                     'flex gap-3 px-4 py-3 hover:bg-stone-50 transition-colors border-b border-stone-50 last:border-0',
-                    !n.read ? 'bg-terracotta/5' : '',
+                    !n.read ? 'bg-accent/5' : '',
                   ].join(' ')}
                 >
                   <span className="text-lg flex-shrink-0 mt-0.5">{typeIcon(n.type)}</span>
@@ -143,7 +143,7 @@ export function NotificationBell() {
                     <p className="text-[11px] text-stone-400 mt-1">{relativeDate(n.created_at)}</p>
                   </div>
                   {!n.read && (
-                    <span className="mt-2 h-2 w-2 rounded-full bg-terracotta flex-shrink-0" />
+                    <span className="mt-2 h-2 w-2 rounded-full bg-accent flex-shrink-0" />
                   )}
                 </a>
               ))
