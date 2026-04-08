@@ -1,256 +1,120 @@
-// Mascotte fourmi Loovia — 4 poses SVG
-// Style : Creative South — trait épais, géométrique, expressif
+// Mascotte fourmi Loovia — style rétro/cartoon
+// Trait épais noir, couleurs chaudes pastel, visible sur fond sombre
+// Utilisée de façon DISCRÈTE : petite, dans les coins, fil conducteur
 
 interface AntProps {
   className?: string
 }
 
-/** Hero pose — fière, debout, tenant un trousseau de clés */
-export function AntHero({ className = '' }: AntProps) {
+/** Fourmi qui marche avec un trousseau de clés — style rétro cartoon */
+export function AntWithKeys({ className = '' }: AntProps) {
   return (
-    <svg viewBox="0 0 300 400" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      {/* Antennes — relevées, fières */}
-      <path d="M130 95 C120 50, 100 30, 85 15" stroke="#0D0F1A" strokeWidth="5" strokeLinecap="round" fill="none"/>
-      <circle cx="85" cy="15" r="6" fill="#E8622A"/>
-      <path d="M170 95 C180 50, 200 30, 215 15" stroke="#0D0F1A" strokeWidth="5" strokeLinecap="round" fill="none"/>
-      <circle cx="215" cy="15" r="6" fill="#E8622A"/>
-
-      {/* Tête — ronde */}
-      <circle cx="150" cy="130" r="45" fill="#0D0F1A" stroke="#0D0F1A" strokeWidth="3"/>
-      {/* Yeux — grands, ronds, expressifs */}
-      <ellipse cx="135" cy="125" rx="12" ry="14" fill="white"/>
-      <ellipse cx="165" cy="125" rx="12" ry="14" fill="white"/>
-      <circle cx="138" cy="123" r="6" fill="#0D0F1A"/>
-      <circle cx="168" cy="123" r="6" fill="#0D0F1A"/>
-      <circle cx="140" cy="121" r="2.5" fill="white"/>
-      <circle cx="170" cy="121" r="2.5" fill="white"/>
-      {/* Sourire */}
-      <path d="M137 145 C142 155, 158 155, 163 145" stroke="white" strokeWidth="3" strokeLinecap="round" fill="none"/>
-
-      {/* Corps — costume sombre */}
-      <ellipse cx="150" cy="220" rx="50" ry="55" fill="#1A1E30" stroke="#0D0F1A" strokeWidth="3"/>
-      {/* Col de chemise */}
-      <path d="M130 178 L150 195 L170 178" stroke="white" strokeWidth="2.5" fill="none"/>
-      {/* Cravate orange */}
-      <polygon points="150,192 143,215 150,225 157,215" fill="#E8622A"/>
-      {/* Boutons */}
-      <circle cx="150" cy="240" r="3" fill="#252840"/>
-      <circle cx="150" cy="255" r="3" fill="#252840"/>
-
-      {/* Abdomen */}
-      <ellipse cx="150" cy="310" rx="42" ry="45" fill="#0D0F1A"/>
-      <ellipse cx="150" cy="310" rx="30" ry="32" fill="#1A1E30" opacity="0.3"/>
-
-      {/* Bras gauche — posé sur la hanche */}
-      <path d="M100 210 C75 215, 65 240, 80 255" stroke="#0D0F1A" strokeWidth="8" strokeLinecap="round" fill="none"/>
-      {/* Main gauche */}
-      <circle cx="80" cy="257" r="8" fill="#0D0F1A"/>
-
-      {/* Bras droit — tient les clés en l'air */}
-      <path d="M200 205 C225 195, 240 175, 235 155" stroke="#0D0F1A" strokeWidth="8" strokeLinecap="round" fill="none"/>
-      {/* Main droite */}
-      <circle cx="235" cy="153" r="8" fill="#0D0F1A"/>
-      {/* Trousseau de clés */}
-      <circle cx="245" cy="135" r="12" stroke="#E8622A" strokeWidth="3" fill="none"/>
-      <rect x="248" y="120" width="4" height="18" rx="1" fill="#F5C842" transform="rotate(15, 250, 129)"/>
-      <rect x="240" y="118" width="4" height="14" rx="1" fill="#E8622A" transform="rotate(-10, 242, 125)"/>
-      <circle cx="245" cy="135" r="3" fill="#E8622A"/>
-
-      {/* Pattes — fines avec jointures */}
-      <path d="M120 340 C110 360, 100 375, 95 395" stroke="#0D0F1A" strokeWidth="6" strokeLinecap="round" fill="none"/>
-      <path d="M180 340 C190 360, 195 375, 200 395" stroke="#0D0F1A" strokeWidth="6" strokeLinecap="round" fill="none"/>
-      {/* Pieds */}
-      <ellipse cx="90" cy="395" rx="14" ry="6" fill="#0D0F1A"/>
-      <ellipse cx="205" cy="395" rx="14" ry="6" fill="#0D0F1A"/>
-    </svg>
-  )
-}
-
-/** Problème pose — submergée sous des papiers, antennes tombantes */
-export function AntOverwhelmed({ className = '' }: AntProps) {
-  return (
-    <svg viewBox="0 0 300 400" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      {/* Antennes — tombantes */}
-      <path d="M130 95 C125 70, 110 65, 90 75" stroke="#0D0F1A" strokeWidth="5" strokeLinecap="round" fill="none"/>
-      <circle cx="88" cy="77" r="5" fill="#9BA3C2"/>
-      <path d="M170 95 C175 70, 190 65, 210 75" stroke="#0D0F1A" strokeWidth="5" strokeLinecap="round" fill="none"/>
-      <circle cx="212" cy="77" r="5" fill="#9BA3C2"/>
-
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      {/* Antennes */}
+      <path d="M38 30 C35 18, 28 12, 22 8" stroke="#0D0F1A" strokeWidth="3" strokeLinecap="round"/>
+      <circle cx="21" cy="7" r="3.5" fill="#F4A77C"/>
+      <path d="M52 28 C55 18, 62 12, 68 10" stroke="#0D0F1A" strokeWidth="3" strokeLinecap="round"/>
+      <circle cx="69" cy="9" r="3.5" fill="#F4A77C"/>
       {/* Tête */}
-      <circle cx="150" cy="130" r="45" fill="#0D0F1A" stroke="#0D0F1A" strokeWidth="3"/>
-      {/* Yeux — stressés */}
-      <ellipse cx="135" cy="125" rx="12" ry="14" fill="white"/>
-      <ellipse cx="165" cy="125" rx="12" ry="14" fill="white"/>
-      <circle cx="135" cy="128" r="5" fill="#0D0F1A"/>
-      <circle cx="165" cy="128" r="5" fill="#0D0F1A"/>
-      {/* Sourcils inquiets */}
-      <path d="M123 110 L140 116" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M177 110 L160 116" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-      {/* Bouche — grimace */}
-      <path d="M135 150 C140 145, 160 145, 165 150" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
-
+      <circle cx="45" cy="38" r="16" fill="#F4A77C" stroke="#0D0F1A" strokeWidth="3"/>
+      {/* Yeux */}
+      <circle cx="40" cy="36" r="4.5" fill="white"/>
+      <circle cx="51" cy="36" r="4.5" fill="white"/>
+      <circle cx="41" cy="35" r="2.2" fill="#0D0F1A"/>
+      <circle cx="52" cy="35" r="2.2" fill="#0D0F1A"/>
+      <circle cx="41.5" cy="34" r="0.8" fill="white"/>
+      <circle cx="52.5" cy="34" r="0.8" fill="white"/>
+      {/* Sourire */}
+      <path d="M40 44 C43 48, 48 48, 51 44" stroke="#0D0F1A" strokeWidth="2" strokeLinecap="round" fill="none"/>
       {/* Corps */}
-      <ellipse cx="150" cy="220" rx="50" ry="55" fill="#1A1E30" stroke="#0D0F1A" strokeWidth="3"/>
-      <polygon points="150,192 143,215 150,225 157,215" fill="#E8622A" opacity="0.6"/>
-      <ellipse cx="150" cy="310" rx="42" ry="45" fill="#0D0F1A"/>
-
-      {/* Bras — levés en panique */}
-      <path d="M100 210 C70 195, 55 180, 50 160" stroke="#0D0F1A" strokeWidth="8" strokeLinecap="round" fill="none"/>
-      <path d="M200 210 C230 195, 245 180, 250 160" stroke="#0D0F1A" strokeWidth="8" strokeLinecap="round" fill="none"/>
-      <circle cx="48" cy="158" r="8" fill="#0D0F1A"/>
-      <circle cx="252" cy="158" r="8" fill="#0D0F1A"/>
-
-      {/* Papiers qui volent */}
-      <rect x="30" y="100" width="40" height="50" rx="3" fill="white" stroke="#252840" strokeWidth="1.5" transform="rotate(-15, 50, 125)"/>
-      <rect x="35" y="112" width="20" height="2" rx="1" fill="#9BA3C2" transform="rotate(-15, 50, 125)"/>
-      <rect x="35" y="118" width="25" height="2" rx="1" fill="#9BA3C2" transform="rotate(-15, 50, 125)"/>
-
-      <rect x="230" y="90" width="40" height="50" rx="3" fill="white" stroke="#252840" strokeWidth="1.5" transform="rotate(12, 250, 115)"/>
-      <rect x="235" y="102" width="20" height="2" rx="1" fill="#9BA3C2" transform="rotate(12, 250, 115)"/>
-
-      <rect x="60" y="140" width="35" height="45" rx="3" fill="#F5F0E8" stroke="#252840" strokeWidth="1.5" transform="rotate(-8, 77, 162)"/>
-      <rect x="235" y="140" width="35" height="45" rx="3" fill="#F5F0E8" stroke="#252840" strokeWidth="1.5" transform="rotate(10, 252, 162)"/>
-
+      <ellipse cx="45" cy="62" rx="14" ry="15" fill="#F2B5A0" stroke="#0D0F1A" strokeWidth="3"/>
+      {/* Abdomen */}
+      <ellipse cx="45" cy="82" rx="11" ry="12" fill="#F4A77C" stroke="#0D0F1A" strokeWidth="3"/>
+      {/* Bras — tient les clés */}
+      <path d="M59 58 C68 52, 74 48, 78 44" stroke="#0D0F1A" strokeWidth="3" strokeLinecap="round"/>
+      <circle cx="79" cy="43" r="3" fill="#F4A77C" stroke="#0D0F1A" strokeWidth="2"/>
+      {/* Clés */}
+      <circle cx="86" cy="36" r="5" stroke="#E8622A" strokeWidth="2.5" fill="none"/>
+      <rect x="88" y="30" width="2.5" height="8" rx="1" fill="#E8622A" transform="rotate(15, 89, 34)"/>
+      {/* Autre bras */}
+      <path d="M31 60 C22 58, 18 62, 16 68" stroke="#0D0F1A" strokeWidth="3" strokeLinecap="round"/>
+      <circle cx="15" cy="69" r="3" fill="#F4A77C" stroke="#0D0F1A" strokeWidth="2"/>
       {/* Pattes */}
-      <path d="M120 340 C110 360, 100 375, 95 395" stroke="#0D0F1A" strokeWidth="6" strokeLinecap="round" fill="none"/>
-      <path d="M180 340 C190 360, 195 375, 200 395" stroke="#0D0F1A" strokeWidth="6" strokeLinecap="round" fill="none"/>
-      <ellipse cx="90" cy="395" rx="14" ry="6" fill="#0D0F1A"/>
-      <ellipse cx="205" cy="395" rx="14" ry="6" fill="#0D0F1A"/>
+      <path d="M38 90 C35 95, 32 98, 30 100" stroke="#0D0F1A" strokeWidth="3" strokeLinecap="round"/>
+      <path d="M52 90 C55 95, 58 98, 60 100" stroke="#0D0F1A" strokeWidth="3" strokeLinecap="round"/>
     </svg>
   )
 }
 
-/** Solution pose — assise, détendue, tasse en main */
+/** Fourmi assise qui sirote un café — pour les sections détente */
 export function AntRelaxed({ className = '' }: AntProps) {
   return (
-    <svg viewBox="0 0 300 380" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      {/* Fauteuil */}
-      <path d="M50 250 C50 220, 60 200, 80 195 L220 195 C240 200, 250 220, 250 250 L250 330 C250 345, 240 355, 225 355 L75 355 C60 355, 50 345, 50 330Z" fill="#1A1E30" stroke="#252840" strokeWidth="2"/>
-      <path d="M40 240 C35 240, 30 250, 30 265 L30 310 C30 320, 35 325, 45 325 L55 325 L55 240Z" fill="#1A1E30" stroke="#252840" strokeWidth="2"/>
-      <path d="M260 240 C265 240, 270 250, 270 265 L270 310 C270 320, 265 325, 255 325 L245 325 L245 240Z" fill="#1A1E30" stroke="#252840" strokeWidth="2"/>
-
-      {/* Antennes — détendues */}
-      <path d="M130 70 C125 40, 115 25, 100 20" stroke="#0D0F1A" strokeWidth="5" strokeLinecap="round" fill="none"/>
-      <circle cx="98" cy="19" r="6" fill="#E8622A"/>
-      <path d="M170 70 C175 40, 185 25, 200 20" stroke="#0D0F1A" strokeWidth="5" strokeLinecap="round" fill="none"/>
-      <circle cx="202" cy="19" r="6" fill="#E8622A"/>
-
-      {/* Tête */}
-      <circle cx="150" cy="105" r="42" fill="#0D0F1A"/>
-      {/* Yeux — demi-fermés, content */}
-      <path d="M125 100 C130 92, 140 92, 145 100" stroke="white" strokeWidth="3" strokeLinecap="round" fill="none"/>
-      <path d="M155 100 C160 92, 170 92, 175 100" stroke="white" strokeWidth="3" strokeLinecap="round" fill="none"/>
-      {/* Sourire satisfait */}
-      <path d="M135 118 C142 128, 158 128, 165 118" stroke="white" strokeWidth="3" strokeLinecap="round" fill="none"/>
-
-      {/* Corps — assis dans le fauteuil */}
-      <ellipse cx="150" cy="200" rx="48" ry="50" fill="#1A1E30" stroke="#0D0F1A" strokeWidth="3"/>
-      <path d="M130 155 L150 170 L170 155" stroke="white" strokeWidth="2.5" fill="none"/>
-      <polygon points="150,168 144,188 150,198 156,188" fill="#E8622A"/>
-
-      {/* Abdomen */}
-      <ellipse cx="150" cy="280" rx="40" ry="42" fill="#0D0F1A"/>
-
-      {/* Bras gauche — posé sur l'accoudoir */}
-      <path d="M102 200 C75 210, 55 220, 45 240" stroke="#0D0F1A" strokeWidth="8" strokeLinecap="round" fill="none"/>
-      <circle cx="43" cy="242" r="8" fill="#0D0F1A"/>
-
-      {/* Bras droit — tient une tasse */}
-      <path d="M198 195 C220 190, 232 185, 238 178" stroke="#0D0F1A" strokeWidth="8" strokeLinecap="round" fill="none"/>
-      <circle cx="240" cy="176" r="8" fill="#0D0F1A"/>
-      {/* Tasse */}
-      <rect x="228" y="148" width="24" height="28" rx="4" fill="#E8622A"/>
-      <path d="M252 158 C262 158, 262 170, 252 170" stroke="#E8622A" strokeWidth="3" fill="none"/>
-      {/* Vapeur */}
-      <path d="M236 142 C234 135, 238 130, 236 123" stroke="#9BA3C2" strokeWidth="2" strokeLinecap="round" opacity="0.5"/>
-      <path d="M244 144 C242 137, 246 132, 244 125" stroke="#9BA3C2" strokeWidth="2" strokeLinecap="round" opacity="0.5"/>
-
-      {/* Pattes — croisées et posées */}
-      <path d="M120 310 C110 330, 115 345, 130 355" stroke="#0D0F1A" strokeWidth="6" strokeLinecap="round" fill="none"/>
-      <path d="M180 310 C195 320, 210 325, 225 325" stroke="#0D0F1A" strokeWidth="6" strokeLinecap="round" fill="none"/>
-      <ellipse cx="130" cy="358" rx="14" ry="5" fill="#0D0F1A"/>
-      <ellipse cx="228" cy="327" rx="14" ry="5" fill="#0D0F1A"/>
-    </svg>
-  )
-}
-
-/** CTA pose — ouvre une porte, métaphore du démarrage */
-export function AntDoor({ className = '' }: AntProps) {
-  return (
-    <svg viewBox="0 0 350 400" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      {/* Porte */}
-      <rect x="170" y="40" width="130" height="340" rx="6" fill="#1A1E30" stroke="#252840" strokeWidth="3"/>
-      <rect x="180" y="50" width="110" height="320" rx="3" fill="#131629"/>
-      {/* Poignée */}
-      <circle cx="275" cy="210" r="8" fill="#E8622A"/>
-      <circle cx="275" cy="210" r="4" fill="#0D0F1A"/>
-      {/* Lumière qui sort de la porte */}
-      <path d="M180 50 L120 20 L120 380 L180 370Z" fill="#E8622A" opacity="0.06"/>
-      <path d="M180 100 L140 80 L140 320 L180 310Z" fill="#E8622A" opacity="0.08"/>
-
-      {/* Fourmi */}
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
       {/* Antennes */}
-      <path d="M80 130 C75 100, 65 85, 50 75" stroke="#0D0F1A" strokeWidth="5" strokeLinecap="round" fill="none"/>
-      <circle cx="48" cy="73" r="6" fill="#E8622A"/>
-      <path d="M115 130 C120 100, 130 85, 145 80" stroke="#0D0F1A" strokeWidth="5" strokeLinecap="round" fill="none"/>
-      <circle cx="147" cy="78" r="6" fill="#E8622A"/>
-
+      <path d="M30 22 C28 14, 22 10, 16 8" stroke="#0D0F1A" strokeWidth="2.5" strokeLinecap="round"/>
+      <circle cx="15" cy="7" r="3" fill="#F4A77C"/>
+      <path d="M44 22 C46 14, 52 10, 58 8" stroke="#0D0F1A" strokeWidth="2.5" strokeLinecap="round"/>
+      <circle cx="59" cy="7" r="3" fill="#F4A77C"/>
       {/* Tête */}
-      <circle cx="98" cy="165" r="40" fill="#0D0F1A"/>
-      <ellipse cx="85" cy="160" rx="10" ry="12" fill="white"/>
-      <ellipse cx="112" cy="160" rx="10" ry="12" fill="white"/>
-      <circle cx="88" cy="158" r="5" fill="#0D0F1A"/>
-      <circle cx="115" cy="158" r="5" fill="#0D0F1A"/>
-      <circle cx="89" cy="156" r="2" fill="white"/>
-      <circle cx="116" cy="156" r="2" fill="white"/>
-      {/* Grand sourire */}
-      <path d="M82 180 C90 192, 106 192, 114 180" stroke="white" strokeWidth="3" strokeLinecap="round" fill="none"/>
-
-      {/* Corps */}
-      <ellipse cx="98" cy="250" rx="45" ry="48" fill="#1A1E30" stroke="#0D0F1A" strokeWidth="3"/>
-      <path d="M80 210 L98 225 L116 210" stroke="white" strokeWidth="2.5" fill="none"/>
-      <polygon points="98,222 92,242 98,252 104,242" fill="#E8622A"/>
-      <ellipse cx="98" cy="335" rx="38" ry="40" fill="#0D0F1A"/>
-
-      {/* Bras gauche — posé */}
-      <path d="M53 245 C30 250, 20 265, 25 280" stroke="#0D0F1A" strokeWidth="8" strokeLinecap="round" fill="none"/>
-      <circle cx="25" cy="282" r="7" fill="#0D0F1A"/>
-      {/* Bras droit — pousse la porte */}
-      <path d="M143 240 C160 235, 172 225, 178 215" stroke="#0D0F1A" strokeWidth="8" strokeLinecap="round" fill="none"/>
-      <circle cx="180" cy="213" r="7" fill="#0D0F1A"/>
-
+      <circle cx="37" cy="30" r="13" fill="#F4A77C" stroke="#0D0F1A" strokeWidth="2.5"/>
+      {/* Yeux fermés — content */}
+      <path d="M31 28 C33 25, 36 25, 38 28" stroke="#0D0F1A" strokeWidth="2" strokeLinecap="round" fill="none"/>
+      <path d="M40 28 C42 25, 45 25, 47 28" stroke="#0D0F1A" strokeWidth="2" strokeLinecap="round" fill="none"/>
+      {/* Sourire */}
+      <path d="M33 36 C35 39, 39 39, 41 36" stroke="#0D0F1A" strokeWidth="1.8" strokeLinecap="round" fill="none"/>
+      {/* Corps assis */}
+      <ellipse cx="37" cy="50" rx="12" ry="12" fill="#F2B5A0" stroke="#0D0F1A" strokeWidth="2.5"/>
+      {/* Abdomen */}
+      <ellipse cx="37" cy="66" rx="10" ry="9" fill="#F4A77C" stroke="#0D0F1A" strokeWidth="2.5"/>
+      {/* Bras + tasse */}
+      <path d="M49 48 C56 44, 60 40, 62 36" stroke="#0D0F1A" strokeWidth="2.5" strokeLinecap="round"/>
+      <rect x="59" y="30" width="10" height="12" rx="2" fill="#E8622A" stroke="#0D0F1A" strokeWidth="2"/>
+      <path d="M69 34 C73 34, 73 40, 69 40" stroke="#0D0F1A" strokeWidth="2" fill="none"/>
+      {/* Vapeur */}
+      <path d="M63 26 C62 22, 64 20, 63 16" stroke="#C0B0DC" strokeWidth="1.5" strokeLinecap="round" opacity="0.6"/>
       {/* Pattes */}
-      <path d="M72 365 C65 380, 60 390, 55 398" stroke="#0D0F1A" strokeWidth="6" strokeLinecap="round" fill="none"/>
-      <path d="M125 365 C130 380, 135 390, 140 398" stroke="#0D0F1A" strokeWidth="6" strokeLinecap="round" fill="none"/>
-      <ellipse cx="50" cy="398" rx="12" ry="5" fill="#0D0F1A"/>
-      <ellipse cx="145" cy="398" rx="12" ry="5" fill="#0D0F1A"/>
-
-      {/* Étoiles décoratives autour de la porte */}
-      <path d="M320 80 L323 88 L331 88 L325 93 L327 101 L320 96 L313 101 L315 93 L309 88 L317 88Z" fill="#F5C842" opacity="0.7"/>
-      <path d="M160 55 L162 60 L167 60 L163 63 L164 68 L160 65 L156 68 L157 63 L153 60 L158 60Z" fill="#E8622A" opacity="0.5"/>
+      <path d="M30 72 C28 76, 24 78, 20 78" stroke="#0D0F1A" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M44 72 C46 76, 50 78, 54 78" stroke="#0D0F1A" strokeWidth="2.5" strokeLinecap="round"/>
     </svg>
   )
 }
 
-/** Petite fourmi pour le footer — qui salue */
+/** Petite fourmi qui salue — pour le footer */
 export function AntWave({ className = '' }: AntProps) {
   return (
-    <svg viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      <path d="M26 18 C24 8, 18 4, 12 2" stroke="#0D0F1A" strokeWidth="2" strokeLinecap="round"/>
-      <circle cx="11" cy="2" r="2.5" fill="#E8622A"/>
-      <path d="M34 18 C36 8, 42 4, 48 2" stroke="#0D0F1A" strokeWidth="2" strokeLinecap="round"/>
-      <circle cx="49" cy="2" r="2.5" fill="#E8622A"/>
-      <circle cx="30" cy="28" r="14" fill="#0D0F1A"/>
-      <circle cx="25" cy="26" r="4" fill="white"/>
-      <circle cx="35" cy="26" r="4" fill="white"/>
-      <circle cx="26" cy="25" r="2" fill="#0D0F1A"/>
-      <circle cx="36" cy="25" r="2" fill="#0D0F1A"/>
-      <path d="M26 34 C28 37, 32 37, 34 34" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-      <ellipse cx="30" cy="50" rx="14" ry="14" fill="#1A1E30" stroke="#0D0F1A" strokeWidth="1.5"/>
-      <ellipse cx="30" cy="70" rx="11" ry="10" fill="#0D0F1A"/>
+    <svg viewBox="0 0 50 60" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <path d="M20 14 C18 8, 14 5, 10 3" stroke="#0D0F1A" strokeWidth="2" strokeLinecap="round"/>
+      <circle cx="9" cy="2.5" r="2.5" fill="#F4A77C"/>
+      <path d="M30 14 C32 8, 36 5, 40 3" stroke="#0D0F1A" strokeWidth="2" strokeLinecap="round"/>
+      <circle cx="41" cy="2.5" r="2.5" fill="#F4A77C"/>
+      <circle cx="25" cy="22" r="10" fill="#F4A77C" stroke="#0D0F1A" strokeWidth="2.5"/>
+      <circle cx="22" cy="20" r="3" fill="white"/>
+      <circle cx="29" cy="20" r="3" fill="white"/>
+      <circle cx="22.5" cy="19.5" r="1.5" fill="#0D0F1A"/>
+      <circle cx="29.5" cy="19.5" r="1.5" fill="#0D0F1A"/>
+      <path d="M22 27 C24 29, 27 29, 29 27" stroke="#0D0F1A" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+      <ellipse cx="25" cy="38" rx="9" ry="10" fill="#F2B5A0" stroke="#0D0F1A" strokeWidth="2.5"/>
+      <ellipse cx="25" cy="52" rx="7" ry="7" fill="#F4A77C" stroke="#0D0F1A" strokeWidth="2.5"/>
       {/* Bras droit qui salue */}
-      <path d="M44 48 C52 42, 55 35, 53 28" stroke="#0D0F1A" strokeWidth="3" strokeLinecap="round"/>
-      <circle cx="53" cy="27" r="3" fill="#0D0F1A"/>
+      <path d="M34 36 C40 30, 42 24, 40 18" stroke="#0D0F1A" strokeWidth="2.5" strokeLinecap="round"/>
+      <circle cx="40" cy="17" r="2.5" fill="#F4A77C" stroke="#0D0F1A" strokeWidth="1.5"/>
+    </svg>
+  )
+}
+
+/** Mini fourmi icon — pour les accents décoratifs */
+export function AntMini({ className = '' }: AntProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <path d="M9 6 C8 3, 6 2, 4 1" stroke="#0D0F1A" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="3.5" cy="0.8" r="1.5" fill="#F4A77C"/>
+      <path d="M15 6 C16 3, 18 2, 20 1" stroke="#0D0F1A" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="20.5" cy="0.8" r="1.5" fill="#F4A77C"/>
+      <circle cx="12" cy="8" r="4" fill="#F4A77C" stroke="#0D0F1A" strokeWidth="1.5"/>
+      <circle cx="10.5" cy="7.5" r="1" fill="#0D0F1A"/>
+      <circle cx="13.5" cy="7.5" r="1" fill="#0D0F1A"/>
+      <ellipse cx="12" cy="15" rx="4" ry="4" fill="#F2B5A0" stroke="#0D0F1A" strokeWidth="1.5"/>
+      <ellipse cx="12" cy="21" rx="3" ry="3" fill="#F4A77C" stroke="#0D0F1A" strokeWidth="1.5"/>
     </svg>
   )
 }

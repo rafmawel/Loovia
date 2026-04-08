@@ -5,6 +5,7 @@ import { HeroSection } from './sections/HeroSection'
 import { ProblemSection } from './sections/ProblemSection'
 import { SolutionSection } from './sections/SolutionSection'
 import { FeaturesSection } from './sections/FeaturesSection'
+import { MockupSection } from './sections/MockupSection'
 import { StorySection } from './sections/StorySection'
 import { StepsSection } from './sections/StepsSection'
 import { PricingSection } from './sections/PricingSection'
@@ -19,6 +20,7 @@ export function LandingPage() {
       <ProblemSection />
       <SolutionSection />
       <FeaturesSection />
+      <MockupSection />
       <StorySection />
       <StepsSection />
       <PricingSection />
