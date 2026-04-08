@@ -1,11 +1,35 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Palette Loovia */
-  --color-terracotta: #e2725b;
-  --color-terracotta-light: #f0a899;
-  --color-terracotta-dark: #c45a44;
-  --color-off-white: #f7f5f3;
+  /* ── Palette Loovia DA ── */
+
+  /* Fonds */
+  --color-bg-dark: #0F1117;
+  --color-bg-mid: #1A1D2E;
+  --color-bg-light: #F4F2EE;
+  --color-ui-card: #161929;
+  --color-ui-border: #2A2D3E;
+
+  /* Accent */
+  --color-accent: #E8622A;
+  --color-accent-hover: #D4501A;
+  --color-accent-soft: #F2AA7E;
+
+  /* Texte */
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #A8B0C8;
+  --color-text-dark: #1A1D2E;
+  --color-text-muted: #6B7394;
+
+  /* Statut */
+  --color-success: #4ADE80;
+  --color-warning: #FBBF24;
+
+  /* Legacy — utilisées dans l'app interne */
+  --color-terracotta: #E8622A;
+  --color-terracotta-light: #F2AA7E;
+  --color-terracotta-dark: #D4501A;
+  --color-off-white: #F4F2EE;
   --color-slate-900: #0f172a;
   --color-stone-500: #78716c;
   --color-stone-200: #e7e5e0;
@@ -14,6 +38,8 @@
 
   /* Polices */
   --font-sans: var(--font-inter);
+  --font-display: var(--font-cabinet), var(--font-inter), system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   /* Animations */
   --animate-in: in 0.3s ease-out;
@@ -21,113 +47,41 @@
   --animate-fade-in: fade-in 0.2s ease-out;
 }
 
-/* Animations personnalisées */
+/* ── Keyframes ── */
+
 @keyframes in {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slide-in-from-top {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slide-in-from-right {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
 }
 
 @keyframes slide-out-to-right {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(100%);
-  }
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
 }
 
-/* Styles de base */
-body {
-  background: var(--color-off-white);
-  color: var(--color-slate-900);
-  font-family: var(--font-sans), system-ui, sans-serif;
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
-/* Chiffres tabulaires pour les montants */
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
-}
-
-/* Scrollbar personnalisée */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-stone-300);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-stone-500);
-}
-
-/* Focus visible pour accessibilité */
-*:focus-visible {
-  outline: 2px solid var(--color-terracotta);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-/* ─── Landing page animations ─── */
 
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-12px); }
-}
-
-@keyframes underline-draw {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
-}
-
-@keyframes fade-up {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes count-up {
-  from { opacity: 0; transform: scale(0.5); }
-  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes gradient-shift {
@@ -135,30 +89,24 @@ body {
   50% { background-position: 100% 50%; }
 }
 
-.animate-float {
-  animation: float 6s ease-in-out infinite;
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(232, 98, 42, 0.15); }
+  50% { box-shadow: 0 0 40px rgba(232, 98, 42, 0.3); }
 }
 
-.animate-float-delay {
-  animation: float 6s ease-in-out 2s infinite;
-}
-
-.animate-underline-draw {
-  animation: underline-draw 1s cubic-bezier(0.65, 0, 0.35, 1) forwards;
-  transform-origin: left;
-}
+/* ── Animation utilities ── */
 
 .animate-fade-up {
   animation: fade-up 0.8s ease-out forwards;
   opacity: 0;
 }
 
-.animate-gradient {
-  background-size: 200% 200%;
-  animation: gradient-shift 8s ease infinite;
-}
+.animate-float { animation: float 6s ease-in-out infinite; }
+.animate-float-delay { animation: float 6s ease-in-out 2s infinite; }
+.animate-gradient { background-size: 200% 200%; animation: gradient-shift 8s ease infinite; }
+.animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
 
-/* Stagger delay utilities */
+/* Stagger delays */
 .delay-100 { animation-delay: 100ms; }
 .delay-200 { animation-delay: 200ms; }
 .delay-300 { animation-delay: 300ms; }
@@ -166,19 +114,65 @@ body {
 .delay-500 { animation-delay: 500ms; }
 .delay-600 { animation-delay: 600ms; }
 .delay-700 { animation-delay: 700ms; }
+.delay-800 { animation-delay: 800ms; }
 
-/* PWA standalone mode — ajustements quand l'app est installée */
+/* ── Base styles ── */
+
+body {
+  background: var(--color-off-white);
+  color: var(--color-slate-900);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Scrollbar ── */
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-stone-300); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-stone-500); }
+
+/* ── Focus ── */
+
+*:focus-visible {
+  outline: 2px solid var(--color-terracotta);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Landing-specific ── */
+
+.landing-section { padding: 100px 0; }
+@media (min-width: 768px) { .landing-section { padding: 120px 0; } }
+
+/* Dot grid background */
+.bg-dot-grid {
+  background-image: radial-gradient(circle, rgba(168, 176, 200, 0.15) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Noise texture overlay */
+.bg-noise::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── PWA standalone mode ── */
+
 @media (display-mode: standalone) {
-  /* Safe area pour les encoches (notch) sur mobile */
   body {
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
-
-  /* Empêcher le pull-to-refresh natif */
-  html {
-    overscroll-behavior-y: contain;
-  }
+  html { overscroll-behavior-y: contain; }
 }
