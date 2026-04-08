@@ -1,13 +1,26 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Syne, JetBrains_Mono } from 'next/font/google'
 import { Toaster } from 'sonner'
 import './globals.css'
 
-// Police Inter — variable CSS utilisée par le design system (--font-inter)
 const inter = Inter({
   variable: '--font-inter',
   subsets: ['latin'],
   display: 'swap',
+})
+
+const syne = Syne({
+  variable: '--font-syne',
+  subsets: ['latin'],
+  display: 'swap',
+  weight: ['400', '700', '800'],
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: '--font-jb-mono',
+  subsets: ['latin'],
+  display: 'swap',
+  weight: ['400', '500'],
 })
 
 // Viewport et thème PWA
@@ -16,7 +29,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#e2725b',
+  themeColor: '#E8622A',
 }
 
 // Métadonnées SEO + PWA
@@ -50,7 +63,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body className={`${inter.variable} antialiased`}>
+      <body className={`${inter.variable} ${syne.variable} ${jetbrainsMono.variable} antialiased`}>
         {children}
         <Toaster richColors position="top-right" />
         <ServiceWorkerRegistration />
