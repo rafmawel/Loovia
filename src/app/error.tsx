@@ -15,9 +15,9 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-stone-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-bg-primary px-4">
       <div className="text-center max-w-md">
-        <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-red-100 text-red-600 mb-6">
+        <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-red-500/10 text-red-400 mb-6">
           <svg
             className="h-8 w-8"
             fill="none"
@@ -32,15 +32,15 @@ export default function Error({
             />
           </svg>
         </div>
-        <h1 className="text-2xl font-bold text-slate-900 mb-2">
+        <h1 className="text-2xl font-bold text-text-primary mb-2">
           Une erreur est survenue
         </h1>
-        <p className="text-stone-500 mb-8">
+        <p className="text-text-secondary mb-8">
           Quelque chose s&apos;est mal passé. Veuillez réessayer.
         </p>
         <button
           onClick={() => reset()}
-          className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-white bg-terracotta rounded-xl hover:bg-terracotta-dark transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-white bg-accent rounded-xl hover:bg-accent-light transition-colors"
         >
           Réessayer
         </button>

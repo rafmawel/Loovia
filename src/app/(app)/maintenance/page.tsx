@@ -109,7 +109,7 @@ export default function MaintenancePage() {
       <div>
         <PageHeader title="Travaux & Maintenance" description="Suivi des demandes de travaux" />
         <div className="flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-stone-200 border-t-terracotta" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border-light border-t-accent" />
         </div>
       </div>
     );
@@ -158,8 +158,8 @@ export default function MaintenancePage() {
       {/* Tableau */}
       <Card padding="p-0">
         {/* Toolbar */}
-        <div className="p-4 border-b border-stone-100 flex flex-wrap items-center gap-3">
-          <Filter className="h-4 w-4 text-stone-400" />
+        <div className="p-4 border-b border-border flex flex-wrap items-center gap-3">
+          <Filter className="h-4 w-4 text-text-muted" />
 
           {/* Filtre par statut */}
           <div className="flex items-center gap-1">
@@ -178,7 +178,7 @@ export default function MaintenancePage() {
                 className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                   statusFilter === btn.value
                     ? 'bg-terracotta text-white'
-                    : 'text-stone-500 hover:bg-stone-100'
+                    : 'text-text-secondary hover:bg-bg-card'
                 }`}
               >
                 {btn.label}
@@ -190,7 +190,7 @@ export default function MaintenancePage() {
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value as FilterPriorityType)}
-            className="text-xs border border-stone-200 rounded-lg px-2 py-1.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+            className="text-xs border border-border-light rounded-lg px-2 py-1.5 text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
           >
             <option value="all">Toutes priorités</option>
             <option value="urgent">Urgente</option>
@@ -203,7 +203,7 @@ export default function MaintenancePage() {
           <select
             value={propertyFilter}
             onChange={(e) => setPropertyFilter(e.target.value)}
-            className="text-xs border border-stone-200 rounded-lg px-2 py-1.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+            className="text-xs border border-border-light rounded-lg px-2 py-1.5 text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
           >
             <option value="all">Tous les biens</option>
             {properties.map((p) => (
@@ -237,26 +237,26 @@ export default function MaintenancePage() {
           ) : (
             <table className="w-full">
               <thead>
-                <tr className="bg-stone-50">
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                <tr className="bg-bg-card">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Demande
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Bien
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Locataire
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Priorité
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Statut
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -265,14 +265,14 @@ export default function MaintenancePage() {
                 {filteredRequests.map((req) => (
                   <tr
                     key={req.id}
-                    className="border-b border-stone-100 hover:bg-stone-50/50 transition-colors"
+                    className="border-b border-border hover:bg-bg-card/50 transition-colors"
                   >
                     <td className="px-4 py-3">
-                      <p className="text-sm font-medium text-slate-900">
+                      <p className="text-sm font-medium text-text-primary">
                         {req.title}
                       </p>
                       {req.description && (
-                        <p className="text-xs text-stone-400 truncate max-w-xs mt-0.5">
+                        <p className="text-xs text-text-muted truncate max-w-xs mt-0.5">
                           {req.description}
                         </p>
                       )}
@@ -294,7 +294,7 @@ export default function MaintenancePage() {
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                          priorityColors[req.priority]?.bg || 'bg-stone-100'
+                          priorityColors[req.priority]?.bg || 'bg-bg-card'
                         } ${priorityColors[req.priority]?.text || 'text-stone-600'}`}
                       >
                         {priorityLabels[req.priority] || req.priority}
@@ -303,7 +303,7 @@ export default function MaintenancePage() {
                     <td className="px-4 py-3">
                       <StatusBadge variant="maintenance" status={req.status} />
                     </td>
-                    <td className="px-4 py-3 text-sm text-stone-500 whitespace-nowrap">
+                    <td className="px-4 py-3 text-sm text-text-secondary whitespace-nowrap">
                       {formatDate(req.created_at)}
                     </td>
                     <td className="px-4 py-3">
@@ -329,7 +329,7 @@ export default function MaintenancePage() {
                         {req.status === 'resolved' && (
                           <button
                             onClick={() => handleUpdateStatus(req.id, 'closed')}
-                            className="p-1.5 text-stone-500 hover:bg-stone-200 rounded-lg transition-colors"
+                            className="p-1.5 text-text-secondary hover:bg-stone-200 rounded-lg transition-colors"
                             title="Fermer"
                           >
                             <XCircle className="h-3.5 w-3.5" />

@@ -217,10 +217,10 @@ export default function AnalytiquePage() {
   //           <div className="rounded-full bg-terracotta/10 p-4 mb-4">
   //             <Lock className="h-8 w-8 text-terracotta" />
   //           </div>
-  //           <h2 className="text-lg font-bold text-slate-900 mb-2">
+  //           <h2 className="text-lg font-bold text-text-primary mb-2">
   //             Fonctionnalité réservée au plan Pro
   //           </h2>
-  //           <p className="text-sm text-stone-500 max-w-md mb-6">
+  //           <p className="text-sm text-text-secondary max-w-md mb-6">
   //             Accédez à des graphiques détaillés sur vos revenus, votre taux d&apos;occupation,
   //             la rentabilité de vos biens et le suivi de vos paiements.
   //           </p>
@@ -244,7 +244,7 @@ export default function AnalytiquePage() {
       <div>
         <PageHeader title="Analytique" description="Tableaux de bord avancés" />
         <div className="flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-stone-200 border-t-terracotta" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border-light border-t-accent" />
         </div>
       </div>
     );
@@ -283,11 +283,11 @@ export default function AnalytiquePage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Revenus mensuels */}
         <Card>
-          <h3 className="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+          <h3 className="text-sm font-bold text-text-primary mb-1 flex items-center gap-2">
             <Calendar className="h-4 w-4 text-terracotta" />
             Revenus mensuels
           </h3>
-          <p className="text-xs text-stone-500 mb-4">Attendu vs reçu — 12 derniers mois</p>
+          <p className="text-xs text-text-secondary mb-4">Attendu vs reçu — 12 derniers mois</p>
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={revenueByMonth} barGap={2}>
@@ -308,11 +308,11 @@ export default function AnalytiquePage() {
 
         {/* Taux d'occupation */}
         <Card>
-          <h3 className="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+          <h3 className="text-sm font-bold text-text-primary mb-1 flex items-center gap-2">
             <Building2 className="h-4 w-4 text-terracotta" />
             Taux d&apos;occupation
           </h3>
-          <p className="text-xs text-stone-500 mb-4">Évolution sur 12 mois</p>
+          <p className="text-xs text-text-secondary mb-4">Évolution sur 12 mois</p>
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={occupancyByMonth}>
@@ -342,11 +342,11 @@ export default function AnalytiquePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Répartition des paiements */}
         <Card>
-          <h3 className="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+          <h3 className="text-sm font-bold text-text-primary mb-1 flex items-center gap-2">
             <PieChart className="h-4 w-4 text-terracotta" />
             Statut des paiements
           </h3>
-          <p className="text-xs text-stone-500 mb-4">Répartition globale</p>
+          <p className="text-xs text-text-secondary mb-4">Répartition globale</p>
           <div className="h-[240px]">
             {paymentStatusDistribution.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -370,7 +370,7 @@ export default function AnalytiquePage() {
                 </RechartsPie>
               </ResponsiveContainer>
             ) : (
-              <div className="flex items-center justify-center h-full text-xs text-stone-400">
+              <div className="flex items-center justify-center h-full text-xs text-text-muted">
                 Aucun paiement enregistré
               </div>
             )}
@@ -379,11 +379,11 @@ export default function AnalytiquePage() {
 
         {/* Rentabilité par bien */}
         <Card className="lg:col-span-2">
-          <h3 className="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+          <h3 className="text-sm font-bold text-text-primary mb-1 flex items-center gap-2">
             <TrendingUp className="h-4 w-4 text-terracotta" />
             Rentabilité par bien
           </h3>
-          <p className="text-xs text-stone-500 mb-4">Cashflow mensuel (loyer - crédit)</p>
+          <p className="text-xs text-text-secondary mb-4">Cashflow mensuel (loyer - crédit)</p>
           {profitabilityByProperty.length > 0 ? (
             <div className="h-[240px]">
               <ResponsiveContainer width="100%" height="100%">
@@ -402,7 +402,7 @@ export default function AnalytiquePage() {
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="flex items-center justify-center h-[240px] text-xs text-stone-400">
+            <div className="flex items-center justify-center h-[240px] text-xs text-text-muted">
               Ajoutez des biens avec un loyer pour voir la rentabilité
             </div>
           )}
@@ -412,14 +412,14 @@ export default function AnalytiquePage() {
       {/* Tableau de rendement */}
       {profitabilityByProperty.length > 0 && (
         <Card>
-          <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <h3 className="text-sm font-bold text-text-primary mb-4 flex items-center gap-2">
             <Wallet className="h-4 w-4 text-terracotta" />
             Détail par bien
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-stone-200 text-left text-xs text-stone-500">
+                <tr className="border-b border-border-light text-left text-xs text-text-secondary">
                   <th className="pb-3 font-medium">Bien</th>
                   <th className="pb-3 font-medium text-right">Loyer mensuel</th>
                   <th className="pb-3 font-medium text-right">Crédit mensuel</th>
@@ -429,8 +429,8 @@ export default function AnalytiquePage() {
               </thead>
               <tbody>
                 {profitabilityByProperty.map((prop) => (
-                  <tr key={prop.name} className="border-b border-stone-100">
-                    <td className="py-3 font-medium text-slate-900">{prop.name}</td>
+                  <tr key={prop.name} className="border-b border-border">
+                    <td className="py-3 font-medium text-text-primary">{prop.name}</td>
                     <td className="py-3 text-right tabular-nums text-emerald-600">
                       {formatCurrency(prop.loyer)}
                     </td>
@@ -440,7 +440,7 @@ export default function AnalytiquePage() {
                     <td className={`py-3 text-right tabular-nums font-medium ${prop.cashflow >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
                       {formatCurrency(prop.cashflow)}
                     </td>
-                    <td className="py-3 text-right tabular-nums text-slate-900">
+                    <td className="py-3 text-right tabular-nums text-text-primary">
                       {prop.rendement !== null ? `${prop.rendement}%` : '—'}
                     </td>
                   </tr>

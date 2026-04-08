@@ -114,7 +114,7 @@ export default function DocumentsPage() {
       <div>
         <PageHeader title="Documents" description="Gestion des documents locataires" />
         <div className="flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-stone-200 border-t-terracotta" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border-light border-t-accent" />
         </div>
       </div>
     );
@@ -132,8 +132,8 @@ export default function DocumentsPage() {
       {/* Tableau */}
       <Card padding="p-0">
         {/* Toolbar */}
-        <div className="p-4 border-b border-stone-100 flex flex-wrap items-center gap-3">
-          <Filter className="h-4 w-4 text-stone-400" />
+        <div className="p-4 border-b border-border flex flex-wrap items-center gap-3">
+          <Filter className="h-4 w-4 text-text-muted" />
 
           {/* Filtre par statut */}
           <div className="flex items-center gap-1">
@@ -152,7 +152,7 @@ export default function DocumentsPage() {
                 className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                   statusFilter === btn.value
                     ? 'bg-terracotta text-white'
-                    : 'text-stone-500 hover:bg-stone-100'
+                    : 'text-text-secondary hover:bg-bg-card'
                 }`}
               >
                 {btn.label}
@@ -164,7 +164,7 @@ export default function DocumentsPage() {
           <select
             value={tenantFilter}
             onChange={(e) => setTenantFilter(e.target.value)}
-            className="text-xs border border-stone-200 rounded-lg px-2 py-1.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+            className="text-xs border border-border-light rounded-lg px-2 py-1.5 text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
           >
             <option value="all">Tous les locataires</option>
             {tenants.map((t) => (
@@ -188,23 +188,23 @@ export default function DocumentsPage() {
           ) : (
             <table className="w-full">
               <thead>
-                <tr className="bg-stone-50">
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                <tr className="bg-bg-card">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Locataire
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Bien
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Type de document
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Statut
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Demandé le
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -215,7 +215,7 @@ export default function DocumentsPage() {
                   return (
                     <tr
                       key={doc.id}
-                      className="border-b border-stone-100 hover:bg-stone-50/50 transition-colors"
+                      className="border-b border-border hover:bg-bg-card/50 transition-colors"
                     >
                       <td className="px-4 py-3 text-sm font-medium">
                         {tenant ? (
@@ -230,13 +230,13 @@ export default function DocumentsPage() {
                             {doc.property_name}
                           </Link>
                         ) : (
-                          <span className="text-stone-500">{doc.property_name}</span>
+                          <span className="text-text-secondary">{doc.property_name}</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-900">
+                      <td className="px-4 py-3 text-sm text-text-primary">
                         {doc.document_type}
                         {doc.notes && (
-                          <p className="text-xs text-stone-400 mt-0.5 truncate max-w-xs">
+                          <p className="text-xs text-text-muted mt-0.5 truncate max-w-xs">
                             {doc.notes}
                           </p>
                         )}
@@ -244,10 +244,10 @@ export default function DocumentsPage() {
                       <td className="px-4 py-3">
                         <StatusBadge variant="document" status={doc.status} />
                       </td>
-                      <td className="px-4 py-3 text-sm text-stone-500 whitespace-nowrap">
+                      <td className="px-4 py-3 text-sm text-text-secondary whitespace-nowrap">
                         {formatDate(doc.requested_at)}
                         {doc.received_at && (
-                          <p className="text-xs text-stone-400">
+                          <p className="text-xs text-text-muted">
                             Reçu le {formatDate(doc.received_at)}
                           </p>
                         )}
@@ -260,7 +260,7 @@ export default function DocumentsPage() {
                               href={doc.file_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="p-1.5 text-stone-500 hover:text-slate-900 hover:bg-stone-100 rounded-lg transition-colors"
+                              className="p-1.5 text-text-secondary hover:text-text-primary hover:bg-bg-card rounded-lg transition-colors"
                               title="Voir le fichier"
                             >
                               <Eye className="h-4 w-4" />
@@ -272,18 +272,18 @@ export default function DocumentsPage() {
                             onClick={() =>
                               setShowStatusMenu(showStatusMenu === doc.id ? null : doc.id)
                             }
-                            className="p-1.5 text-stone-500 hover:text-slate-900 hover:bg-stone-100 rounded-lg transition-colors"
+                            className="p-1.5 text-text-secondary hover:text-text-primary hover:bg-bg-card rounded-lg transition-colors"
                             title="Changer le statut"
                           >
                             <ChevronDown className="h-4 w-4" />
                           </button>
 
                           {showStatusMenu === doc.id && (
-                            <div className="absolute right-0 top-full mt-1 z-10 bg-white border border-stone-200 rounded-xl shadow-lg py-1 w-48">
+                            <div className="absolute right-0 top-full mt-1 z-10 bg-bg-elevated border border-border-light rounded-xl shadow-lg py-1 w-48">
                               {doc.status !== 'received' && (
                                 <button
                                   onClick={() => handleUpdateStatus(doc.id, 'received')}
-                                  className="w-full text-left px-4 py-2 text-sm text-slate-900 hover:bg-stone-50 transition-colors flex items-center gap-2"
+                                  className="w-full text-left px-4 py-2 text-sm text-text-primary hover:bg-bg-card transition-colors flex items-center gap-2"
                                 >
                                   <Upload className="h-3.5 w-3.5 text-amber-600" />
                                   Marquer reçu
@@ -292,7 +292,7 @@ export default function DocumentsPage() {
                               {doc.status !== 'validated' && (
                                 <button
                                   onClick={() => handleUpdateStatus(doc.id, 'validated')}
-                                  className="w-full text-left px-4 py-2 text-sm text-slate-900 hover:bg-stone-50 transition-colors flex items-center gap-2"
+                                  className="w-full text-left px-4 py-2 text-sm text-text-primary hover:bg-bg-card transition-colors flex items-center gap-2"
                                 >
                                   <CheckCircle className="h-3.5 w-3.5 text-emerald-600" />
                                   Valider

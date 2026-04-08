@@ -41,7 +41,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         {label && (
           <label
             htmlFor={selectId}
-            className="text-sm font-medium text-slate-900"
+            className="text-sm font-medium text-text-primary"
           >
             {label}
           </label>
@@ -61,17 +61,13 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
                   : undefined
             }
             className={[
-              // Style de base — identique à Input
-              'w-full appearance-none rounded-xl border bg-white px-4 py-2.5 pr-10 text-sm text-slate-900',
+              'w-full appearance-none rounded-xl border bg-bg-card px-4 py-2.5 pr-10 text-sm text-text-primary',
               'transition-all duration-200',
-              // Focus — anneau terracotta
-              'focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta',
-              // État d'erreur
+              'focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent',
               error
                 ? 'border-red-400 focus:ring-red-200 focus:border-red-500'
-                : 'border-stone-200',
-              // État désactivé
-              'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-stone-50',
+                : 'border-border-light',
+              'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-bg-elevated',
               className,
             ]
               .filter(Boolean)
@@ -96,7 +92,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           {/* Flèche personnalisée */}
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
             <svg
-              className="h-4 w-4 text-stone-400"
+              className="h-4 w-4 text-text-muted"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
               fill="currentColor"
@@ -120,7 +116,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
 
         {/* Texte d'aide (masqué si une erreur est affichée) */}
         {!error && helperText && (
-          <p id={`${selectId}-helper`} className="text-xs text-stone-500">
+          <p id={`${selectId}-helper`} className="text-xs text-text-muted">
             {helperText}
           </p>
         )}

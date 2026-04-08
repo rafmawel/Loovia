@@ -91,7 +91,7 @@ export function NotificationBell() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="relative rounded-lg p-2 text-text-dark/60 hover:bg-stone-200/50 transition-colors"
+        className="relative rounded-lg p-2 text-text-secondary hover:bg-bg-elevated transition-colors"
         aria-label="Notifications"
       >
         <Bell className="h-5 w-5" />
@@ -103,10 +103,10 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-xl border border-stone-200 bg-white shadow-lg z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-xl border border-border-light bg-bg-elevated shadow-lg z-50 overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-stone-100">
-            <h3 className="text-sm font-semibold text-slate-900">Notifications</h3>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <h3 className="text-sm font-semibold text-text-primary">Notifications</h3>
             {unreadCount > 0 && (
               <button
                 onClick={markAllRead}
@@ -120,7 +120,7 @@ export function NotificationBell() {
           {/* Liste */}
           <div className="max-h-80 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="px-4 py-8 text-center text-sm text-stone-400">
+              <div className="px-4 py-8 text-center text-sm text-text-muted">
                 Aucune notification
               </div>
             ) : (
@@ -130,17 +130,17 @@ export function NotificationBell() {
                   href={n.link || '#'}
                   onClick={() => setOpen(false)}
                   className={[
-                    'flex gap-3 px-4 py-3 hover:bg-stone-50 transition-colors border-b border-stone-50 last:border-0',
+                    'flex gap-3 px-4 py-3 hover:bg-bg-card transition-colors border-b border-border last:border-0',
                     !n.read ? 'bg-accent/5' : '',
                   ].join(' ')}
                 >
                   <span className="text-lg flex-shrink-0 mt-0.5">{typeIcon(n.type)}</span>
                   <div className="flex-1 min-w-0">
-                    <p className={['text-sm', !n.read ? 'font-semibold text-slate-900' : 'text-slate-700'].join(' ')}>
+                    <p className={['text-sm', !n.read ? 'font-semibold text-text-primary' : 'text-text-secondary'].join(' ')}>
                       {n.title}
                     </p>
-                    <p className="text-xs text-stone-500 mt-0.5 line-clamp-2">{n.message}</p>
-                    <p className="text-[11px] text-stone-400 mt-1">{relativeDate(n.created_at)}</p>
+                    <p className="text-xs text-text-muted mt-0.5 line-clamp-2">{n.message}</p>
+                    <p className="text-[11px] text-text-muted mt-1">{relativeDate(n.created_at)}</p>
                   </div>
                   {!n.read && (
                     <span className="mt-2 h-2 w-2 rounded-full bg-accent flex-shrink-0" />

@@ -251,7 +251,7 @@ export default function TenantForm({ tenant, propertyId, onClose }: TenantFormPr
             disabled={loadingProperties}
           />
           {form.property_id && (
-            <p className="text-xs text-stone-500 mt-1">
+            <p className="text-xs text-text-secondary mt-1">
               Loyer du bien auto-rempli : {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(form.rent_amount)}
             </p>
           )}
@@ -259,7 +259,7 @@ export default function TenantForm({ tenant, propertyId, onClose }: TenantFormPr
 
         {/* Informations personnelles */}
         <div>
-          <h3 className="text-sm font-semibold text-slate-900 mb-3">Informations personnelles</h3>
+          <h3 className="text-sm font-semibold text-text-primary mb-3">Informations personnelles</h3>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <Input
@@ -322,7 +322,7 @@ export default function TenantForm({ tenant, propertyId, onClose }: TenantFormPr
 
         {/* Bail */}
         <div>
-          <h3 className="text-sm font-semibold text-slate-900 mb-3">Bail</h3>
+          <h3 className="text-sm font-semibold text-text-primary mb-3">Bail</h3>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <Input
@@ -348,7 +348,7 @@ export default function TenantForm({ tenant, propertyId, onClose }: TenantFormPr
 
         {/* Co-locataires */}
         <div>
-          <div className="p-4 rounded-xl border border-stone-200">
+          <div className="p-4 rounded-xl border border-border-light">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -359,10 +359,10 @@ export default function TenantForm({ tenant, propertyId, onClose }: TenantFormPr
                     updateField('co_tenants', []);
                   }
                 }}
-                className="rounded border-stone-300 text-terracotta focus:ring-terracotta"
+                className="rounded border-stone-300 text-terracotta focus:ring-accent"
               />
-              <span className="text-sm font-medium text-slate-900 flex items-center gap-2">
-                <Users className="h-4 w-4 text-stone-400" />
+              <span className="text-sm font-medium text-text-primary flex items-center gap-2">
+                <Users className="h-4 w-4 text-text-muted" />
                 Plusieurs locataires ?
               </span>
             </label>
@@ -372,16 +372,16 @@ export default function TenantForm({ tenant, propertyId, onClose }: TenantFormPr
                 {form.co_tenants.map((co, index) => (
                   <div
                     key={index}
-                    className="p-4 rounded-xl bg-stone-50 border border-stone-100 space-y-3"
+                    className="p-4 rounded-xl bg-bg-card border border-border space-y-3"
                   >
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-medium text-stone-500">
+                      <p className="text-xs font-medium text-text-secondary">
                         Co-locataire {index + 1}
                       </p>
                       <button
                         type="button"
                         onClick={() => removeCoTenant(index)}
-                        className="p-1 rounded-lg text-stone-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                        className="p-1 rounded-lg text-text-muted hover:text-red-600 hover:bg-red-50 transition-colors"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -464,7 +464,7 @@ export default function TenantForm({ tenant, propertyId, onClose }: TenantFormPr
       </div>
 
       {/* Barre d'actions */}
-      <div className="flex items-center justify-between pt-4 mt-4 border-t border-stone-100 shrink-0">
+      <div className="flex items-center justify-between pt-4 mt-4 border-t border-border shrink-0">
         <Button type="button" variant="ghost" onClick={onClose} icon={<X className="h-4 w-4" />}>
           Annuler
         </Button>

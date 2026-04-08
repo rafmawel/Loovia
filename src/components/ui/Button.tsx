@@ -25,11 +25,11 @@ const variantClasses: Record<ButtonVariant, string> = {
   primary:
     'bg-accent text-white hover:bg-accent-light active:bg-accent-light',
   secondary:
-    'border border-stone-200 bg-white text-slate-900 hover:bg-stone-100 active:bg-stone-200',
+    'border border-border-light bg-bg-card text-text-primary hover:bg-bg-elevated active:bg-bg-elevated',
   danger:
     'bg-red-600 text-white hover:bg-red-700 active:bg-red-800',
   ghost:
-    'text-slate-900 hover:bg-stone-100 active:bg-stone-200',
+    'text-text-primary hover:bg-bg-elevated active:bg-bg-card',
 };
 
 // --- Classes par taille ---

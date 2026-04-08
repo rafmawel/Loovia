@@ -92,7 +92,7 @@ export default async function BailDetailPage({ params }: Props) {
     <div>
       <Link
         href="/baux"
-        className="inline-flex items-center gap-2 text-sm text-stone-500 hover:text-slate-900 mb-4 transition-colors"
+        className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary mb-4 transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
         Retour aux baux
@@ -113,35 +113,35 @@ export default async function BailDetailPage({ params }: Props) {
         <div className="lg:col-span-2 space-y-6">
           {/* Conditions financières */}
           <Card>
-            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
               <FileText className="h-5 w-5 text-terracotta" />
               Conditions financières
             </h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-stone-500">Loyer mensuel HC</p>
-                <p className="text-lg font-bold tabular-nums text-slate-900">{formatCurrency(lease.monthly_rent)}</p>
+                <p className="text-xs text-text-secondary">Loyer mensuel HC</p>
+                <p className="text-lg font-bold tabular-nums text-text-primary">{formatCurrency(lease.monthly_rent)}</p>
               </div>
               <div>
-                <p className="text-xs text-stone-500">Charges</p>
-                <p className="text-lg font-bold tabular-nums text-slate-900">{formatCurrency(lease.charges_amount)}</p>
+                <p className="text-xs text-text-secondary">Charges</p>
+                <p className="text-lg font-bold tabular-nums text-text-primary">{formatCurrency(lease.charges_amount)}</p>
               </div>
               <div>
-                <p className="text-xs text-stone-500">Total mensuel CC</p>
+                <p className="text-xs text-text-secondary">Total mensuel CC</p>
                 <p className="text-lg font-bold tabular-nums text-terracotta">
                   {formatCurrency(lease.monthly_rent + lease.charges_amount)}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-stone-500">Dépôt de garantie</p>
-                <p className="text-lg font-bold tabular-nums text-slate-900">
+                <p className="text-xs text-text-secondary">Dépôt de garantie</p>
+                <p className="text-lg font-bold tabular-nums text-text-primary">
                   {d.deposit_amount != null ? formatCurrency(d.deposit_amount) : '—'}
                 </p>
               </div>
               {d.charges_mode && (
                 <div className="col-span-2">
-                  <p className="text-xs text-stone-500">Mode de charges</p>
-                  <p className="text-sm font-medium text-slate-900">{d.charges_mode}</p>
+                  <p className="text-xs text-text-secondary">Mode de charges</p>
+                  <p className="text-sm font-medium text-text-primary">{d.charges_mode}</p>
                 </div>
               )}
             </div>
@@ -149,22 +149,22 @@ export default async function BailDetailPage({ params }: Props) {
 
           {/* Durée et dates */}
           <Card>
-            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
               <Calendar className="h-5 w-5 text-terracotta" />
               Durée du bail
             </h2>
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <p className="text-xs text-stone-500">Date de début</p>
-                <p className="text-sm font-medium text-slate-900">{formatDate(lease.start_date)}</p>
+                <p className="text-xs text-text-secondary">Date de début</p>
+                <p className="text-sm font-medium text-text-primary">{formatDate(lease.start_date)}</p>
               </div>
               <div>
-                <p className="text-xs text-stone-500">Date de fin</p>
-                <p className="text-sm font-medium text-slate-900">{lease.end_date ? formatDate(lease.end_date) : 'Indéterminée'}</p>
+                <p className="text-xs text-text-secondary">Date de fin</p>
+                <p className="text-sm font-medium text-text-primary">{lease.end_date ? formatDate(lease.end_date) : 'Indéterminée'}</p>
               </div>
               <div>
-                <p className="text-xs text-stone-500">Durée</p>
-                <p className="text-sm font-medium text-slate-900">{durationLabel}</p>
+                <p className="text-xs text-text-secondary">Durée</p>
+                <p className="text-sm font-medium text-text-primary">{durationLabel}</p>
               </div>
             </div>
             {d.tacit_renewal && (
@@ -173,8 +173,8 @@ export default async function BailDetailPage({ params }: Props) {
               </p>
             )}
             {d.location_type && (
-              <p className="text-xs text-stone-500 mt-2">
-                Type : <span className="font-medium text-slate-900">{d.location_type}</span>
+              <p className="text-xs text-text-secondary mt-2">
+                Type : <span className="font-medium text-text-primary">{d.location_type}</span>
               </p>
             )}
           </Card>
@@ -182,18 +182,18 @@ export default async function BailDetailPage({ params }: Props) {
           {/* Indexation IRL */}
           {d.irl_enabled && (
             <Card>
-              <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
                 <Scale className="h-5 w-5 text-terracotta" />
                 Clause d'indexation IRL
               </h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs text-stone-500">Trimestre de référence</p>
-                  <p className="text-sm font-medium text-slate-900">{d.irl_quarter}</p>
+                  <p className="text-xs text-text-secondary">Trimestre de référence</p>
+                  <p className="text-sm font-medium text-text-primary">{d.irl_quarter}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-stone-500">Année de référence</p>
-                  <p className="text-sm font-medium text-slate-900">{d.irl_year}</p>
+                  <p className="text-xs text-text-secondary">Année de référence</p>
+                  <p className="text-sm font-medium text-text-primary">{d.irl_year}</p>
                 </div>
               </div>
             </Card>
@@ -201,7 +201,7 @@ export default async function BailDetailPage({ params }: Props) {
 
           {/* Diagnostics */}
           <Card>
-            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
               <Thermometer className="h-5 w-5 text-terracotta" />
               Diagnostics techniques
             </h2>
@@ -218,7 +218,7 @@ export default async function BailDetailPage({ params }: Props) {
               )}
             </div>
             {d.construction_year && (
-              <p className="text-xs text-stone-500 mt-3">
+              <p className="text-xs text-text-secondary mt-3">
                 Année de construction : <span className="font-medium">{d.construction_year}</span>
               </p>
             )}
@@ -233,16 +233,16 @@ export default async function BailDetailPage({ params }: Props) {
               </p>
             )}
             {d.special_clauses && (
-              <div className="mt-4 pt-3 border-t border-stone-100">
-                <p className="text-xs text-stone-500 mb-1">Clauses particulières</p>
-                <p className="text-sm text-slate-900 whitespace-pre-wrap">{d.special_clauses}</p>
+              <div className="mt-4 pt-3 border-t border-border">
+                <p className="text-xs text-text-secondary mb-1">Clauses particulières</p>
+                <p className="text-sm text-text-primary whitespace-pre-wrap">{d.special_clauses}</p>
               </div>
             )}
           </Card>
 
           {/* Signature */}
           <Card>
-            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
               <PenTool className="h-5 w-5 text-terracotta" />
               Signature
             </h2>
@@ -270,28 +270,28 @@ export default async function BailDetailPage({ params }: Props) {
             )}
 
             {lease.sent_for_signature_at && (
-              <p className="text-xs text-stone-500 mb-3">
+              <p className="text-xs text-text-secondary mb-3">
                 Envoyé pour signature le {formatDate(lease.sent_for_signature_at)}
               </p>
             )}
 
             <div className="grid grid-cols-2 gap-4">
-              <div className={`p-4 rounded-xl ${lease.signature_landlord_status === 'signed' ? 'bg-emerald-50' : 'bg-stone-50'}`}>
-                <p className="text-xs text-stone-500 mb-1">Propriétaire</p>
-                <p className={`text-sm font-medium capitalize ${lease.signature_landlord_status === 'signed' ? 'text-emerald-700' : 'text-slate-900'}`}>
+              <div className={`p-4 rounded-xl ${lease.signature_landlord_status === 'signed' ? 'bg-emerald-50' : 'bg-bg-card'}`}>
+                <p className="text-xs text-text-secondary mb-1">Propriétaire</p>
+                <p className={`text-sm font-medium capitalize ${lease.signature_landlord_status === 'signed' ? 'text-emerald-700' : 'text-text-primary'}`}>
                   {lease.signature_landlord_status === 'signed' ? '✅ Signé' : lease.signature_landlord_status === 'pending' ? '⏳ En attente' : lease.signature_landlord_status}
                 </p>
                 {lease.signature_landlord_date && (
-                  <p className="text-xs text-stone-500 mt-1">Signé le {formatDate(lease.signature_landlord_date)}</p>
+                  <p className="text-xs text-text-secondary mt-1">Signé le {formatDate(lease.signature_landlord_date)}</p>
                 )}
               </div>
-              <div className={`p-4 rounded-xl ${lease.signature_tenant_status === 'signed' ? 'bg-emerald-50' : 'bg-stone-50'}`}>
-                <p className="text-xs text-stone-500 mb-1">Locataire</p>
-                <p className={`text-sm font-medium capitalize ${lease.signature_tenant_status === 'signed' ? 'text-emerald-700' : 'text-slate-900'}`}>
+              <div className={`p-4 rounded-xl ${lease.signature_tenant_status === 'signed' ? 'bg-emerald-50' : 'bg-bg-card'}`}>
+                <p className="text-xs text-text-secondary mb-1">Locataire</p>
+                <p className={`text-sm font-medium capitalize ${lease.signature_tenant_status === 'signed' ? 'text-emerald-700' : 'text-text-primary'}`}>
                   {lease.signature_tenant_status === 'signed' ? '✅ Signé' : lease.signature_tenant_status === 'pending' ? '⏳ En attente' : lease.signature_tenant_status}
                 </p>
                 {lease.signature_tenant_date && (
-                  <p className="text-xs text-stone-500 mt-1">Signé le {formatDate(lease.signature_tenant_date)}</p>
+                  <p className="text-xs text-text-secondary mt-1">Signé le {formatDate(lease.signature_tenant_date)}</p>
                 )}
               </div>
             </div>
@@ -299,18 +299,18 @@ export default async function BailDetailPage({ params }: Props) {
 
           {/* Paiements */}
           <Card>
-            <h2 className="text-lg font-bold text-slate-900 mb-4">Paiements</h2>
+            <h2 className="text-lg font-bold text-text-primary mb-4">Paiements</h2>
             {payments.length === 0 ? (
-              <p className="text-sm text-stone-500">Aucun paiement enregistré pour ce bail.</p>
+              <p className="text-sm text-text-secondary">Aucun paiement enregistré pour ce bail.</p>
             ) : (
               <div className="space-y-3">
                 {payments.map((payment) => (
-                  <div key={payment.id} className="flex items-center justify-between p-3 rounded-xl bg-stone-50">
-                    <p className="text-sm font-medium text-slate-900">
+                  <div key={payment.id} className="flex items-center justify-between p-3 rounded-xl bg-bg-card">
+                    <p className="text-sm font-medium text-text-primary">
                       {formatDate(payment.period_start)} — {formatDate(payment.period_end)}
                     </p>
                     <div className="flex items-center gap-3">
-                      <span className="text-sm font-bold tabular-nums text-slate-900">
+                      <span className="text-sm font-bold tabular-nums text-text-primary">
                         {formatCurrency(payment.amount_paid)} / {formatCurrency(payment.amount_expected)}
                       </span>
                       <StatusBadge variant="payment" status={payment.status} />
@@ -327,23 +327,23 @@ export default async function BailDetailPage({ params }: Props) {
           {/* Bailleur */}
           {d.landlord_name && (
             <Card>
-              <h2 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-text-primary mb-3 flex items-center gap-2">
                 <Shield className="h-5 w-5 text-terracotta" />
                 Bailleur
               </h2>
               <div className="space-y-2">
                 <div>
-                  <p className="text-xs text-stone-500">Structure</p>
-                  <p className="text-sm font-medium text-slate-900">{d.landlord_type}</p>
+                  <p className="text-xs text-text-secondary">Structure</p>
+                  <p className="text-sm font-medium text-text-primary">{d.landlord_type}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-stone-500">Nom</p>
-                  <p className="text-sm font-medium text-slate-900">{d.landlord_name}</p>
+                  <p className="text-xs text-text-secondary">Nom</p>
+                  <p className="text-sm font-medium text-text-primary">{d.landlord_name}</p>
                 </div>
                 {d.landlord_address && (
                   <div>
-                    <p className="text-xs text-stone-500">Adresse</p>
-                    <p className="text-sm text-slate-900">{d.landlord_address}</p>
+                    <p className="text-xs text-text-secondary">Adresse</p>
+                    <p className="text-sm text-text-primary">{d.landlord_address}</p>
                   </div>
                 )}
               </div>
@@ -353,18 +353,18 @@ export default async function BailDetailPage({ params }: Props) {
           {/* Bien associé */}
           {lease.property && (
             <Card>
-              <h2 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-text-primary mb-3 flex items-center gap-2">
                 <Building2 className="h-5 w-5 text-terracotta" />
                 Bien
               </h2>
               <Link
                 href={`/biens/${lease.property.id}`}
-                className="block p-3 rounded-xl hover:bg-stone-50 transition-colors"
+                className="block p-3 rounded-xl hover:bg-bg-card transition-colors"
               >
-                <p className="text-sm font-medium text-slate-900">{lease.property.name}</p>
-                <p className="text-xs text-stone-500">{lease.property.address}, {lease.property.city}</p>
+                <p className="text-sm font-medium text-text-primary">{lease.property.name}</p>
+                <p className="text-xs text-text-secondary">{lease.property.address}, {lease.property.city}</p>
                 {d.property_surface ? (
-                  <p className="text-xs text-stone-400 mt-1">
+                  <p className="text-xs text-text-muted mt-1">
                     {d.property_surface} m² — {d.property_rooms} pièces
                   </p>
                 ) : null}
@@ -375,31 +375,31 @@ export default async function BailDetailPage({ params }: Props) {
           {/* Locataire */}
           {lease.tenant && (
             <Card>
-              <h2 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-text-primary mb-3 flex items-center gap-2">
                 <User className="h-5 w-5 text-terracotta" />
                 Locataire
               </h2>
               <Link
                 href={`/locataires/${lease.tenant.id}`}
-                className="flex items-center gap-3 p-3 rounded-xl hover:bg-stone-50 transition-colors"
+                className="flex items-center gap-3 p-3 rounded-xl hover:bg-bg-card transition-colors"
               >
                 <div className="flex items-center justify-center h-9 w-9 rounded-full bg-terracotta/10 text-terracotta text-sm font-semibold shrink-0">
                   {lease.tenant.first_name.charAt(0)}{lease.tenant.last_name.charAt(0)}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-900">
+                  <p className="text-sm font-medium text-text-primary">
                     {fullName(lease.tenant.first_name, lease.tenant.last_name)}
                   </p>
-                  <p className="text-xs text-stone-500">{lease.tenant.email}</p>
+                  <p className="text-xs text-text-secondary">{lease.tenant.email}</p>
                 </div>
               </Link>
 
               {d.has_cotenants && d.cotenants && d.cotenants.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-stone-100 space-y-2">
-                  <p className="text-xs font-medium text-stone-500">Co-locataires</p>
+                <div className="mt-3 pt-3 border-t border-border space-y-2">
+                  <p className="text-xs font-medium text-text-secondary">Co-locataires</p>
                   {d.cotenants.map((co, i) => (
-                    <div key={i} className="flex items-center gap-2 text-sm text-slate-900">
-                      <div className="flex items-center justify-center h-6 w-6 rounded-full bg-stone-100 text-stone-500 text-[10px] font-semibold">
+                    <div key={i} className="flex items-center gap-2 text-sm text-text-primary">
+                      <div className="flex items-center justify-center h-6 w-6 rounded-full bg-bg-card text-text-secondary text-[10px] font-semibold">
                         {co.first_name.charAt(0)}{co.last_name.charAt(0)}
                       </div>
                       {co.first_name} {co.last_name}
@@ -412,18 +412,18 @@ export default async function BailDetailPage({ params }: Props) {
 
           {/* Dates clés */}
           <Card>
-            <h2 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-text-primary mb-3 flex items-center gap-2">
               <Calendar className="h-5 w-5 text-terracotta" />
               Dates
             </h2>
             <div className="space-y-3">
               <div>
-                <p className="text-xs text-stone-500">Créé le</p>
-                <p className="text-sm font-medium text-slate-900">{formatDate(lease.created_at)}</p>
+                <p className="text-xs text-text-secondary">Créé le</p>
+                <p className="text-sm font-medium text-text-primary">{formatDate(lease.created_at)}</p>
               </div>
               <div>
-                <p className="text-xs text-stone-500">Dernière mise à jour</p>
-                <p className="text-sm font-medium text-slate-900">{formatDate(lease.updated_at)}</p>
+                <p className="text-xs text-text-secondary">Dernière mise à jour</p>
+                <p className="text-sm font-medium text-text-primary">{formatDate(lease.updated_at)}</p>
               </div>
             </div>
           </Card>

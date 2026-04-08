@@ -98,10 +98,10 @@ export default function StepTypeBail({ data, onChange }: Props) {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider text-opacity-70">
+      <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wider text-opacity-70">
         Type de bail
       </h3>
-      <p className="text-sm text-stone-500">
+      <p className="text-sm text-text-secondary">
         Choisissez le type de bail adapté à votre situation. Les clauses, la durée et les conditions financières seront adaptées automatiquement.
       </p>
 
@@ -118,28 +118,28 @@ export default function StepTypeBail({ data, onChange }: Props) {
                 'w-full text-left p-4 rounded-xl border-2 transition-all',
                 selected
                   ? 'border-terracotta bg-terracotta/5'
-                  : 'border-stone-200 hover:border-stone-300 bg-white',
+                  : 'border-border-light hover:border-stone-300 bg-bg-elevated',
               ].join(' ')}
             >
               <div className="flex items-start gap-3">
                 <div
                   className={[
                     'flex items-center justify-center h-10 w-10 rounded-lg shrink-0',
-                    selected ? 'bg-terracotta/10 text-terracotta' : 'bg-stone-100 text-stone-500',
+                    selected ? 'bg-terracotta/10 text-terracotta' : 'bg-bg-card text-text-secondary',
                   ].join(' ')}
                 >
                   <Icon className="h-5 w-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className={`text-sm font-semibold ${selected ? 'text-terracotta' : 'text-slate-900'}`}>
+                    <p className={`text-sm font-semibold ${selected ? 'text-terracotta' : 'text-text-primary'}`}>
                       {type.label}
                     </p>
-                    <span className="text-xs text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full shrink-0">
+                    <span className="text-xs text-text-muted bg-bg-card px-2 py-0.5 rounded-full shrink-0">
                       {type.duration}
                     </span>
                   </div>
-                  <p className="text-xs text-stone-500 mt-1 leading-relaxed">
+                  <p className="text-xs text-text-secondary mt-1 leading-relaxed">
                     {type.description}
                   </p>
                 </div>

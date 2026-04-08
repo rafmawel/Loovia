@@ -65,13 +65,13 @@ export default function PropertyListClient({ properties }: PropertyListClientPro
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
         {/* Recherche */}
         <div className="relative flex-1 w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher par nom, adresse, ville..."
-            className="w-full pl-10 pr-4 py-2.5 text-sm border border-stone-200 rounded-xl bg-white text-slate-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-terracotta/20 focus:border-terracotta transition-colors"
+            className="w-full pl-10 pr-4 py-2.5 text-sm border border-border-light rounded-xl bg-bg-elevated text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-colors"
           />
         </div>
 
@@ -85,11 +85,11 @@ export default function PropertyListClient({ properties }: PropertyListClientPro
               className={`px-3 py-2 text-xs font-medium rounded-lg transition-all ${
                 filter === btn.value
                   ? 'bg-terracotta text-white'
-                  : 'bg-white text-stone-500 border border-stone-200 hover:bg-stone-50'
+                  : 'bg-bg-elevated text-text-secondary border border-border-light hover:bg-bg-card'
               }`}
             >
               {btn.label}
-              <span className={`ml-1.5 ${filter === btn.value ? 'text-white/70' : 'text-stone-400'}`}>
+              <span className={`ml-1.5 ${filter === btn.value ? 'text-white/70' : 'text-text-muted'}`}>
                 {btn.count}
               </span>
             </button>
@@ -126,9 +126,9 @@ export default function PropertyListClient({ properties }: PropertyListClientPro
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((property) => (
             <Link key={property.id} href={`/biens/${property.id}`} className="group">
-              <div className="bg-white rounded-2xl shadow-sm border border-stone-200/50 overflow-hidden hover:shadow-md hover:scale-[1.02] transition-all duration-200 h-full flex flex-col">
+              <div className="bg-bg-elevated rounded-2xl shadow-sm border border-border-light/50 overflow-hidden hover:shadow-md hover:scale-[1.02] transition-all duration-200 h-full flex flex-col">
                 {/* Image ou placeholder */}
-                <div className="h-44 bg-stone-100 relative overflow-hidden">
+                <div className="h-44 bg-bg-card relative overflow-hidden">
                   {property.image_url ? (
                     <img
                       src={property.image_url}
@@ -137,7 +137,7 @@ export default function PropertyListClient({ properties }: PropertyListClientPro
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-stone-100 to-stone-200">
-                      <Building2 className="h-12 w-12 text-stone-300" />
+                      <Building2 className="h-12 w-12 text-text-muted" />
                     </div>
                   )}
 
@@ -154,7 +154,7 @@ export default function PropertyListClient({ properties }: PropertyListClientPro
                   {/* Badge statut occupé/libre en overlay */}
                   <div className="absolute top-3 right-3">
                     {property.activeTenant ? (
-                      <span className="inline-flex items-center gap-1 text-xs font-medium text-terracotta bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-lg">
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-terracotta bg-bg-elevated/90 backdrop-blur-sm px-2.5 py-1 rounded-lg">
                         <User className="h-3 w-3" />
                         {property.activeTenant.first_name} {property.activeTenant.last_name}
                       </span>
@@ -168,11 +168,11 @@ export default function PropertyListClient({ properties }: PropertyListClientPro
 
                 {/* Informations */}
                 <div className="p-5 flex-1 flex flex-col">
-                  <h3 className="text-base font-bold text-slate-900 truncate mb-1 group-hover:text-terracotta transition-colors">
+                  <h3 className="text-base font-bold text-text-primary truncate mb-1 group-hover:text-terracotta transition-colors">
                     {property.name}
                   </h3>
 
-                  <div className="flex items-center gap-1 text-sm text-stone-500 mb-3">
+                  <div className="flex items-center gap-1 text-sm text-text-secondary mb-3">
                     <MapPin className="h-3.5 w-3.5 shrink-0" />
                     <span className="truncate">{property.address}, {property.postal_code} {property.city}</span>
                   </div>
@@ -180,29 +180,29 @@ export default function PropertyListClient({ properties }: PropertyListClientPro
                   {/* Infos surface + pièces */}
                   <div className="flex items-center gap-3 mb-4">
                     {property.surface && (
-                      <div className="flex items-center gap-1 text-sm text-stone-500">
+                      <div className="flex items-center gap-1 text-sm text-text-secondary">
                         <Maximize className="h-3.5 w-3.5" />
                         <span>{property.surface} m²</span>
                       </div>
                     )}
                     {property.number_of_rooms && (
-                      <span className="text-sm text-stone-500">
+                      <span className="text-sm text-text-secondary">
                         {property.number_of_rooms} pièce{property.number_of_rooms > 1 ? 's' : ''}
                       </span>
                     )}
                   </div>
 
                   {/* Finances en bas */}
-                  <div className="mt-auto pt-3 border-t border-stone-100 flex items-center justify-between">
+                  <div className="mt-auto pt-3 border-t border-border flex items-center justify-between">
                     <div>
-                      <p className="text-xs text-stone-500">Loyer HC</p>
-                      <p className="text-sm font-bold tabular-nums text-slate-900">
-                        {formatCurrency(property.rent_amount)}<span className="text-xs font-normal text-stone-400">/mois</span>
+                      <p className="text-xs text-text-secondary">Loyer HC</p>
+                      <p className="text-sm font-bold tabular-nums text-text-primary">
+                        {formatCurrency(property.rent_amount)}<span className="text-xs font-normal text-text-muted">/mois</span>
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-stone-500">Charges</p>
-                      <p className="text-sm font-medium tabular-nums text-stone-500">
+                      <p className="text-xs text-text-secondary">Charges</p>
+                      <p className="text-sm font-medium tabular-nums text-text-secondary">
                         +{formatCurrency(property.charges_amount)}
                       </p>
                     </div>

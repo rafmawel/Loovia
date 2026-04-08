@@ -176,12 +176,12 @@ export default function LeaseDetailActions({ lease, property, tenant }: LeaseDet
 
         {/* Timeline des signatures */}
         <Card>
-          <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+          <h3 className="text-sm font-bold text-text-primary mb-3 flex items-center gap-2">
             <FileCheck className="h-4 w-4 text-terracotta" />
             Suivi des signatures
           </h3>
           {lease.sent_for_signature_at && (
-            <p className="text-xs text-stone-500 mb-3">
+            <p className="text-xs text-text-secondary mb-3">
               Envoyé le {formatDate(lease.sent_for_signature_at)}
             </p>
           )}
@@ -194,7 +194,7 @@ export default function LeaseDetailActions({ lease, property, tenant }: LeaseDet
                 <Clock className="h-5 w-5 text-amber-500 shrink-0" />
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-900">Bailleur</p>
+                <p className="text-sm font-medium text-text-primary">Bailleur</p>
                 {landlordSigned && lease.signature_landlord_date ? (
                   <p className="text-xs text-emerald-600">
                     Signé le {formatDate(lease.signature_landlord_date)}
@@ -213,7 +213,7 @@ export default function LeaseDetailActions({ lease, property, tenant }: LeaseDet
                 <Clock className="h-5 w-5 text-amber-500 shrink-0" />
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-900">
+                <p className="text-sm font-medium text-text-primary">
                   Locataire — {tenant.first_name} {tenant.last_name}
                 </p>
                 {tenantSigned && lease.signature_tenant_date ? (

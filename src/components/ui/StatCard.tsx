@@ -27,7 +27,7 @@ interface StatCardProps {
 export function StatCard({ icon: Icon, label, value, trend, className = '' }: StatCardProps) {
   return (
     <div
-      className={`bg-white rounded-2xl border border-stone-200/60 shadow-xs p-6 ${className}`}
+      className={`bg-bg-elevated rounded-2xl border border-border-light p-6 ${className}`}
     >
       <div className="flex items-start justify-between">
         {/* Icône dans un cercle terracotta */}
@@ -54,10 +54,10 @@ export function StatCard({ icon: Icon, label, value, trend, className = '' }: St
 
       {/* Valeur principale */}
       <div className="mt-4">
-        <p className="text-2xl font-bold tabular-nums text-slate-900">
+        <p className="text-2xl font-bold tabular-nums text-text-primary">
           {value}
         </p>
-        <p className="text-sm text-stone-500 mt-1">
+        <p className="text-sm text-text-secondary mt-1">
           {label}
         </p>
       </div>

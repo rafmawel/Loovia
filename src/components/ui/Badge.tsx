@@ -23,9 +23,9 @@ interface BadgeProps {
 export default function Badge({ status, label, className = '' }: BadgeProps) {
   // Récupération des couleurs depuis le design system, avec un fallback neutre
   const colors = statusColors[status] ?? {
-    bg: 'bg-stone-100',
+    bg: 'bg-bg-card',
     text: 'text-stone-600',
-    border: 'border-stone-200',
+    border: 'border-border-light',
   };
 
   // Libellé : priorité au label personnalisé, sinon le label français, sinon la clé brute

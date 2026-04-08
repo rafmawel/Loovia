@@ -101,7 +101,7 @@ export default function ParametresPage() {
       <div>
         <PageHeader title="Paramètres" description="Gérez votre compte et vos intégrations" />
         <div className="flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-stone-200 border-t-terracotta" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border-light border-t-accent" />
         </div>
       </div>
     );
@@ -114,7 +114,7 @@ export default function ParametresPage() {
       <div className="max-w-2xl space-y-6">
         {/* Profil */}
         <Card>
-          <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
             <User className="h-5 w-5 text-terracotta" />
             Mon profil
           </h2>
@@ -148,7 +148,7 @@ export default function ParametresPage() {
 
         {/* Abonnement */}
         <Card>
-          <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
             <Crown className="h-5 w-5 text-terracotta" />
             Abonnement
           </h2>
@@ -158,8 +158,8 @@ export default function ParametresPage() {
               <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-terracotta/10 to-amber-50 border border-terracotta/20">
                 <Sparkles className="h-5 w-5 text-terracotta shrink-0" />
                 <div className="flex-1">
-                  <p className="text-sm font-bold text-slate-900">Plan Pro</p>
-                  <p className="text-xs text-stone-500">
+                  <p className="text-sm font-bold text-text-primary">Plan Pro</p>
+                  <p className="text-xs text-text-secondary">
                     {subscription.cancel_at_period_end
                       ? `Actif jusqu'au ${new Date(subscription.current_period_end!).toLocaleDateString('fr-FR')}`
                       : `Prochain renouvellement le ${new Date(subscription.current_period_end!).toLocaleDateString('fr-FR')}`}
@@ -172,15 +172,15 @@ export default function ParametresPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="flex items-center gap-3 p-4 rounded-xl bg-stone-50 border border-stone-200">
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-bg-card border border-border-light">
                 <div className="flex-1">
-                  <p className="text-sm font-bold text-slate-900">Plan Gratuit</p>
-                  <p className="text-xs text-stone-500">Fonctionnalités limitées avec publicités</p>
+                  <p className="text-sm font-bold text-text-primary">Plan Gratuit</p>
+                  <p className="text-xs text-text-secondary">Fonctionnalités limitées avec publicités</p>
                 </div>
               </div>
 
               <div className="p-4 rounded-xl border border-terracotta/30 bg-gradient-to-r from-terracotta/5 to-amber-50">
-                <p className="text-sm font-bold text-slate-900 mb-3">Passez au Pro</p>
+                <p className="text-sm font-bold text-text-primary mb-3">Passez au Pro</p>
                 <ul className="space-y-2 mb-4">
                   {[
                     'Aucune publicité',
@@ -211,35 +211,35 @@ export default function ParametresPage() {
 
         {/* Intégrations */}
         <Card>
-          <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
             <Plug className="h-5 w-5 text-terracotta" />
             Intégrations
           </h2>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-xl bg-stone-50">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-bg-card">
               <div>
-                <p className="text-sm font-medium text-slate-900">Firma.dev</p>
-                <p className="text-xs text-stone-500">Signature électronique des baux</p>
+                <p className="text-sm font-medium text-text-primary">Firma.dev</p>
+                <p className="text-xs text-text-secondary">Signature électronique des baux</p>
               </div>
-              <span className="text-xs font-medium text-stone-500 bg-white px-3 py-1 rounded-full border border-stone-200">
+              <span className="text-xs font-medium text-text-secondary bg-bg-elevated px-3 py-1 rounded-full border border-border-light">
                 Variable serveur
               </span>
             </div>
-            <div className="flex items-center justify-between p-4 rounded-xl bg-stone-50">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-bg-card">
               <div>
-                <p className="text-sm font-medium text-slate-900">Plaid</p>
-                <p className="text-xs text-stone-500">Synchronisation bancaire</p>
+                <p className="text-sm font-medium text-text-primary">Plaid</p>
+                <p className="text-xs text-text-secondary">Synchronisation bancaire</p>
               </div>
-              <span className="text-xs font-medium text-stone-500 bg-white px-3 py-1 rounded-full border border-stone-200">
+              <span className="text-xs font-medium text-text-secondary bg-bg-elevated px-3 py-1 rounded-full border border-border-light">
                 Variable serveur
               </span>
             </div>
-            <div className="flex items-center justify-between p-4 rounded-xl bg-stone-50">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-bg-card">
               <div>
-                <p className="text-sm font-medium text-slate-900">Resend</p>
-                <p className="text-xs text-stone-500">Envoi d&apos;emails et quittances</p>
+                <p className="text-sm font-medium text-text-primary">Resend</p>
+                <p className="text-xs text-text-secondary">Envoi d&apos;emails et quittances</p>
               </div>
-              <span className="text-xs font-medium text-stone-500 bg-white px-3 py-1 rounded-full border border-stone-200">
+              <span className="text-xs font-medium text-text-secondary bg-bg-elevated px-3 py-1 rounded-full border border-border-light">
                 Variable serveur
               </span>
             </div>
@@ -248,7 +248,7 @@ export default function ParametresPage() {
 
         {/* Zone dangereuse */}
         <Card>
-          <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
             <Settings className="h-5 w-5 text-terracotta" />
             Session
           </h2>

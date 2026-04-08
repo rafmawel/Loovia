@@ -401,7 +401,7 @@ export default function FinancesPage() {
               Loyer détecté ?
             </span>
             {tenant && (
-              <span className="text-xs text-stone-500">
+              <span className="text-xs text-text-secondary">
                 {tenant.first_name} {tenant.last_name}
               </span>
             )}
@@ -437,7 +437,7 @@ export default function FinancesPage() {
       <div>
         <PageHeader title="Finances" description="Suivi financier et rapprochement bancaire" />
         <div className="flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-stone-200 border-t-terracotta" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border-light border-t-accent" />
         </div>
       </div>
     );
@@ -487,7 +487,7 @@ export default function FinancesPage() {
               return (
                 <div
                   key={p.id}
-                  className="flex items-center justify-between p-3 rounded-xl bg-white border border-red-100"
+                  className="flex items-center justify-between p-3 rounded-xl bg-bg-elevated border border-red-100"
                 >
                   <div>
                     <p className="text-sm font-medium">
@@ -497,9 +497,9 @@ export default function FinancesPage() {
                         </Link>
                       ) : '—'}
                     </p>
-                    <p className="text-xs text-stone-500">
+                    <p className="text-xs text-text-secondary">
                       {property && p.lease?.property_id ? (
-                        <Link href={`/biens/${p.lease.property_id}`} className="text-stone-500 hover:text-terracotta hover:underline">
+                        <Link href={`/biens/${p.lease.property_id}`} className="text-text-secondary hover:text-terracotta hover:underline">
                           {property.address}
                         </Link>
                       ) : '—'}
@@ -533,12 +533,12 @@ export default function FinancesPage() {
               <Landmark className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-slate-900">
+              <h2 className="text-sm font-bold text-text-primary">
                 {connections.length > 0
                   ? connections[0].institution_name || 'Compte connecté'
                   : 'Connexion bancaire'}
               </h2>
-              <p className="text-xs text-stone-500">
+              <p className="text-xs text-text-secondary">
                 {connections.length > 0
                   ? `Connecté le ${formatDate(connections[0].created_at)}`
                   : 'Connectez votre banque pour synchroniser vos transactions'}
@@ -569,26 +569,26 @@ export default function FinancesPage() {
       <Card className="mb-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-sm font-bold text-slate-900">Export comptable</h2>
-            <p className="text-xs text-stone-500">
+            <h2 className="text-sm font-bold text-text-primary">Export comptable</h2>
+            <p className="text-xs text-text-secondary">
               Exportez vos transactions en CSV ou PDF pour votre comptabilité
             </p>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <label className="text-xs text-stone-500">Du</label>
+              <label className="text-xs text-text-secondary">Du</label>
               <input
                 type="date"
                 value={exportDateFrom}
                 onChange={(e) => setExportDateFrom(e.target.value)}
-                className="text-sm border border-stone-200 rounded-lg px-2 py-1.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+                className="text-sm border border-border-light rounded-lg px-2 py-1.5 text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
               />
-              <label className="text-xs text-stone-500">au</label>
+              <label className="text-xs text-text-secondary">au</label>
               <input
                 type="date"
                 value={exportDateTo}
                 onChange={(e) => setExportDateTo(e.target.value)}
-                className="text-sm border border-stone-200 rounded-lg px-2 py-1.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+                className="text-sm border border-border-light rounded-lg px-2 py-1.5 text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
               />
             </div>
             <div className="relative">
@@ -601,24 +601,24 @@ export default function FinancesPage() {
                 Exporter
               </Button>
               {showExportMenu && (
-                <div className="absolute right-0 top-full mt-1 z-10 bg-white border border-stone-200 rounded-xl shadow-lg py-1 w-56">
+                <div className="absolute right-0 top-full mt-1 z-10 bg-bg-elevated border border-border-light rounded-xl shadow-lg py-1 w-56">
                   <button
                     onClick={handleExportCsv}
-                    className="w-full text-left px-4 py-2.5 text-sm text-slate-900 hover:bg-stone-50 transition-colors flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-sm text-text-primary hover:bg-bg-card transition-colors flex items-center gap-2"
                   >
                     <FileText className="h-4 w-4 text-emerald-600" />
                     Export CSV (Excel)
                   </button>
                   <button
                     onClick={handleExportAccountingPdf}
-                    className="w-full text-left px-4 py-2.5 text-sm text-slate-900 hover:bg-stone-50 transition-colors flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-sm text-text-primary hover:bg-bg-card transition-colors flex items-center gap-2"
                   >
                     <FileText className="h-4 w-4 text-terracotta" />
                     PDF Récapitulatif comptable
                   </button>
                   <button
                     onClick={handleExportFiscalPdf}
-                    className="w-full text-left px-4 py-2.5 text-sm text-slate-900 hover:bg-stone-50 transition-colors flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-sm text-text-primary hover:bg-bg-card transition-colors flex items-center gap-2"
                   >
                     <FileText className="h-4 w-4 text-blue-600" />
                     PDF Déclaration foncière
@@ -633,9 +633,9 @@ export default function FinancesPage() {
       {/* SECTION 5 — Tableau des transactions */}
       <Card padding="p-0">
         {/* Toolbar */}
-        <div className="p-4 border-b border-stone-100 flex flex-wrap items-center justify-between gap-3">
+        <div className="p-4 border-b border-border flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-stone-400" />
+            <Filter className="h-4 w-4 text-text-muted" />
             {/* Filtre par statut */}
             <div className="flex items-center gap-1">
               {(
@@ -653,7 +653,7 @@ export default function FinancesPage() {
                   className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                     statusFilter === btn.value
                       ? 'bg-terracotta text-white'
-                      : 'text-stone-500 hover:bg-stone-100'
+                      : 'text-text-secondary hover:bg-bg-card'
                   }`}
                 >
                   {btn.label}
@@ -664,7 +664,7 @@ export default function FinancesPage() {
             <div className="relative">
               <button
                 onClick={() => setCategoryFilter(categoryFilter === 'all' ? CATEGORIES[0] : 'all')}
-                className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg text-stone-500 hover:bg-stone-100"
+                className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg text-text-secondary hover:bg-bg-card"
               >
                 <Tag className="h-3 w-3" />
                 {categoryFilter === 'all' ? 'Catégorie' : categoryFilter}
@@ -685,11 +685,11 @@ export default function FinancesPage() {
                 Catégoriser ({selected.size})
               </Button>
               {showCategoryMenu === 'bulk' && (
-                <div className="absolute right-0 top-full mt-1 z-10 bg-white border border-stone-200 rounded-xl shadow-lg py-1 w-48">
+                <div className="absolute right-0 top-full mt-1 z-10 bg-bg-elevated border border-border-light rounded-xl shadow-lg py-1 w-48">
                   {CATEGORIES.map((cat) => (
                     <button
                       key={cat}
-                      className="w-full text-left px-4 py-2 text-sm text-slate-900 hover:bg-stone-50 transition-colors"
+                      className="w-full text-left px-4 py-2 text-sm text-text-primary hover:bg-bg-card transition-colors"
                       onClick={() => handleCategorize([...selected], cat)}
                     >
                       {cat}
@@ -714,28 +714,28 @@ export default function FinancesPage() {
           ) : (
             <table className="w-full">
               <thead>
-                <tr className="bg-stone-50">
+                <tr className="bg-bg-card">
                   <th className="px-4 py-3 w-10">
                     <input
                       type="checkbox"
                       checked={selected.size === filteredTransactions.length && filteredTransactions.length > 0}
                       onChange={toggleSelectAll}
-                      className="rounded border-stone-300 text-terracotta focus:ring-terracotta/30"
+                      className="rounded border-stone-300 text-terracotta focus:ring-accent/30"
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Libellé
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Montant
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Catégorie
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Statut
                   </th>
                   <th className="px-4 py-3 w-20"></th>
@@ -745,20 +745,20 @@ export default function FinancesPage() {
                 {filteredTransactions.map((tx) => (
                   <tr
                     key={tx.id}
-                    className="border-b border-stone-100 hover:bg-stone-50/50 transition-colors"
+                    className="border-b border-border hover:bg-bg-card/50 transition-colors"
                   >
                     <td className="px-4 py-3">
                       <input
                         type="checkbox"
                         checked={selected.has(tx.id)}
                         onChange={() => toggleSelect(tx.id)}
-                        className="rounded border-stone-300 text-terracotta focus:ring-terracotta/30"
+                        className="rounded border-stone-300 text-terracotta focus:ring-accent/30"
                       />
                     </td>
-                    <td className="px-4 py-3 text-sm text-stone-500 whitespace-nowrap">
+                    <td className="px-4 py-3 text-sm text-text-secondary whitespace-nowrap">
                       {formatDate(tx.date)}
                     </td>
-                    <td className="px-4 py-3 text-sm font-medium text-slate-900 max-w-xs truncate">
+                    <td className="px-4 py-3 text-sm font-medium text-text-primary max-w-xs truncate">
                       {tx.description || '—'}
                     </td>
                     <td className={`px-4 py-3 text-sm font-bold tabular-nums text-right whitespace-nowrap ${
@@ -770,17 +770,17 @@ export default function FinancesPage() {
                       <div className="relative">
                         <button
                           onClick={() => setShowCategoryMenu(showCategoryMenu === tx.id ? null : tx.id)}
-                          className="text-xs text-stone-500 hover:text-slate-900 flex items-center gap-1 transition-colors"
+                          className="text-xs text-text-secondary hover:text-text-primary flex items-center gap-1 transition-colors"
                         >
                           {tx.category || 'Autre'}
                           <ChevronDown className="h-3 w-3" />
                         </button>
                         {showCategoryMenu === tx.id && (
-                          <div className="absolute left-0 top-full mt-1 z-10 bg-white border border-stone-200 rounded-xl shadow-lg py-1 w-44">
+                          <div className="absolute left-0 top-full mt-1 z-10 bg-bg-elevated border border-border-light rounded-xl shadow-lg py-1 w-44">
                             {CATEGORIES.map((cat) => (
                               <button
                                 key={cat}
-                                className="w-full text-left px-4 py-2 text-sm text-slate-900 hover:bg-stone-50 transition-colors"
+                                className="w-full text-left px-4 py-2 text-sm text-text-primary hover:bg-bg-card transition-colors"
                                 onClick={() => handleCategorize([tx.id], cat)}
                               >
                                 {cat}

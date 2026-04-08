@@ -96,21 +96,21 @@ function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="border-b border-stone-200/60 last:border-0">
+    <div className="border-b border-border last:border-0">
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center justify-between w-full py-4 text-left gap-4"
       >
-        <span className="text-sm font-medium text-slate-900">{q}</span>
+        <span className="text-sm font-medium text-text-primary">{q}</span>
         <ChevronDown
-          className={`h-4 w-4 text-stone-400 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 text-text-muted shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         />
       </button>
       <div
         className={`grid transition-all duration-200 ${open ? 'grid-rows-[1fr] pb-4' : 'grid-rows-[0fr]'}`}
       >
         <div className="overflow-hidden">
-          <p className="text-sm leading-relaxed text-stone-500">{a}</p>
+          <p className="text-sm leading-relaxed text-text-secondary">{a}</p>
         </div>
       </div>
     </div>
@@ -127,10 +127,10 @@ export default function FAQPage() {
 
       <div className="mt-8 grid gap-6">
         {categories.map((cat) => (
-          <div key={cat.title} className="bg-white rounded-2xl border border-stone-200/60 shadow-xs overflow-hidden">
-            <div className="flex items-center gap-3 px-6 py-4 border-b border-stone-200/60 bg-stone-50/50">
+          <div key={cat.title} className="bg-bg-elevated rounded-2xl border border-border-light overflow-hidden">
+            <div className="flex items-center gap-3 px-6 py-4 border-b border-border bg-bg-card/50">
               <HelpCircle className="h-5 w-5 text-accent" />
-              <h2 className="text-base font-semibold text-slate-900">{cat.title}</h2>
+              <h2 className="text-base font-semibold text-text-primary">{cat.title}</h2>
             </div>
             <div className="px-6">
               {cat.faqs.map((faq) => (

@@ -61,7 +61,7 @@ export default function StepLogement({ data, errors, properties, tenants, onChan
 
   return (
     <div className="space-y-6">
-      <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider text-opacity-70">
+      <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wider text-opacity-70">
         Désignation du logement
       </h3>
 

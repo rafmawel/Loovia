@@ -59,39 +59,39 @@ export default async function BauxPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-stone-50">
-                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Bien</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Locataire</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Loyer</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Charges</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Statut</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Début</th>
+                <tr className="bg-bg-card">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Bien</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Locataire</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Loyer</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Charges</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Statut</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Début</th>
                 </tr>
               </thead>
               <tbody>
                 {leases.map((lease) => (
-                  <tr key={lease.id} className="border-b border-stone-100 hover:bg-stone-50/50 transition-colors">
+                  <tr key={lease.id} className="border-b border-border hover:bg-bg-card/50 transition-colors">
                     <td className="px-6 py-4">
                       <Link
                         href={`/baux/${lease.id}`}
-                        className="text-sm font-medium text-slate-900 hover:text-terracotta transition-colors"
+                        className="text-sm font-medium text-text-primary hover:text-terracotta transition-colors"
                       >
                         {lease.property?.name || '—'}
                       </Link>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-900">
+                    <td className="px-6 py-4 text-sm text-text-primary">
                       {lease.tenant ? fullName(lease.tenant.first_name, lease.tenant.last_name) : '—'}
                     </td>
-                    <td className="px-6 py-4 text-sm font-medium tabular-nums text-slate-900">
+                    <td className="px-6 py-4 text-sm font-medium tabular-nums text-text-primary">
                       {formatCurrency(lease.monthly_rent)}
                     </td>
-                    <td className="px-6 py-4 text-sm tabular-nums text-stone-500">
+                    <td className="px-6 py-4 text-sm tabular-nums text-text-secondary">
                       {formatCurrency(lease.charges_amount)}
                     </td>
                     <td className="px-6 py-4">
                       <StatusBadge variant="lease" status={lease.status} />
                     </td>
-                    <td className="px-6 py-4 text-sm text-stone-500">
+                    <td className="px-6 py-4 text-sm text-text-secondary">
                       {formatDate(lease.start_date)}
                     </td>
                   </tr>

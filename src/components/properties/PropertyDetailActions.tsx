@@ -283,8 +283,8 @@ export default function PropertyDetailActions({ property }: Props) {
             )}
 
             {deleteReason === 'vente' && (
-              <div className="space-y-3 p-4 rounded-xl bg-stone-50 border border-stone-200">
-                <p className="text-sm font-medium text-slate-900">Détails de la vente</p>
+              <div className="space-y-3 p-4 rounded-xl bg-bg-card border border-border-light">
+                <p className="text-sm font-medium text-text-primary">Détails de la vente</p>
                 <div className="grid grid-cols-2 gap-3">
                   <Input
                     label="Prix de vente"
@@ -301,8 +301,8 @@ export default function PropertyDetailActions({ property }: Props) {
                   />
                 </div>
                 {salePrice && property.purchase_price ? (
-                  <div className="mt-2 p-3 rounded-lg bg-white border border-stone-200">
-                    <p className="text-xs text-stone-500">Plus-value estimée</p>
+                  <div className="mt-2 p-3 rounded-lg bg-bg-elevated border border-border-light">
+                    <p className="text-xs text-text-secondary">Plus-value estimée</p>
                     <p className={`text-sm font-bold ${Number(salePrice) - property.purchase_price >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                       {formatCurrency(Number(salePrice) - property.purchase_price)}
                     </p>
@@ -313,7 +313,7 @@ export default function PropertyDetailActions({ property }: Props) {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-2 border-t border-stone-100">
+          <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
             <Button variant="ghost" onClick={() => { setShowDeleteModal(false); resetDeleteForm(); }}>
               Annuler
             </Button>

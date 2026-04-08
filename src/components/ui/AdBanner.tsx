@@ -17,20 +17,19 @@ export default function AdBanner({ className = '' }: AdBannerProps) {
 
   return (
     <div
-      className={`relative rounded-xl border border-stone-200 bg-stone-50 p-4 text-center ${className}`}
+      className={`relative rounded-xl border border-border-light bg-bg-card p-4 text-center ${className}`}
     >
       <button
         onClick={() => setDismissed(true)}
-        className="absolute top-2 right-2 text-stone-400 hover:text-stone-600"
+        className="absolute top-2 right-2 text-text-muted hover:text-text-secondary"
         aria-label="Fermer"
       >
         <X className="h-3.5 w-3.5" />
       </button>
-      {/* Emplacement publicitaire — à remplacer par le réseau pub (Google AdSense, etc.) */}
-      <div className="flex items-center justify-center h-[90px] text-xs text-stone-400">
+      <div className="flex items-center justify-center h-[90px] text-xs text-text-muted">
         <p>Espace publicitaire</p>
       </div>
-      <p className="text-[10px] text-stone-400 mt-1">
+      <p className="text-[10px] text-text-muted mt-1">
         Passez au Pro pour supprimer les publicités
       </p>
     </div>
