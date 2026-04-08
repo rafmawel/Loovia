@@ -36,8 +36,10 @@ export default function LoginPage() {
       toast.success('Connexion réussie !');
       router.refresh();
       router.push('/dashboard');
-    } catch {
-      setError('Une erreur inattendue est survenue. Veuillez réessayer.');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erreur inconnue';
+      console.error('Login error:', err);
+      setError(`Erreur : ${message}`);
     } finally {
       setLoading(false);
     }
