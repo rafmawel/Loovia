@@ -18,7 +18,10 @@ export function MockupSection() {
             de gestion locative en un coup d&apos;œil.
           </p>
         </div>
-        <MockupDashboard className="w-full glow-accent-strong" />
+        <div className="relative">
+          <div className="absolute -inset-16 bg-accent/[0.06] rounded-full blur-[100px] pointer-events-none" />
+          <MockupDashboard className="relative w-full" />
+        </div>
       </div>
     </section>
   )

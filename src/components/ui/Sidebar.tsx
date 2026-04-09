@@ -70,7 +70,7 @@ export function Sidebar({ user, onClose }: SidebarProps) {
   }
 
   return (
-    <aside className="fixed left-0 top-0 w-[260px] h-screen bg-bg-primary border-r border-border flex flex-col z-20">
+    <aside className="fixed left-0 top-0 w-[260px] h-screen bg-bg-elevated border-r border-border flex flex-col z-20">
       {/* Logo */}
       <div className="px-6 py-6 border-b border-border flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-2.5" onClick={onClose}>

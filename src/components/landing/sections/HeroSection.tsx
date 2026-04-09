@@ -45,7 +45,9 @@ export function HeroSection() {
 
           {/* Mockup */}
           <div className="relative hidden lg:block">
-            <MockupDashboard className="w-full glow-accent" />
+            {/* Halo orange */}
+            <div className="absolute -inset-10 bg-accent/[0.07] rounded-full blur-[80px] pointer-events-none" />
+            <MockupDashboard className="relative w-full" />
           </div>
         </div>
       </div>
