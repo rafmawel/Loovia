@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* ── Palette Loovia — Charcoal (Qonto-style) ── */
+  /* ── Palette Loovia — Noir + gris foncé (Qonto-style) ── */
 
-  --color-bg-primary: #0D0D0D;
-  --color-bg-section: #161616;
-  --color-bg-elevated: #1E1E1E;
+  --color-bg-primary: #000000;
+  --color-bg-section: #000000;
+  --color-bg-elevated: #1A1A1A;
   --color-bg-cream: #F8F6F2;
-  --color-bg-card: #262626;
+  --color-bg-card: #222222;
 
   --color-accent: #E8622A;
   --color-accent-light: #F0845A;
@@ -15,7 +15,7 @@
 
   --color-text-primary: #FFFFFF;
   --color-text-secondary: #9A9A9A;
-  --color-text-dark: #0D0D0D;
+  --color-text-dark: #000000;
   --color-text-muted: #5C5C5C;
 
   --color-border: #2A2A2A;
