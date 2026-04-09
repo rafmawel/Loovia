@@ -19,7 +19,7 @@ export function MockupSection() {
           </p>
         </div>
         <div className="relative">
-          <div className="absolute -inset-16 bg-accent/[0.06] rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute -inset-20 bg-accent/[0.10] rounded-full blur-[90px] pointer-events-none" />
           <MockupDashboard className="relative w-full" />
         </div>
       </div>

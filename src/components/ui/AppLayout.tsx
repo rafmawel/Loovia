@@ -30,8 +30,8 @@ export function AppLayout({ children, user }: AppLayoutProps) {
   return (
     <div className="min-h-screen bg-bg-primary relative">
       {/* Halo orange subtil */}
-      <div className="fixed top-[-200px] right-[-100px] w-[600px] h-[600px] bg-accent/[0.03] rounded-full blur-[150px] pointer-events-none" />
-      <div className="fixed bottom-[-300px] left-[20%] w-[500px] h-[500px] bg-accent/[0.02] rounded-full blur-[150px] pointer-events-none" />
+      <div className="fixed top-[-150px] right-[-50px] w-[700px] h-[700px] bg-accent/[0.08] rounded-full blur-[120px] pointer-events-none" />
+      <div className="fixed bottom-[-200px] left-[10%] w-[600px] h-[600px] bg-accent/[0.06] rounded-full blur-[120px] pointer-events-none" />
 
       {/* Overlay mobile */}
       {sidebarOpen && (
