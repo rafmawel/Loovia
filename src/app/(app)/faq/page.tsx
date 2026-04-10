@@ -127,7 +127,7 @@ export default function FAQPage() {
 
       <div className="mt-8 grid gap-6">
         {categories.map((cat) => (
-          <div key={cat.title} className="bg-bg-elevated rounded-2xl border border-border-light overflow-hidden">
+          <div key={cat.title} className="bg-bg-elevated rounded-2xl border border-border-light overflow-hidden glow-accent">
             <div className="flex items-center gap-3 px-6 py-4 border-b border-border bg-bg-card/50">
               <HelpCircle className="h-5 w-5 text-accent" />
               <h2 className="text-base font-semibold text-text-primary">{cat.title}</h2>
