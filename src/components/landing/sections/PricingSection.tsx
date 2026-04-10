@@ -14,6 +14,11 @@ const plans = [
     features: ['Biens illimités', 'Tout le plan Gratuit', 'Analytique avancée', 'Révision IRL automatique', 'Signature électronique', 'Sans publicité', 'Support prioritaire'],
     cta: 'Passer à Pro', href: '/register', highlighted: true,
   },
+  {
+    name: 'Multi-SCI', price: '14,90', period: '/mois', description: 'Pour gérer plusieurs structures',
+    features: ['Tout le plan Pro', 'SCI multiples (IR, IS…)', 'Basculer entre vos structures', 'Analytique par SCI', 'Vision globale consolidée', 'Comparatif financier entre SCI'],
+    cta: 'Choisir Multi-SCI', href: '/register', highlighted: false,
+  },
 ]
 
 export function PricingSection() {
@@ -29,7 +34,7 @@ export function PricingSection() {
           </h2>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 max-w-[740px] mx-auto">
+        <div className="grid md:grid-cols-3 gap-6 max-w-[960px] mx-auto">
           {plans.map((plan, i) => (
             <div key={plan.name} className={`rounded-2xl p-8 flex flex-col transition-all ${
               plan.highlighted
