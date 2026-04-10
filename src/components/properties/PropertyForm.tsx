@@ -13,11 +13,20 @@ import AddressAutocomplete from '@/components/ui/AddressAutocomplete';
 import { toast } from 'sonner';
 import {
   Home, MapPin, Utensils, Warehouse, Thermometer, Shield, Wallet,
-  ImageIcon, Save, X, Upload, Trash2, Building2, Car, Box, Landmark,
+  ImageIcon, Save, X, Upload, Trash2, Building2, Car, Box, Landmark, Briefcase, Plus,
 } from 'lucide-react';
 import type { Property, PropertyLot } from '@/types';
 
 const MAX_PHOTOS_FREE = 3;
+
+// Régimes de détention
+const OWNERSHIP_REGIMES = [
+  { value: 'nom_propre_nu', label: 'Nom propre — Location nue' },
+  { value: 'nom_propre_meuble', label: 'Nom propre — LMNP / LMP' },
+  { value: 'sci_ir', label: 'SCI à l\'IR' },
+  { value: 'sci_is', label: 'SCI à l\'IS' },
+  { value: 'autre', label: 'Autre' },
+] as const;
 
 interface PropertyFormProps {
   property?: Property | null;
@@ -162,9 +171,29 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
   const [creatingLot, setCreatingLot] = useState(false);
   const [newLotName, setNewLotName] = useState('');
 
+  // Détention / SCI
+  const [ownershipRegime, setOwnershipRegime] = useState('');
+  const [sciList, setSciList] = useState<{ id: string; name: string }[]>([]);
+  const [selectedSciId, setSelectedSciId] = useState('');
+  const [creatingSci, setCreatingSci] = useState(false);
+  const [newSciName, setNewSciName] = useState('');
+  const isSciRegime = ownershipRegime === 'sci_ir' || ownershipRegime === 'sci_is';
+
+  // Charger les SCI existantes
+  useState(() => {
+    supabase
+      .from('sci_entities')
+      .select('id, name')
+      .order('name')
+      .then(({ data }) => {
+        if (data) setSciList(data);
+      });
+  });
+
   // Dynamic sections based on property type
   const sections = useMemo(() => {
     const base = [
+      { icon: Briefcase, label: 'Détention' },
       { icon: Home, label: 'Type de bien' },
       { icon: MapPin, label: 'Localisation' },
       { icon: Home, label: 'Description' },
@@ -369,6 +398,22 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('Vous devez être connecté pour ajouter un bien');
 
+        // Créer une SCI si demandé
+        let sciId: string | null = selectedSciId || null;
+        if (isSciRegime && (creatingSci || sciList.length === 0) && newSciName.trim()) {
+          const { data: sci, error: sciError } = await supabase
+            .from('sci_entities')
+            .insert({
+              user_id: user.id,
+              name: newSciName.trim(),
+              regime: ownershipRegime,
+            })
+            .select()
+            .single();
+          if (sciError) throw new Error(sciError.message);
+          sciId = sci.id;
+        }
+
         // Créer un lot si demandé
         let lotId = result.data.lot_id;
         if (creatingLot && newLotName.trim()) {
@@ -392,7 +437,13 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
 
         const { data, error } = await supabase
           .from('properties')
-          .insert({ ...result.data, user_id: user.id, lot_id: lotId })
+          .insert({
+            ...result.data,
+            user_id: user.id,
+            lot_id: lotId,
+            ownership_regime: ownershipRegime || null,
+            sci_id: sciId,
+          })
           .select()
           .single();
 
@@ -437,6 +488,109 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
 
       {/* Contenu de la section active */}
       <div className="overflow-y-auto flex-1 px-1">
+        {/* Section : Détention */}
+        {sectionKey === 'Détention' && (
+          <div className="space-y-5 animate-in">
+            <div>
+              <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wider mb-1">
+                Mode de détention
+              </h3>
+              <p className="text-sm text-text-secondary">
+                Comment détenez-vous ce bien ? Cela adapte la comptabilité et les exports fiscaux.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              {OWNERSHIP_REGIMES.map((regime) => (
+                <button
+                  key={regime.value}
+                  type="button"
+                  onClick={() => {
+                    setOwnershipRegime(regime.value);
+                    if (regime.value !== 'sci_ir' && regime.value !== 'sci_is') {
+                      setSelectedSciId('');
+                      setCreatingSci(false);
+                      setNewSciName('');
+                    }
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
+                    ownershipRegime === regime.value
+                      ? 'bg-accent/10 border border-accent/30'
+                      : 'bg-bg-card border border-border-light hover:border-accent/20'
+                  }`}
+                >
+                  <div className={`h-4 w-4 rounded-full border-2 shrink-0 flex items-center justify-center ${
+                    ownershipRegime === regime.value ? 'border-accent' : 'border-border-light'
+                  }`}>
+                    {ownershipRegime === regime.value && (
+                      <div className="h-2 w-2 rounded-full bg-accent" />
+                    )}
+                  </div>
+                  <span className={`text-sm font-medium ${ownershipRegime === regime.value ? 'text-accent' : 'text-text-primary'}`}>
+                    {regime.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* Sélection / création SCI */}
+            {isSciRegime && (
+              <div className="p-5 rounded-xl border border-accent/20 bg-accent/5 space-y-4">
+                <h4 className="text-sm font-semibold text-text-primary flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-accent" />
+                  Quelle SCI ?
+                </h4>
+
+                {sciList.length > 0 && !creatingSci && (
+                  <>
+                    <select
+                      value={selectedSciId}
+                      onChange={(e) => setSelectedSciId(e.target.value)}
+                      className="w-full px-3 py-2.5 text-sm border border-border-light rounded-xl bg-bg-card text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
+                    >
+                      <option value="">Sélectionner une SCI existante</option>
+                      {sciList.map((sci) => (
+                        <option key={sci.id} value={sci.id}>{sci.name}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setCreatingSci(true)}
+                      className="flex items-center gap-1.5 text-xs text-accent hover:underline"
+                    >
+                      <Plus className="h-3 w-3" /> Créer une nouvelle SCI
+                    </button>
+                  </>
+                )}
+
+                {(creatingSci || sciList.length === 0) && (
+                  <>
+                    <Input
+                      label="Nom de la SCI"
+                      placeholder="Ex: SCI Patrimoine Dupont"
+                      value={newSciName}
+                      onChange={(e) => setNewSciName(e.target.value)}
+                    />
+                    {creatingSci && sciList.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => { setCreatingSci(false); setNewSciName(''); }}
+                        className="text-xs text-text-secondary hover:underline"
+                      >
+                        Choisir une SCI existante
+                      </button>
+                    )}
+                  </>
+                )}
+
+                <p className="text-xs text-text-muted">
+                  La SCI sera réutilisable pour vos autres biens détenus par la même structure.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Section : Type de bien */}
         {sectionKey === 'Type de bien' && (
           <div className="space-y-5 animate-in">
@@ -462,13 +616,17 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
             </div>
 
             {!isStorageType && !isCommercialType && (
-              <div className="pt-2">
+              <div className="pt-2 space-y-3">
                 <Select
                   label="Type de location"
                   options={furnishedTypes.map((t) => ({ value: t, label: t }))}
                   value={form.furnished_type}
                   onChange={(e) => updateField('furnished_type', e.target.value)}
                 />
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-bg-card/50 border border-dashed border-border-light opacity-60">
+                  <span className="text-xs text-text-muted">Location saisonnière (Airbnb)</span>
+                  <span className="text-[9px] font-semibold text-accent bg-accent/10 px-1.5 py-0.5 rounded-full">À venir</span>
+                </div>
               </div>
             )}
           </div>

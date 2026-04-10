@@ -41,6 +41,16 @@ const faqs = [
       'Oui, Loovia est une Progressive Web App (PWA). Vous pouvez l\'installer directement sur votre smartphone depuis le navigateur et y accéder comme une application native, même hors connexion pour certaines fonctionnalités.',
   },
   {
+    question: 'Loovia supporte-t-il la location saisonnière (Airbnb) ?',
+    answer:
+      'Pas encore, mais c\'est prévu ! La gestion de la location courte durée (calendrier de réservations, tarification dynamique, contrats saisonniers) fait partie de notre feuille de route et arrivera très prochainement.',
+  },
+  {
+    question: 'Puis-je gérer des biens en SCI ?',
+    answer:
+      'Oui. Lors de l\'ajout d\'un bien, vous pouvez indiquer s\'il est détenu en SCI (à l\'IR ou à l\'IS) et rattacher le bien à une structure existante ou en créer une nouvelle. Le plan Multi-SCI à 14,90 €/mois vous permet de gérer plusieurs SCI avec une vision consolidée.',
+  },
+  {
     question: 'Comment résilier ou changer de plan ?',
     answer:
       'Vous pouvez passer du plan Gratuit au Pro (et inversement) à tout moment depuis vos paramètres. Aucun engagement, aucuns frais cachés. La résiliation du Pro est immédiate et vous conservez vos données.',

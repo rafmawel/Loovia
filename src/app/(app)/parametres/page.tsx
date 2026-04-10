@@ -1,6 +1,6 @@
 'use client';
 
-// Page Paramètres — profil utilisateur, régime fiscal, abonnement
+// Page Paramètres — profil utilisateur, abonnement
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -12,16 +12,16 @@ import { Settings, User, LogOut, Save, Crown, Check, Sparkles, Building2, Briefc
 import { toast } from 'sonner';
 import type { Subscription } from '@/types';
 
-const FISCAL_REGIMES = [
-  { value: 'lmnp_micro', label: 'LMNP — Micro-BIC' },
-  { value: 'lmnp_reel', label: 'LMNP — Régime réel' },
-  { value: 'lmp', label: 'LMP (Loueur Meublé Professionnel)' },
-  { value: 'nu_micro', label: 'Location nue — Micro-foncier' },
-  { value: 'nu_reel', label: 'Location nue — Régime réel' },
-  { value: 'sci_ir', label: 'SCI à l\'IR (impôt sur le revenu)' },
-  { value: 'sci_is', label: 'SCI à l\'IS (impôt sur les sociétés)' },
-  { value: 'autre', label: 'Autre' },
-] as const;
+const FISCAL_REGIME_LABELS: Record<string, string> = {
+  lmnp_micro: 'LMNP — Micro-BIC',
+  lmnp_reel: 'LMNP — Régime réel',
+  lmp: 'LMP (Loueur Meublé Professionnel)',
+  nu_micro: 'Location nue — Micro-foncier',
+  nu_reel: 'Location nue — Régime réel',
+  sci_ir: 'SCI à l\'IR (impôt sur le revenu)',
+  sci_is: 'SCI à l\'IS (impôt sur les sociétés)',
+  autre: 'Autre',
+};
 
 export default function ParametresPage() {
   const [firstName, setFirstName] = useState('');
@@ -65,7 +65,7 @@ export default function ParametresPage() {
 
     try {
       const { error } = await supabase.auth.updateUser({
-        data: { first_name: firstName, last_name: lastName, fiscal_regime: fiscalRegime },
+        data: { first_name: firstName, last_name: lastName },
       });
 
       if (error) throw error;
@@ -166,47 +166,26 @@ export default function ParametresPage() {
           </form>
         </Card>
 
-        {/* Régime fiscal */}
-        <Card>
-          <h2 className="text-lg font-bold text-text-primary mb-2 flex items-center gap-2">
-            <Briefcase className="h-5 w-5 text-accent" />
-            Régime fiscal
-          </h2>
-          <p className="text-sm text-text-secondary mb-4">
-            Sélectionnez votre régime fiscal pour adapter la comptabilité et les exports.
-          </p>
-          <div className="grid gap-2">
-            {FISCAL_REGIMES.map((regime) => (
-              <button
-                key={regime.value}
-                type="button"
-                onClick={() => {
-                  setFiscalRegime(regime.value);
-                  // Auto-save fiscal regime
-                  supabase.auth.updateUser({ data: { fiscal_regime: regime.value } })
-                    .then(({ error }) => {
-                      if (!error) toast.success('Régime fiscal mis à jour');
-                      else toast.error('Erreur');
-                    });
-                }}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-left transition-all ${
-                  fiscalRegime === regime.value
-                    ? 'bg-accent/10 text-accent border border-accent/30'
-                    : 'bg-bg-card text-text-secondary border border-border-light hover:border-accent/20 hover:text-text-primary'
-                }`}
-              >
-                <div className={`h-4 w-4 rounded-full border-2 shrink-0 flex items-center justify-center ${
-                  fiscalRegime === regime.value ? 'border-accent' : 'border-border-light'
-                }`}>
-                  {fiscalRegime === regime.value && (
-                    <div className="h-2 w-2 rounded-full bg-accent" />
-                  )}
-                </div>
-                {regime.label}
-              </button>
-            ))}
-          </div>
-        </Card>
+        {/* Régime fiscal — lecture seule */}
+        {fiscalRegime && (
+          <Card>
+            <h2 className="text-lg font-bold text-text-primary mb-2 flex items-center gap-2">
+              <Briefcase className="h-5 w-5 text-accent" />
+              Régime fiscal principal
+            </h2>
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-bg-card border border-border-light">
+              <div className="h-4 w-4 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
+                <div className="h-2 w-2 rounded-full bg-accent" />
+              </div>
+              <p className="text-sm font-medium text-text-primary">
+                {FISCAL_REGIME_LABELS[fiscalRegime] || fiscalRegime}
+              </p>
+            </div>
+            <p className="text-xs text-text-muted mt-3">
+              Choisi lors de l&apos;inscription. Vous pouvez attribuer un régime différent à chaque bien lors de sa création.
+            </p>
+          </Card>
+        )}
 
         {/* Abonnement */}
         <Card>
