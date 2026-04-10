@@ -27,7 +27,7 @@ interface StatCardProps {
 export function StatCard({ icon: Icon, label, value, trend, className = '' }: StatCardProps) {
   return (
     <div
-      className={`bg-bg-elevated rounded-2xl border border-border-light glow-accent p-6 ${className}`}
+      className={`bg-bg-elevated rounded-2xl border border-border-light p-6 ${className}`}
     >
       <div className="flex items-start justify-between">
         {/* Icône dans un cercle terracotta */}

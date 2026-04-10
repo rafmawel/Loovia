@@ -8,7 +8,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import { Settings, User, LogOut, Save, Crown, Check, Sparkles, Building2, Briefcase } from 'lucide-react';
+import { Settings, User, LogOut, Save, Crown, Check, Sparkles, Building2, Briefcase, Tag, Gift } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Subscription } from '@/types';
 
@@ -32,6 +32,9 @@ export default function ParametresPage() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [upgrading, setUpgrading] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
+  const [betaCode, setBetaCode] = useState('');
+  const [betaLoading, setBetaLoading] = useState(false);
 
   const supabase = createClient();
   const router = useRouter();
@@ -84,7 +87,7 @@ export default function ParametresPage() {
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({ plan, promoCode: promoCode.trim() || undefined }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -92,6 +95,27 @@ export default function ParametresPage() {
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erreur lors de la mise à niveau');
       setUpgrading(false);
+    }
+  }
+
+  // Activer un code beta
+  async function handleBetaCode() {
+    if (!betaCode.trim()) return;
+    setBetaLoading(true);
+    try {
+      const res = await fetch('/api/beta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: betaCode.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      toast.success(data.message || 'Code activé !');
+      window.location.reload();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Code invalide');
+    } finally {
+      setBetaLoading(false);
     }
   }
 
@@ -304,6 +328,37 @@ export default function ParametresPage() {
             </div>
           )}
         </Card>
+
+        {/* Code promo / Beta */}
+        {currentPlan === 'free' && (
+          <Card>
+            <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
+              <Gift className="h-5 w-5 text-accent" />
+              Code d&apos;activation
+            </h2>
+            <p className="text-sm text-text-secondary mb-4">
+              Vous avez un code promotionnel ou un code beta ? Entrez-le ci-dessous.
+            </p>
+            <div className="flex gap-3">
+              <input
+                type="text"
+                value={betaCode}
+                onChange={(e) => setBetaCode(e.target.value)}
+                placeholder="Ex: LOOVIA-BETA-2026"
+                className="flex-1 px-4 py-2.5 text-sm border border-border-light rounded-xl bg-bg-card text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
+              />
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleBetaCode}
+                loading={betaLoading}
+                icon={<Tag className="h-4 w-4" />}
+              >
+                Activer
+              </Button>
+            </div>
+          </Card>
+        )}
 
         {/* Session */}
         <Card>

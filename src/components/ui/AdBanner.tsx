@@ -17,7 +17,7 @@ export default function AdBanner({ className = '' }: AdBannerProps) {
 
   return (
     <div
-      className={`relative rounded-xl border border-border-light bg-bg-card glow-accent p-4 text-center ${className}`}
+      className={`relative rounded-xl border border-border-light bg-bg-card p-4 text-center ${className}`}
     >
       <button
         onClick={() => setDismissed(true)}

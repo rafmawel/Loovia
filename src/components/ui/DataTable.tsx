@@ -103,7 +103,7 @@ export function DataTable<T extends Record<string, unknown>>({
   }
 
   return (
-    <div className="rounded-2xl border border-border-light overflow-hidden bg-bg-elevated glow-accent">
+    <div className="rounded-2xl border border-border-light overflow-hidden bg-bg-elevated">
       {/* Barre de recherche */}
       {searchable && (
         <div className="p-4 border-b border-border">

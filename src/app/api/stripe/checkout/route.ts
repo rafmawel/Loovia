@@ -2,16 +2,26 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { stripe } from '@/lib/stripe';
+import { getStripe } from '@/lib/stripe';
 
-export async function POST() {
+export async function POST(req: Request) {
   try {
+    const stripeClient = getStripe();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
+
+    const body = await req.json().catch(() => ({}));
+    const plan = body.plan || 'pro';
+    const promoCode: string | undefined = body.promoCode || undefined;
+
+    // Déterminer le price ID
+    const priceId = plan === 'multi_sci'
+      ? process.env.STRIPE_MULTI_SCI_PRICE_ID || process.env.STRIPE_PRO_PRICE_ID!
+      : process.env.STRIPE_PRO_PRICE_ID!;
 
     // Vérifier si un customer Stripe existe déjà
     const { data: subscription } = await supabase
@@ -24,7 +34,7 @@ export async function POST() {
 
     // Créer un customer Stripe si nécessaire
     if (!customerId) {
-      const customer = await stripe.customers.create({
+      const customer = await stripeClient.customers.create({
         email: user.email,
         metadata: { user_id: user.id },
       });
@@ -43,19 +53,32 @@ export async function POST() {
       );
     }
 
+    // Résoudre le code promo si fourni
+    let promotionCodeId: string | undefined;
+    if (promoCode) {
+      const promotionCodes = await stripeClient.promotionCodes.list({
+        code: promoCode,
+        active: true,
+        limit: 1,
+      });
+      if (promotionCodes.data.length > 0) {
+        promotionCodeId = promotionCodes.data[0].id;
+      } else {
+        return NextResponse.json({ error: 'Code promo invalide ou expiré' }, { status: 400 });
+      }
+    }
+
     // Créer la session Checkout
-    const session = await stripe.checkout.sessions.create({
+    const session = await stripeClient.checkout.sessions.create({
       customer: customerId,
       mode: 'subscription',
-      line_items: [
-        {
-          price: process.env.STRIPE_PRO_PRICE_ID!,
-          quantity: 1,
-        },
-      ],
+      line_items: [{ price: priceId, quantity: 1 }],
+      ...(promotionCodeId
+        ? { discounts: [{ promotion_code: promotionCodeId }] }
+        : { allow_promotion_codes: true }),
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/parametres?upgrade=success`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/parametres`,
-      metadata: { user_id: user.id },
+      metadata: { user_id: user.id, plan },
     });
 
     return NextResponse.json({ url: session.url });
