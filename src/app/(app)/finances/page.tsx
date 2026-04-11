@@ -150,26 +150,17 @@ export default function FinancesPage() {
 
   const handlePlaidLink = async () => {
     try {
-      const res = await fetch('/api/plaid/create-link-token', { method: 'POST' });
+      const res = await fetch('/api/powens/connect', { method: 'POST' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      // Charger Plaid Link dynamiquement
-      const { default: loadPlaidLink } = await import('@/lib/plaid-link');
-      await loadPlaidLink(data.link_token, async (publicToken: string, metadata: Record<string, unknown>) => {
-        const institution = metadata?.institution as { name?: string } | undefined;
-        const exchangeRes = await fetch('/api/plaid/exchange-token', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            publicToken,
-            institutionName: institution?.name || null,
-          }),
-        });
-        if (!exchangeRes.ok) throw new Error('Erreur lors de la connexion');
-        toast.success('Compte bancaire connecté');
-        fetchAll();
-      });
+      // Ouvrir la webview Powens dans une popup
+      const { default: openPowensConnect } = await import('@/lib/powens-connect');
+      await openPowensConnect(data.connect_url);
+
+      // Recharger les données après fermeture de la popup
+      toast.success('Connexion bancaire mise à jour');
+      fetchAll();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erreur');
     }

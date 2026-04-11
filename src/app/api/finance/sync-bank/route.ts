@@ -1,7 +1,7 @@
-// API Route — synchronisation des transactions bancaires via Plaid + matching
+// API Route — synchronisation des transactions bancaires via Powens + matching
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { syncTransactions } from '@/lib/api/plaid';
+import { listTransactions, listConnections } from '@/lib/api/powens';
 import { matchTransactions } from '@/lib/matching';
 import type { BankConnection, BankTransaction, Payment, Tenant, Lease } from '@/types';
 
@@ -34,39 +34,59 @@ export async function POST(request: NextRequest) {
     }
 
     const typedConnection = connection as BankConnection;
-    let hasMore = true;
-    let cursor = typedConnection.cursor || undefined;
+    const token = typedConnection.access_token;
+
+    // Récupérer les infos de connexion Powens (nom de banque)
+    const powensConnections = await listConnections(token);
+    if (powensConnections.length > 0) {
+      const bankName = powensConnections[0].connector?.name;
+      if (bankName && bankName !== typedConnection.institution_name) {
+        await supabase
+          .from('bank_connections')
+          .update({ institution_name: bankName })
+          .eq('id', connectionId);
+      }
+    }
+
+    // Déterminer la date de début de sync
+    const lastSync = typedConnection.cursor;
+    const minDate = lastSync
+      ? new Date(lastSync).toISOString().split('T')[0]
+      : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // 90 jours par défaut
+
+    // Récupérer les transactions via Powens (avec pagination)
+    let offset = 0;
+    const limit = 100;
     let totalAdded = 0;
+    let hasMore = true;
 
-    // Boucle de synchronisation (Plaid peut paginer les résultats)
     while (hasMore) {
-      const result = await syncTransactions(typedConnection.access_token, cursor);
+      const result = await listTransactions(token, { offset, limit, min_date: minDate });
 
-      // Insérer les nouvelles transactions
-      if (result.added.length > 0) {
-        const transactions = result.added.map((tx) => ({
+      if (result.transactions.length > 0) {
+        const transactions = result.transactions.map((tx) => ({
           user_id: user.id,
           connection_id: connectionId,
-          amount: tx.amount,
+          amount: tx.value,
           date: tx.date,
-          description: tx.name || tx.merchant_name || '',
-          category: tx.category?.[0] || 'Autre',
+          description: tx.simplified_wording || tx.original_wording || '',
+          category: tx.category?.name || 'Autre',
           status: 'unmatched' as const,
-          raw_data: tx,
+          raw_data: tx as unknown as Record<string, unknown>,
         }));
 
         await supabase.from('bank_transactions').insert(transactions);
-        totalAdded += result.added.length;
+        totalAdded += result.transactions.length;
       }
 
-      cursor = result.next_cursor;
-      hasMore = result.has_more;
+      offset += limit;
+      hasMore = result.transactions.length === limit && offset < result.total;
     }
 
-    // Sauvegarder le curseur
+    // Sauvegarder le timestamp de sync
     await supabase
       .from('bank_connections')
-      .update({ cursor })
+      .update({ cursor: new Date().toISOString() })
       .eq('id', connectionId);
 
     // ── Lancer le matching automatique ─────────────────────────────
@@ -104,13 +124,11 @@ export async function POST(request: NextRequest) {
       // Appliquer les résultats
       for (const result of results) {
         if (result.status === 'matched' && result.paymentId) {
-          // Match automatique → mettre à jour transaction ET paiement
           await supabase
             .from('bank_transactions')
             .update({ status: 'matched', matched_payment_id: result.paymentId })
             .eq('id', result.transactionId);
 
-          // Trouver le montant de la transaction
           const tx = unmatchedTx.find((t) => (t as BankTransaction).id === result.transactionId) as BankTransaction | undefined;
           if (tx) {
             await supabase
@@ -125,7 +143,6 @@ export async function POST(request: NextRequest) {
 
           matched++;
         } else if (result.status === 'suggestion' && result.paymentId) {
-          // Suggestion → mettre à jour transaction uniquement
           await supabase
             .from('bank_transactions')
             .update({ status: 'suggestion', matched_payment_id: result.paymentId })
