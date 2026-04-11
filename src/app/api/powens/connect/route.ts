@@ -13,19 +13,37 @@ export async function POST() {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
-    // Vérifier si l'utilisateur a déjà un token Powens
-    const { data: existing } = await supabase
+    // Récupérer les connexions existantes
+    const { data: existingConnections } = await supabase
       .from('bank_connections')
-      .select('access_token')
-      .eq('user_id', user.id)
-      .limit(1)
-      .maybeSingle();
+      .select('id, access_token')
+      .eq('user_id', user.id);
+
+    const connectionCount = existingConnections?.length || 0;
+
+    // Vérifier la limite selon le plan (Gratuit/Premium = 1, Pro = illimité)
+    if (connectionCount >= 1) {
+      const { data: subscription } = await supabase
+        .from('subscriptions')
+        .select('plan, status')
+        .eq('user_id', user.id)
+        .single();
+
+      const isPro = subscription?.plan === 'pro' && subscription?.status === 'active';
+
+      if (!isPro) {
+        return NextResponse.json(
+          { error: 'Passez au plan Pro pour connecter plusieurs comptes bancaires' },
+          { status: 403 },
+        );
+      }
+    }
 
     let token: string;
 
-    if (existing?.access_token) {
-      // Réutiliser le token permanent existant
-      token = existing.access_token;
+    if (existingConnections && existingConnections.length > 0) {
+      // Réutiliser le token permanent existant (même utilisateur Powens)
+      token = existingConnections[0].access_token;
     } else {
       // Créer un nouveau token et utilisateur Powens
       const tempToken = await getAuthToken();

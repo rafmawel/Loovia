@@ -163,6 +163,7 @@ export interface BankConnection {
   access_token: string;
   item_id: string;
   cursor?: string | null;
+  property_id?: string | null;
   created_at: string;
 }
 

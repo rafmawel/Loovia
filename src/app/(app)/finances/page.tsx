@@ -148,7 +148,7 @@ export default function FinancesPage() {
 
   // ── Actions ──────────────────────────────────────────────────────
 
-  const handlePlaidLink = async () => {
+  const handleBankConnect = async () => {
     try {
       const res = await fetch('/api/powens/connect', { method: 'POST' });
       const data = await res.json();
@@ -166,26 +166,56 @@ export default function FinancesPage() {
     }
   };
 
-  const handleSync = async () => {
+  const handleSync = async (specificConnectionId?: string) => {
     if (connections.length === 0) return;
     setSyncing(true);
+
     try {
-      const res = await fetch('/api/finance/sync-bank', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ connectionId: connections[0].id }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      // Synchroniser toutes les connexions ou une seule
+      const connectionsToSync = specificConnectionId
+        ? connections.filter((c) => c.id === specificConnectionId)
+        : connections;
+
+      let totalAdded = 0;
+      let totalMatched = 0;
+      let totalSuggestions = 0;
+
+      for (const conn of connectionsToSync) {
+        const res = await fetch('/api/finance/sync-bank', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ connectionId: conn.id }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        totalAdded += data.added;
+        totalMatched += data.matched;
+        totalSuggestions += data.suggestions;
+      }
 
       toast.success(
-        `Synchronisation terminée : ${data.added} nouvelles, ${data.matched} matchées, ${data.suggestions} suggestions`,
+        `Synchronisation terminée : ${totalAdded} nouvelles, ${totalMatched} matchées, ${totalSuggestions} suggestions`,
       );
       fetchAll();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erreur de synchronisation');
     } finally {
       setSyncing(false);
+    }
+  };
+
+  const handleLinkProperty = async (connectionId: string, propertyId: string | null) => {
+    try {
+      const res = await fetch('/api/powens/link-property', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ connectionId, propertyId }),
+      });
+      if (!res.ok) throw new Error('Erreur');
+      toast.success(propertyId ? 'Compte associé au bien' : 'Association retirée');
+      fetchAll();
+    } catch {
+      toast.error('Erreur lors de l\'association');
     }
   };
 
@@ -516,44 +546,86 @@ export default function FinancesPage() {
         </Card>
       )}
 
-      {/* SECTION 3 — Connexion bancaire */}
+      {/* SECTION 3 — Connexions bancaires */}
       <Card className="mb-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="rounded-full bg-terracotta/10 p-3 text-terracotta">
               <Landmark className="h-5 w-5" />
             </div>
             <div>
               <h2 className="text-sm font-bold text-text-primary">
-                {connections.length > 0
-                  ? connections[0].institution_name || 'Compte connecté'
-                  : 'Connexion bancaire'}
+                Comptes bancaires ({connections.length})
               </h2>
               <p className="text-xs text-text-secondary">
                 {connections.length > 0
-                  ? `Connecté le ${formatDate(connections[0].created_at)}`
+                  ? 'Synchronisez vos comptes pour le rapprochement automatique'
                   : 'Connectez votre banque pour synchroniser vos transactions'}
               </p>
             </div>
           </div>
-          <div>
-            {connections.length > 0 ? (
+          <div className="flex items-center gap-2">
+            {connections.length > 0 && (
               <Button
                 variant="secondary"
                 size="sm"
                 icon={<RefreshCw className={`h-3.5 w-3.5 ${syncing ? 'animate-spin' : ''}`} />}
-                onClick={handleSync}
+                onClick={() => handleSync()}
                 loading={syncing}
               >
                 Tout synchroniser
               </Button>
-            ) : (
-              <Button variant="primary" size="sm" onClick={handlePlaidLink}>
-                Connecter mon compte bancaire
-              </Button>
             )}
+            <Button variant="primary" size="sm" onClick={handleBankConnect}>
+              {connections.length > 0 ? 'Ajouter un compte' : 'Connecter ma banque'}
+            </Button>
           </div>
         </div>
+
+        {connections.length > 0 && (
+          <div className="space-y-3">
+            {connections.map((conn) => {
+              const linkedProperty = properties.find((p) => p.id === conn.property_id);
+              return (
+                <div
+                  key={conn.id}
+                  className="flex items-center justify-between p-3 rounded-xl bg-bg-card border border-border-light"
+                >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <Landmark className="h-4 w-4 text-terracotta shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-text-primary truncate">
+                        {conn.institution_name || 'Compte bancaire'}
+                      </p>
+                      <p className="text-xs text-text-secondary">
+                        Connecté le {formatDate(conn.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <select
+                      value={conn.property_id || ''}
+                      onChange={(e) => handleLinkProperty(conn.id, e.target.value || null)}
+                      className="text-xs border border-border-light rounded-lg px-2 py-1.5 bg-bg-elevated text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/30 max-w-[180px]"
+                    >
+                      <option value="">Tous les biens</option>
+                      {properties.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name || p.address}
+                        </option>
+                      ))}
+                    </select>
+                    {linkedProperty && (
+                      <span className="text-[10px] font-semibold text-accent bg-accent/10 px-2 py-0.5 rounded-full whitespace-nowrap">
+                        {linkedProperty.name || linkedProperty.address}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </Card>
 
       {/* SECTION 4 — Export comptable */}
