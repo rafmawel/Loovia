@@ -13,8 +13,8 @@ const categories = [
         a: 'Loovia est une application de gestion locative en ligne. Vous ajoutez vos biens, vos locataires et vos baux, puis Loovia s\'occupe du suivi des loyers, de l\'envoi des quittances et des notifications automatiques.',
       },
       {
-        q: 'Quelles sont les différences entre le plan Gratuit et le plan Pro ?',
-        a: 'Le plan Gratuit permet de gérer jusqu\'à 2 biens avec les fonctionnalités essentielles (locataires, paiements, quittances, notifications). Le plan Pro débloque les biens illimités, l\'analytique avancée, la révision IRL automatique, la signature électronique et supprime les publicités.',
+        q: 'Quelles sont les différences entre les plans ?',
+        a: 'Le plan Gratuit permet de gérer jusqu\'à 3 biens avec les fonctionnalités essentielles (locataires, paiements, quittances, signature électronique, notifications). Le plan Premium (9,90 €/mois) débloque les biens illimités, l\'analytique avancée, la révision IRL automatique et supprime les publicités. Le plan Pro (14,90 €/mois) ajoute la gestion multi-SCI, les comptes bancaires multiples et la vision consolidée.',
       },
       {
         q: 'Mes données sont-elles sécurisées ?',
@@ -52,7 +52,7 @@ const categories = [
       },
       {
         q: 'Comment fonctionne la signature électronique ?',
-        a: 'La signature électronique est disponible avec le plan Pro. Depuis la fiche d\'un bail, cliquez sur "Envoyer en signature". Le locataire reçoit un lien par email pour signer le document en ligne.',
+        a: 'La signature électronique est disponible pour tous les utilisateurs, y compris le plan Gratuit. Depuis la fiche d\'un bail, cliquez sur "Envoyer en signature". Le locataire reçoit un lien par email pour signer le document en ligne.',
       },
     ],
   },
@@ -69,7 +69,7 @@ const categories = [
       },
       {
         q: 'Qu\'est-ce que la révision IRL ?',
-        a: 'L\'Indice de Référence des Loyers (IRL), publié par l\'INSEE, permet de réviser annuellement le montant du loyer. Avec le plan Pro, Loovia détecte automatiquement les révisions dues et calcule le nouveau loyer pour vous.',
+        a: 'L\'Indice de Référence des Loyers (IRL), publié par l\'INSEE, permet de réviser annuellement le montant du loyer. À partir du plan Premium, Loovia détecte automatiquement les révisions dues et calcule le nouveau loyer pour vous.',
       },
     ],
   },
@@ -77,12 +77,12 @@ const categories = [
     title: 'Compte & Abonnement',
     faqs: [
       {
-        q: 'Comment passer au plan Pro ?',
-        a: 'Rendez-vous dans "Paramètres" et cliquez sur "Passer au Pro". Vous serez redirigé vers notre page de paiement sécurisée (Stripe). L\'abonnement est mensuel, sans engagement.',
+        q: 'Comment changer de plan ?',
+        a: 'Rendez-vous dans "Paramètres" et choisissez le plan Premium ou Pro. Vous serez redirigé vers notre page de paiement sécurisée (Stripe). L\'abonnement est mensuel, sans engagement.',
       },
       {
-        q: 'Comment résilier mon abonnement Pro ?',
-        a: 'Depuis "Paramètres", cliquez sur "Gérer mon abonnement". Vous pouvez résilier à tout moment. Votre accès Pro reste actif jusqu\'à la fin de la période payée. Vos données sont conservées et vous repassez automatiquement au plan Gratuit.',
+        q: 'Comment résilier mon abonnement ?',
+        a: 'Depuis "Paramètres", cliquez sur "Gérer mon abonnement". Vous pouvez résilier à tout moment. Votre accès reste actif jusqu\'à la fin de la période payée. Vos données sont conservées et vous repassez automatiquement au plan Gratuit.',
       },
       {
         q: 'Puis-je exporter mes données ?',

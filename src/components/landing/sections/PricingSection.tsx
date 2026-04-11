@@ -6,18 +6,18 @@ import { useInView } from '../useInView'
 const plans = [
   {
     name: 'Gratuit', price: '0', period: '/mois', description: 'Pour démarrer sereinement',
-    features: ['Jusqu\'à 3 biens', 'Gestion des locataires', 'Suivi des paiements', 'Quittances de loyer', 'Notifications in-app', 'Application mobile'],
+    features: ['Jusqu\'à 3 biens', 'Gestion des locataires', 'Suivi des paiements', 'Quittances de loyer', 'Signature électronique', 'Notifications in-app', 'Application mobile'],
     cta: 'Commencer gratuitement', href: '/register', highlighted: false,
   },
   {
-    name: 'Pro', price: '9,90', period: '/mois', description: 'Pour les propriétaires exigeants',
-    features: ['Biens illimités', 'Tout le plan Gratuit', 'Analytique avancée', 'Révision IRL automatique', 'Signature électronique', 'Sans publicité', 'Support prioritaire'],
-    cta: 'Passer à Pro', href: '/register', highlighted: true,
+    name: 'Premium', price: '9,90', period: '/mois', description: 'Pour les propriétaires exigeants',
+    features: ['Biens illimités', 'Tout le plan Gratuit', 'Analytique avancée', 'Révision IRL automatique', 'Sans publicité', 'Support prioritaire'],
+    cta: 'Passer au Premium', href: '/register', highlighted: true,
   },
   {
-    name: 'Multi-SCI', price: '14,90', period: '/mois', description: 'Pour gérer plusieurs structures',
-    features: ['Tout le plan Pro', 'SCI multiples (IR, IS…)', 'Basculer entre vos structures', 'Analytique par SCI', 'Vision globale consolidée', 'Comparatif financier entre SCI'],
-    cta: 'Choisir Multi-SCI', href: '/register', highlighted: false,
+    name: 'Pro', price: '14,90', period: '/mois', description: 'Pour gérer plusieurs biens et structures',
+    features: ['Tout le plan Premium', 'Comptes bancaires multiples', 'SCI multiples (IR, IS…)', 'Basculer entre vos structures', 'Analytique par SCI', 'Vision globale consolidée', 'Comparatif financier'],
+    cta: 'Passer au Pro', href: '/register', highlighted: false,
   },
 ]
 

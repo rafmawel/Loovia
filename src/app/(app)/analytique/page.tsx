@@ -218,7 +218,7 @@ export default function AnalytiquePage() {
   //             <Lock className="h-8 w-8 text-terracotta" />
   //           </div>
   //           <h2 className="text-lg font-bold text-text-primary mb-2">
-  //             Fonctionnalité réservée au plan Pro
+  //             Fonctionnalité réservée au plan Premium
   //           </h2>
   //           <p className="text-sm text-text-secondary max-w-md mb-6">
   //             Accédez à des graphiques détaillés sur vos revenus, votre taux d&apos;occupation,
@@ -229,7 +229,7 @@ export default function AnalytiquePage() {
   //             icon={<Crown className="h-4 w-4" />}
   //             onClick={() => router.push('/parametres')}
   //           >
-  //             Passer au Pro
+  //             Passer au Premium
   //           </Button>
   //         </div>
   //       </Card>

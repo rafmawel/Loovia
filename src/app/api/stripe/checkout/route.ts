@@ -15,13 +15,13 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json().catch(() => ({}));
-    const plan = body.plan || 'pro';
+    const plan = body.plan || 'premium';
     const promoCode: string | undefined = body.promoCode || undefined;
 
     // Déterminer le price ID
-    const priceId = plan === 'multi_sci'
-      ? process.env.STRIPE_MULTI_SCI_PRICE_ID || process.env.STRIPE_PRO_PRICE_ID!
-      : process.env.STRIPE_PRO_PRICE_ID!;
+    const priceId = plan === 'pro'
+      ? process.env.STRIPE_PRO_PRICE_ID!
+      : process.env.STRIPE_PREMIUM_PRICE_ID!;
 
     // Vérifier si un customer Stripe existe déjà
     const { data: subscription } = await supabase

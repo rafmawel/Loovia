@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Code beta invalide' }, { status: 400 });
     }
 
-    // Activer le plan Pro gratuitement
+    // Activer le plan Pro (tier le plus élevé) gratuitement pour les beta testeurs
     const admin = createAdminClient();
     const { error } = await admin.from('subscriptions').upsert(
       {

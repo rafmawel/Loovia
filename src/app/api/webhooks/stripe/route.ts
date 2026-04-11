@@ -31,12 +31,14 @@ export async function POST(request: NextRequest) {
       const userId = session.metadata?.user_id;
       if (!userId) break;
 
+      const plan = session.metadata?.plan === 'pro' ? 'pro' : 'premium';
+
       await supabase.from('subscriptions').upsert(
         {
           user_id: userId,
           stripe_customer_id: session.customer as string,
           stripe_subscription_id: session.subscription as string,
-          plan: 'pro',
+          plan,
           status: 'active',
         },
         { onConflict: 'user_id' },

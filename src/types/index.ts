@@ -258,7 +258,7 @@ export interface Notification {
 }
 
 // Types pour les abonnements Stripe
-export type SubscriptionPlan = 'free' | 'pro' | 'multi_sci';
+export type SubscriptionPlan = 'free' | 'premium' | 'pro';
 export type SubscriptionStatus = 'inactive' | 'active' | 'past_due' | 'canceled' | 'trialing';
 
 export interface Subscription {

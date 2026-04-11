@@ -8,7 +8,7 @@ const faqs = [
   {
     question: 'Loovia est-il vraiment gratuit ?',
     answer:
-      'Oui, le plan Gratuit vous permet de gérer jusqu\'à 2 biens sans limite de durée. Vous avez accès à la gestion des locataires, au suivi des paiements, aux quittances et aux notifications. Le plan Pro débloque les biens illimités, l\'analytique avancée et la signature électronique.',
+      'Oui, le plan Gratuit vous permet de gérer jusqu\'à 3 biens sans limite de durée. Vous avez accès à la gestion des locataires, au suivi des paiements, aux quittances, à la signature électronique et aux notifications. Le plan Premium débloque les biens illimités, l\'analytique avancée et supprime les publicités.',
   },
   {
     question: 'Ai-je besoin de connaissances techniques ?',
@@ -23,12 +23,12 @@ const faqs = [
   {
     question: 'Puis-je gérer plusieurs biens et locataires ?',
     answer:
-      'Avec le plan Gratuit, vous pouvez gérer jusqu\'à 2 biens et autant de locataires que nécessaire. Le plan Pro supprime cette limite : gérez un portefeuille entier depuis un seul tableau de bord.',
+      'Avec le plan Gratuit, vous pouvez gérer jusqu\'à 3 biens et autant de locataires que nécessaire. Le plan Premium supprime cette limite : gérez un portefeuille entier depuis un seul tableau de bord.',
   },
   {
     question: 'Comment fonctionne la révision IRL automatique ?',
     answer:
-      'Loovia récupère automatiquement les indices IRL publiés par l\'INSEE. Quand une révision est due sur l\'un de vos baux, vous êtes notifié et le nouveau loyer est calculé pour vous. Cette fonctionnalité est disponible dans le plan Pro.',
+      'Loovia récupère automatiquement les indices IRL publiés par l\'INSEE. Quand une révision est due sur l\'un de vos baux, vous êtes notifié et le nouveau loyer est calculé pour vous. Cette fonctionnalité est disponible à partir du plan Premium.',
   },
   {
     question: 'Est-ce que Loovia remplace un gestionnaire immobilier ?',
@@ -48,12 +48,12 @@ const faqs = [
   {
     question: 'Puis-je gérer des biens en SCI ?',
     answer:
-      'Oui. Lors de l\'ajout d\'un bien, vous pouvez indiquer s\'il est détenu en SCI (à l\'IR ou à l\'IS) et rattacher le bien à une structure existante ou en créer une nouvelle. Le plan Multi-SCI à 14,90 €/mois vous permet de gérer plusieurs SCI avec une vision consolidée.',
+      'Oui. Lors de l\'ajout d\'un bien, vous pouvez indiquer s\'il est détenu en SCI (à l\'IR ou à l\'IS) et rattacher le bien à une structure existante ou en créer une nouvelle. Le plan Pro à 14,90 €/mois vous permet de gérer plusieurs SCI avec une vision consolidée et des comptes bancaires multiples.',
   },
   {
     question: 'Comment résilier ou changer de plan ?',
     answer:
-      'Vous pouvez passer du plan Gratuit au Pro (et inversement) à tout moment depuis vos paramètres. Aucun engagement, aucuns frais cachés. La résiliation du Pro est immédiate et vous conservez vos données.',
+      'Vous pouvez passer du plan Gratuit au Premium ou au Pro à tout moment depuis vos paramètres. Aucun engagement, aucuns frais cachés. La résiliation est immédiate et vous conservez vos données.',
   },
 ]
 

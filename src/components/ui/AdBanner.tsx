@@ -30,7 +30,7 @@ export default function AdBanner({ className = '' }: AdBannerProps) {
         <p>Espace publicitaire</p>
       </div>
       <p className="text-[10px] text-text-muted mt-1">
-        Passez au Pro pour supprimer les publicités
+        Passez au Premium pour supprimer les publicités
       </p>
     </div>
   );

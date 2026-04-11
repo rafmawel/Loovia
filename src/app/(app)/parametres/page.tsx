@@ -80,8 +80,8 @@ export default function ParametresPage() {
     }
   }
 
-  // Upgrade vers Pro
-  async function handleUpgrade(plan: 'pro' | 'multi_sci') {
+  // Upgrade vers Premium ou Pro
+  async function handleUpgrade(plan: 'premium' | 'pro') {
     setUpgrading(true);
     try {
       const res = await fetch('/api/stripe/checkout', {
@@ -218,13 +218,13 @@ export default function ParametresPage() {
             Abonnement
           </h2>
 
-          {(currentPlan === 'pro' || currentPlan === 'multi_sci') && isActive ? (
+          {(currentPlan === 'premium' || currentPlan === 'pro') && isActive ? (
             <div className="space-y-4">
               <div className="flex items-center gap-3 p-4 rounded-xl bg-accent/10 border border-accent/20">
                 <Sparkles className="h-5 w-5 text-accent shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm font-bold text-text-primary">
-                    {currentPlan === 'multi_sci' ? 'Plan Multi-SCI' : 'Plan Pro'}
+                    {currentPlan === 'pro' ? 'Plan Pro' : 'Plan Premium'}
                   </p>
                   <p className="text-xs text-text-secondary">
                     {subscription?.cancel_at_period_end
@@ -247,11 +247,11 @@ export default function ParametresPage() {
                 </div>
               </div>
 
-              {/* Plan Pro */}
+              {/* Plan Premium */}
               <div className="p-5 rounded-xl border border-accent/30 bg-accent/5">
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <p className="text-sm font-bold text-text-primary">Pro</p>
+                    <p className="text-sm font-bold text-text-primary">Premium</p>
                     <p className="text-xs text-text-secondary">Pour les propriétaires exigeants</p>
                   </div>
                   <p className="text-right">
@@ -266,7 +266,6 @@ export default function ParametresPage() {
                     'Analytique avancée',
                     'Révision IRL automatique',
                     'Export fiscal avancé',
-                    'Signature électronique',
                   ].map((feature) => (
                     <li key={feature} className="flex items-center gap-2 text-xs text-text-secondary">
                       <Check className="h-3.5 w-3.5 text-accent shrink-0" />
@@ -278,22 +277,22 @@ export default function ParametresPage() {
                   variant="primary"
                   size="sm"
                   icon={<Crown className="h-4 w-4" />}
-                  onClick={() => handleUpgrade('pro')}
+                  onClick={() => handleUpgrade('premium')}
                   loading={upgrading}
                 >
-                  Passer au Pro
+                  Passer au Premium
                 </Button>
               </div>
 
-              {/* Plan Multi-SCI */}
+              {/* Plan Pro */}
               <div className="p-5 rounded-xl border border-accent/30 bg-accent/5">
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <p className="text-sm font-bold text-text-primary flex items-center gap-2">
-                      Multi-SCI
+                      Pro
                       <span className="text-[10px] font-semibold text-accent bg-accent/10 px-2 py-0.5 rounded-full">Populaire</span>
                     </p>
-                    <p className="text-xs text-text-secondary">Pour gérer plusieurs structures</p>
+                    <p className="text-xs text-text-secondary">Pour gérer plusieurs biens et structures</p>
                   </div>
                   <p className="text-right">
                     <span className="text-2xl font-extrabold text-text-primary">14,90&euro;</span>
@@ -302,7 +301,8 @@ export default function ParametresPage() {
                 </div>
                 <ul className="space-y-2 mb-4">
                   {[
-                    'Tout le plan Pro inclus',
+                    'Tout le plan Premium inclus',
+                    'Comptes bancaires multiples',
                     'SCI multiples (IR, IS…)',
                     'Basculer entre vos structures',
                     'Analytique par SCI',
@@ -319,10 +319,10 @@ export default function ParametresPage() {
                   variant="primary"
                   size="sm"
                   icon={<Building2 className="h-4 w-4" />}
-                  onClick={() => handleUpgrade('multi_sci')}
+                  onClick={() => handleUpgrade('pro')}
                   loading={upgrading}
                 >
-                  Passer au Multi-SCI
+                  Passer au Pro
                 </Button>
               </div>
             </div>
