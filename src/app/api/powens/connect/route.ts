@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getAuthToken, createPowensUser, getConnectUrl } from '@/lib/api/powens';
+import { getAuthToken, getConnectUrl } from '@/lib/api/powens';
 
 export async function POST() {
   try {
@@ -45,17 +45,16 @@ export async function POST() {
       // Réutiliser le token permanent existant (même utilisateur Powens)
       token = existingConnections[0].access_token;
     } else {
-      // Créer un nouveau token et utilisateur Powens
-      const tempToken = await getAuthToken();
-      const powensUser = await createPowensUser(tempToken);
-      token = powensUser.token;
+      // /auth/init avec client_id + client_secret crée un utilisateur permanent
+      const authResult = await getAuthToken();
+      token = authResult.auth_token;
 
       // Sauvegarder le token permanent dans bank_connections
       const admin = createAdminClient();
       await admin.from('bank_connections').insert({
         user_id: user.id,
         access_token: token,
-        item_id: String(powensUser.id),
+        item_id: String(authResult.id_user),
       });
     }
 

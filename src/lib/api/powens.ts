@@ -37,16 +37,15 @@ async function powensRequest<T>(
   return response.json();
 }
 
-// Authentifier l'application et obtenir un token temporaire
-export async function getAuthToken(): Promise<string> {
-  const basicAuth = Buffer.from(`${POWENS_CLIENT_ID}:${POWENS_CLIENT_SECRET}`).toString('base64');
-
+// Authentifier l'application et obtenir un token permanent
+export async function getAuthToken(): Promise<{ auth_token: string; id_user: number }> {
   const response = await fetch(`${POWENS_BASE_URL}/auth/init`, {
     method: 'POST',
-    headers: {
-      'Authorization': `Basic ${basicAuth}`,
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      client_id: POWENS_CLIENT_ID,
+      client_secret: POWENS_CLIENT_SECRET,
+    }),
   });
 
   if (!response.ok) {
@@ -54,8 +53,7 @@ export async function getAuthToken(): Promise<string> {
     throw new Error(`Erreur Powens auth: ${response.status} - ${error}`);
   }
 
-  const data = await response.json();
-  return data.token;
+  return response.json();
 }
 
 // Créer un utilisateur Powens permanent (lié à un user Loovia)
