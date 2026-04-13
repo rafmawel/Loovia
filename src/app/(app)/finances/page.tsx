@@ -11,7 +11,7 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import {
   Wallet, TrendingUp, TrendingDown, AlertTriangle, Landmark,
-  RefreshCw, Check, X, Tag, ChevronDown, Filter, FileText, Send, Download,
+  RefreshCw, Check, X, Tag, ChevronDown, Filter, FileText, Send, Download, Trash2,
 } from 'lucide-react';
 import AdVideo from '@/components/ui/AdVideo';
 import { formatCurrency, formatDate, fullName, formatMonthYear } from '@/lib/utils';
@@ -216,6 +216,22 @@ export default function FinancesPage() {
       fetchAll();
     } catch {
       toast.error('Erreur lors de l\'association');
+    }
+  };
+
+  const handleDisconnect = async (connectionId: string, bankName: string) => {
+    if (!confirm(`Déconnecter "${bankName}" ? Les transactions importées seront supprimées.`)) return;
+    try {
+      const res = await fetch('/api/powens/disconnect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ connectionId }),
+      });
+      if (!res.ok) throw new Error('Erreur');
+      toast.success('Compte bancaire déconnecté');
+      fetchAll();
+    } catch {
+      toast.error('Erreur lors de la déconnexion');
     }
   };
 
@@ -615,11 +631,13 @@ export default function FinancesPage() {
                         </option>
                       ))}
                     </select>
-                    {linkedProperty && (
-                      <span className="text-[10px] font-semibold text-accent bg-accent/10 px-2 py-0.5 rounded-full whitespace-nowrap">
-                        {linkedProperty.name || linkedProperty.address}
-                      </span>
-                    )}
+                    <button
+                      onClick={() => handleDisconnect(conn.id, conn.institution_name || 'Compte bancaire')}
+                      className="p-1.5 text-text-muted hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Déconnecter ce compte"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 </div>
               );
