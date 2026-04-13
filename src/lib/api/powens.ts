@@ -39,14 +39,14 @@ async function powensRequest<T>(
 
 // Authentifier l'application et obtenir un token temporaire
 export async function getAuthToken(): Promise<string> {
-  const params = new URLSearchParams();
-  params.set('client_id', POWENS_CLIENT_ID);
-  params.set('client_secret', POWENS_CLIENT_SECRET);
+  const basicAuth = Buffer.from(`${POWENS_CLIENT_ID}:${POWENS_CLIENT_SECRET}`).toString('base64');
 
   const response = await fetch(`${POWENS_BASE_URL}/auth/init`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params.toString(),
+    headers: {
+      'Authorization': `Basic ${basicAuth}`,
+      'Content-Type': 'application/json',
+    },
   });
 
   if (!response.ok) {
