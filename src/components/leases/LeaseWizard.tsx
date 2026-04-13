@@ -406,7 +406,7 @@ export default function LeaseWizard({
                 ? 'bg-terracotta/10 text-terracotta border border-terracotta/30'
                 : s.number < step
                   ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-pointer hover:bg-emerald-100'
-                  : 'bg-stone-50 text-stone-400 border border-stone-100',
+                  : 'bg-bg-card text-text-muted border border-border',
             ].join(' ')}
           >
             <span
@@ -416,7 +416,7 @@ export default function LeaseWizard({
                   ? 'bg-terracotta text-white'
                   : s.number < step
                     ? 'bg-emerald-600 text-white'
-                    : 'bg-stone-200 text-stone-500',
+                    : 'bg-stone-200 text-text-secondary',
               ].join(' ')}
             >
               {s.number < step ? '✓' : s.number}
@@ -464,7 +464,7 @@ export default function LeaseWizard({
       </div>
 
       {/* Navigation */}
-      <div className="flex items-center justify-between pt-4 mt-4 border-t border-stone-200/50">
+      <div className="flex items-center justify-between pt-4 mt-4 border-t border-border-light/50">
         <Button
           variant="ghost"
           onClick={goPrev}

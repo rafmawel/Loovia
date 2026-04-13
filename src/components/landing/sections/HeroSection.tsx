@@ -1,79 +1,54 @@
 'use client'
-
 import Link from 'next/link'
-import { ArrowRight, ChevronDown } from 'lucide-react'
+import { ArrowRight, Shield, ChevronRight } from 'lucide-react'
 import { MockupDashboard } from '../MockupDashboard'
-import { AntWithKeys } from '../AntMascot'
-import { Star4 } from '../Decorations'
 
 export function HeroSection() {
   return (
-    <section className="relative pt-28 sm:pt-36 pb-20 sm:pb-28 overflow-hidden bg-bg-primary">
-      <div className="absolute inset-0 bg-dot-grid opacity-20" />
-      <div className="absolute top-10 -right-40 w-[600px] h-[600px] rounded-full bg-accent/5 blur-[140px]" />
-      <div className="absolute -bottom-20 -left-20 w-[400px] h-[400px] rounded-full bg-pastel-lavender/5 blur-[120px]" />
+    <section className="relative pt-32 sm:pt-40 pb-24 sm:pb-32 bg-bg-primary overflow-hidden">
+      {/* Gradient orb */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-accent/[0.04] rounded-full blur-[120px]" />
 
-      {/* Étoiles décoratives */}
-      <Star4 className="absolute top-32 right-[12%] w-4 h-4 animate-twinkle hidden lg:block" color="#F4A77C" />
-      <Star4 className="absolute top-48 left-[8%] w-3 h-3 animate-twinkle-d1 hidden lg:block" color="white" />
-      <Star4 className="absolute bottom-40 right-[25%] w-5 h-5 animate-twinkle-d2 hidden lg:block" color="#C0B0DC" />
+      <div className="max-w-[1200px] mx-auto px-6 relative z-10">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          {/* Text */}
+          <div>
+            <h1 className="font-display text-[clamp(40px,5.5vw,72px)] font-extrabold leading-[1] tracking-[-0.035em] text-white">
+              Gérez vos biens.
+              <br />
+              <span className="gradient-text">Loovia</span> s&apos;occupe du reste.
+            </h1>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
-        {/* Text centered */}
-        <div className="text-center max-w-3xl mx-auto">
-          <span className="inline-block text-accent font-mono text-[11px] font-medium tracking-[0.12em] uppercase mb-6">
-            &#9654; Gestion locative
-          </span>
+            <p className="mt-7 text-[17px] text-text-secondary leading-[1.7] max-w-[460px]">
+              Loyers automatisés, quittances en un clic, suivi financier complet.
+              La gestion locative conçue pour les propriétaires qui veulent
+              l&apos;efficacité sans la complexité.
+            </p>
 
-          <h1 className="font-display text-[clamp(44px,7vw,88px)] font-extrabold leading-[0.95] tracking-[-0.04em]">
-            Gérez vos biens.
-            <br />
-            <span className="relative inline-block">
-              Pas vos{' '}
-              <span className="text-accent relative">
-                papiers
-                <span className="absolute left-0 -bottom-1 w-full h-[4px] bg-pastel-peach rounded-full" />
-              </span>
-              .
-            </span>
-          </h1>
+            <div className="mt-9 flex flex-wrap gap-3">
+              <Link href="/register" className="inline-flex items-center gap-2 h-12 px-7 rounded-lg bg-accent text-white font-semibold text-[15px] hover:brightness-110 transition-all shadow-lg shadow-accent/20">
+                Commencer gratuitement <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link href="#fonctionnalites" className="inline-flex items-center gap-2 h-12 px-7 rounded-lg border border-border-light text-text-secondary font-semibold text-[15px] hover:border-accent/40 hover:text-white transition-all">
+                Découvrir <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
 
-          <p className="mt-8 text-lg text-text-secondary leading-[1.75] max-w-xl mx-auto">
-            Loovia centralise tout ce qu&apos;un propriétaire jongle en permanence
-            &mdash; loyers, baux, quittances, comptabilité. Automatisé. Fiable.
-          </p>
-
-          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/register" className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-md bg-accent text-white font-display font-bold text-[15px] border-2 border-accent hover:bg-transparent hover:text-accent transition-all">
-              Rejoindre la bêta gratuite
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link href="#comment-ca-marche" className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-md border-2 border-border text-text-secondary font-display font-bold text-[15px] hover:border-pastel-peach hover:text-pastel-peach transition-all">
-              Voir comment ça marche
-              <ChevronDown className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-
-        {/* Mockup Dashboard — le visuel principal */}
-        <div className="mt-16 relative">
-          {/* Petite fourmi discrète en haut à gauche du mockup */}
-          <div className="absolute -top-8 -left-4 z-20 hidden lg:block">
-            <AntWithKeys className="w-16 h-16 animate-float-slow" />
+            <div className="mt-9 flex items-center gap-5 text-[13px] text-text-muted">
+              <span className="flex items-center gap-1.5"><Shield className="h-3.5 w-3.5 text-accent/70" /> SSL &amp; RGPD</span>
+              <span className="w-px h-3 bg-border" />
+              <span>Gratuit pour démarrer</span>
+              <span className="w-px h-3 bg-border" />
+              <span>Prêt en 2 min</span>
+            </div>
           </div>
 
-          <div className="relative">
-            <MockupDashboard className="w-full max-w-4xl mx-auto" />
-            {/* Halo glow derrière le mockup */}
-            <div className="absolute inset-0 -z-10 bg-gradient-to-b from-accent/8 via-pastel-lavender/5 to-transparent blur-3xl rounded-3xl scale-110" />
+          {/* Mockup */}
+          <div className="relative hidden lg:block">
+            {/* Halo orange */}
+            <div className="absolute -inset-16 bg-accent/[0.12] rounded-full blur-[80px] pointer-events-none" />
+            <MockupDashboard className="relative w-full" />
           </div>
-        </div>
-
-        {/* Beta banner */}
-        <div className="mt-14 py-3 border-t border-border text-center">
-          <p className="text-[12px] font-mono text-text-muted tracking-wider">
-            <span className="text-accent">//</span> Actuellement en bêta ouverte &mdash; accès gratuit pour les premiers propriétaires
-          </p>
         </div>
       </div>
     </section>

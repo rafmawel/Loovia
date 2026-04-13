@@ -3,12 +3,11 @@
 import { Navbar } from './sections/Navbar'
 import { HeroSection } from './sections/HeroSection'
 import { ProblemSection } from './sections/ProblemSection'
-import { SolutionSection } from './sections/SolutionSection'
 import { FeaturesSection } from './sections/FeaturesSection'
 import { MockupSection } from './sections/MockupSection'
-import { StorySection } from './sections/StorySection'
 import { StepsSection } from './sections/StepsSection'
 import { PricingSection } from './sections/PricingSection'
+import { FAQSection } from './sections/FAQSection'
 import { CTASection } from './sections/CTASection'
 import { FooterSection } from './sections/FooterSection'
 
@@ -18,12 +17,11 @@ export function LandingPage() {
       <Navbar />
       <HeroSection />
       <ProblemSection />
-      <SolutionSection />
       <FeaturesSection />
       <MockupSection />
-      <StorySection />
       <StepsSection />
       <PricingSection />
+      <FAQSection />
       <CTASection />
       <FooterSection />
     </div>

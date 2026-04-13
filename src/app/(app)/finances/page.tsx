@@ -148,53 +148,74 @@ export default function FinancesPage() {
 
   // ── Actions ──────────────────────────────────────────────────────
 
-  const handlePlaidLink = async () => {
+  const handleBankConnect = async () => {
     try {
-      const res = await fetch('/api/plaid/create-link-token', { method: 'POST' });
+      const res = await fetch('/api/powens/connect', { method: 'POST' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      // Charger Plaid Link dynamiquement
-      const { default: loadPlaidLink } = await import('@/lib/plaid-link');
-      await loadPlaidLink(data.link_token, async (publicToken: string, metadata: Record<string, unknown>) => {
-        const institution = metadata?.institution as { name?: string } | undefined;
-        const exchangeRes = await fetch('/api/plaid/exchange-token', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            publicToken,
-            institutionName: institution?.name || null,
-          }),
-        });
-        if (!exchangeRes.ok) throw new Error('Erreur lors de la connexion');
-        toast.success('Compte bancaire connecté');
-        fetchAll();
-      });
+      // Ouvrir la webview Powens dans une popup
+      const { default: openPowensConnect } = await import('@/lib/powens-connect');
+      await openPowensConnect(data.connect_url);
+
+      // Recharger les données après fermeture de la popup
+      toast.success('Connexion bancaire mise à jour');
+      fetchAll();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erreur');
     }
   };
 
-  const handleSync = async () => {
+  const handleSync = async (specificConnectionId?: string) => {
     if (connections.length === 0) return;
     setSyncing(true);
+
     try {
-      const res = await fetch('/api/finance/sync-bank', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ connectionId: connections[0].id }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      // Synchroniser toutes les connexions ou une seule
+      const connectionsToSync = specificConnectionId
+        ? connections.filter((c) => c.id === specificConnectionId)
+        : connections;
+
+      let totalAdded = 0;
+      let totalMatched = 0;
+      let totalSuggestions = 0;
+
+      for (const conn of connectionsToSync) {
+        const res = await fetch('/api/finance/sync-bank', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ connectionId: conn.id }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        totalAdded += data.added;
+        totalMatched += data.matched;
+        totalSuggestions += data.suggestions;
+      }
 
       toast.success(
-        `Synchronisation terminée : ${data.added} nouvelles, ${data.matched} matchées, ${data.suggestions} suggestions`,
+        `Synchronisation terminée : ${totalAdded} nouvelles, ${totalMatched} matchées, ${totalSuggestions} suggestions`,
       );
       fetchAll();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erreur de synchronisation');
     } finally {
       setSyncing(false);
+    }
+  };
+
+  const handleLinkProperty = async (connectionId: string, propertyId: string | null) => {
+    try {
+      const res = await fetch('/api/powens/link-property', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ connectionId, propertyId }),
+      });
+      if (!res.ok) throw new Error('Erreur');
+      toast.success(propertyId ? 'Compte associé au bien' : 'Association retirée');
+      fetchAll();
+    } catch {
+      toast.error('Erreur lors de l\'association');
     }
   };
 
@@ -401,7 +422,7 @@ export default function FinancesPage() {
               Loyer détecté ?
             </span>
             {tenant && (
-              <span className="text-xs text-stone-500">
+              <span className="text-xs text-text-secondary">
                 {tenant.first_name} {tenant.last_name}
               </span>
             )}
@@ -437,7 +458,7 @@ export default function FinancesPage() {
       <div>
         <PageHeader title="Finances" description="Suivi financier et rapprochement bancaire" />
         <div className="flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-stone-200 border-t-terracotta" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border-light border-t-accent" />
         </div>
       </div>
     );
@@ -487,7 +508,7 @@ export default function FinancesPage() {
               return (
                 <div
                   key={p.id}
-                  className="flex items-center justify-between p-3 rounded-xl bg-white border border-red-100"
+                  className="flex items-center justify-between p-3 rounded-xl bg-bg-elevated border border-red-100"
                 >
                   <div>
                     <p className="text-sm font-medium">
@@ -497,9 +518,9 @@ export default function FinancesPage() {
                         </Link>
                       ) : '—'}
                     </p>
-                    <p className="text-xs text-stone-500">
+                    <p className="text-xs text-text-secondary">
                       {property && p.lease?.property_id ? (
-                        <Link href={`/biens/${p.lease.property_id}`} className="text-stone-500 hover:text-terracotta hover:underline">
+                        <Link href={`/biens/${p.lease.property_id}`} className="text-text-secondary hover:text-terracotta hover:underline">
                           {property.address}
                         </Link>
                       ) : '—'}
@@ -525,70 +546,112 @@ export default function FinancesPage() {
         </Card>
       )}
 
-      {/* SECTION 3 — Connexion bancaire */}
+      {/* SECTION 3 — Connexions bancaires */}
       <Card className="mb-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="rounded-full bg-terracotta/10 p-3 text-terracotta">
               <Landmark className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-slate-900">
-                {connections.length > 0
-                  ? connections[0].institution_name || 'Compte connecté'
-                  : 'Connexion bancaire'}
+              <h2 className="text-sm font-bold text-text-primary">
+                Comptes bancaires ({connections.length})
               </h2>
-              <p className="text-xs text-stone-500">
+              <p className="text-xs text-text-secondary">
                 {connections.length > 0
-                  ? `Connecté le ${formatDate(connections[0].created_at)}`
+                  ? 'Synchronisez vos comptes pour le rapprochement automatique'
                   : 'Connectez votre banque pour synchroniser vos transactions'}
               </p>
             </div>
           </div>
-          <div>
-            {connections.length > 0 ? (
+          <div className="flex items-center gap-2">
+            {connections.length > 0 && (
               <Button
                 variant="secondary"
                 size="sm"
                 icon={<RefreshCw className={`h-3.5 w-3.5 ${syncing ? 'animate-spin' : ''}`} />}
-                onClick={handleSync}
+                onClick={() => handleSync()}
                 loading={syncing}
               >
                 Tout synchroniser
               </Button>
-            ) : (
-              <Button variant="primary" size="sm" onClick={handlePlaidLink}>
-                Connecter mon compte bancaire
-              </Button>
             )}
+            <Button variant="primary" size="sm" onClick={handleBankConnect}>
+              {connections.length > 0 ? 'Ajouter un compte' : 'Connecter ma banque'}
+            </Button>
           </div>
         </div>
+
+        {connections.length > 0 && (
+          <div className="space-y-3">
+            {connections.map((conn) => {
+              const linkedProperty = properties.find((p) => p.id === conn.property_id);
+              return (
+                <div
+                  key={conn.id}
+                  className="flex items-center justify-between p-3 rounded-xl bg-bg-card border border-border-light"
+                >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <Landmark className="h-4 w-4 text-terracotta shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-text-primary truncate">
+                        {conn.institution_name || 'Compte bancaire'}
+                      </p>
+                      <p className="text-xs text-text-secondary">
+                        Connecté le {formatDate(conn.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <select
+                      value={conn.property_id || ''}
+                      onChange={(e) => handleLinkProperty(conn.id, e.target.value || null)}
+                      className="text-xs border border-border-light rounded-lg px-2 py-1.5 bg-bg-elevated text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/30 max-w-[180px]"
+                    >
+                      <option value="">Tous les biens</option>
+                      {properties.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name || p.address}
+                        </option>
+                      ))}
+                    </select>
+                    {linkedProperty && (
+                      <span className="text-[10px] font-semibold text-accent bg-accent/10 px-2 py-0.5 rounded-full whitespace-nowrap">
+                        {linkedProperty.name || linkedProperty.address}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </Card>
 
       {/* SECTION 4 — Export comptable */}
       <Card className="mb-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-sm font-bold text-slate-900">Export comptable</h2>
-            <p className="text-xs text-stone-500">
+            <h2 className="text-sm font-bold text-text-primary">Export comptable</h2>
+            <p className="text-xs text-text-secondary">
               Exportez vos transactions en CSV ou PDF pour votre comptabilité
             </p>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <label className="text-xs text-stone-500">Du</label>
+              <label className="text-xs text-text-secondary">Du</label>
               <input
                 type="date"
                 value={exportDateFrom}
                 onChange={(e) => setExportDateFrom(e.target.value)}
-                className="text-sm border border-stone-200 rounded-lg px-2 py-1.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+                className="text-sm border border-border-light rounded-lg px-2 py-1.5 text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
               />
-              <label className="text-xs text-stone-500">au</label>
+              <label className="text-xs text-text-secondary">au</label>
               <input
                 type="date"
                 value={exportDateTo}
                 onChange={(e) => setExportDateTo(e.target.value)}
-                className="text-sm border border-stone-200 rounded-lg px-2 py-1.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+                className="text-sm border border-border-light rounded-lg px-2 py-1.5 text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
               />
             </div>
             <div className="relative">
@@ -601,24 +664,24 @@ export default function FinancesPage() {
                 Exporter
               </Button>
               {showExportMenu && (
-                <div className="absolute right-0 top-full mt-1 z-10 bg-white border border-stone-200 rounded-xl shadow-lg py-1 w-56">
+                <div className="absolute right-0 top-full mt-1 z-10 bg-bg-elevated border border-border-light rounded-xl shadow-lg py-1 w-56">
                   <button
                     onClick={handleExportCsv}
-                    className="w-full text-left px-4 py-2.5 text-sm text-slate-900 hover:bg-stone-50 transition-colors flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-sm text-text-primary hover:bg-bg-card transition-colors flex items-center gap-2"
                   >
                     <FileText className="h-4 w-4 text-emerald-600" />
                     Export CSV (Excel)
                   </button>
                   <button
                     onClick={handleExportAccountingPdf}
-                    className="w-full text-left px-4 py-2.5 text-sm text-slate-900 hover:bg-stone-50 transition-colors flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-sm text-text-primary hover:bg-bg-card transition-colors flex items-center gap-2"
                   >
                     <FileText className="h-4 w-4 text-terracotta" />
                     PDF Récapitulatif comptable
                   </button>
                   <button
                     onClick={handleExportFiscalPdf}
-                    className="w-full text-left px-4 py-2.5 text-sm text-slate-900 hover:bg-stone-50 transition-colors flex items-center gap-2"
+                    className="w-full text-left px-4 py-2.5 text-sm text-text-primary hover:bg-bg-card transition-colors flex items-center gap-2"
                   >
                     <FileText className="h-4 w-4 text-blue-600" />
                     PDF Déclaration foncière
@@ -633,9 +696,9 @@ export default function FinancesPage() {
       {/* SECTION 5 — Tableau des transactions */}
       <Card padding="p-0">
         {/* Toolbar */}
-        <div className="p-4 border-b border-stone-100 flex flex-wrap items-center justify-between gap-3">
+        <div className="p-4 border-b border-border flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-stone-400" />
+            <Filter className="h-4 w-4 text-text-muted" />
             {/* Filtre par statut */}
             <div className="flex items-center gap-1">
               {(
@@ -653,7 +716,7 @@ export default function FinancesPage() {
                   className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                     statusFilter === btn.value
                       ? 'bg-terracotta text-white'
-                      : 'text-stone-500 hover:bg-stone-100'
+                      : 'text-text-secondary hover:bg-bg-card'
                   }`}
                 >
                   {btn.label}
@@ -664,7 +727,7 @@ export default function FinancesPage() {
             <div className="relative">
               <button
                 onClick={() => setCategoryFilter(categoryFilter === 'all' ? CATEGORIES[0] : 'all')}
-                className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg text-stone-500 hover:bg-stone-100"
+                className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg text-text-secondary hover:bg-bg-card"
               >
                 <Tag className="h-3 w-3" />
                 {categoryFilter === 'all' ? 'Catégorie' : categoryFilter}
@@ -685,11 +748,11 @@ export default function FinancesPage() {
                 Catégoriser ({selected.size})
               </Button>
               {showCategoryMenu === 'bulk' && (
-                <div className="absolute right-0 top-full mt-1 z-10 bg-white border border-stone-200 rounded-xl shadow-lg py-1 w-48">
+                <div className="absolute right-0 top-full mt-1 z-10 bg-bg-elevated border border-border-light rounded-xl shadow-lg py-1 w-48">
                   {CATEGORIES.map((cat) => (
                     <button
                       key={cat}
-                      className="w-full text-left px-4 py-2 text-sm text-slate-900 hover:bg-stone-50 transition-colors"
+                      className="w-full text-left px-4 py-2 text-sm text-text-primary hover:bg-bg-card transition-colors"
                       onClick={() => handleCategorize([...selected], cat)}
                     >
                       {cat}
@@ -714,28 +777,28 @@ export default function FinancesPage() {
           ) : (
             <table className="w-full">
               <thead>
-                <tr className="bg-stone-50">
+                <tr className="bg-bg-card">
                   <th className="px-4 py-3 w-10">
                     <input
                       type="checkbox"
                       checked={selected.size === filteredTransactions.length && filteredTransactions.length > 0}
                       onChange={toggleSelectAll}
-                      className="rounded border-stone-300 text-terracotta focus:ring-terracotta/30"
+                      className="rounded border-stone-300 text-terracotta focus:ring-accent/30"
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Libellé
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Montant
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Catégorie
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Statut
                   </th>
                   <th className="px-4 py-3 w-20"></th>
@@ -745,20 +808,20 @@ export default function FinancesPage() {
                 {filteredTransactions.map((tx) => (
                   <tr
                     key={tx.id}
-                    className="border-b border-stone-100 hover:bg-stone-50/50 transition-colors"
+                    className="border-b border-border hover:bg-bg-card/50 transition-colors"
                   >
                     <td className="px-4 py-3">
                       <input
                         type="checkbox"
                         checked={selected.has(tx.id)}
                         onChange={() => toggleSelect(tx.id)}
-                        className="rounded border-stone-300 text-terracotta focus:ring-terracotta/30"
+                        className="rounded border-stone-300 text-terracotta focus:ring-accent/30"
                       />
                     </td>
-                    <td className="px-4 py-3 text-sm text-stone-500 whitespace-nowrap">
+                    <td className="px-4 py-3 text-sm text-text-secondary whitespace-nowrap">
                       {formatDate(tx.date)}
                     </td>
-                    <td className="px-4 py-3 text-sm font-medium text-slate-900 max-w-xs truncate">
+                    <td className="px-4 py-3 text-sm font-medium text-text-primary max-w-xs truncate">
                       {tx.description || '—'}
                     </td>
                     <td className={`px-4 py-3 text-sm font-bold tabular-nums text-right whitespace-nowrap ${
@@ -770,17 +833,17 @@ export default function FinancesPage() {
                       <div className="relative">
                         <button
                           onClick={() => setShowCategoryMenu(showCategoryMenu === tx.id ? null : tx.id)}
-                          className="text-xs text-stone-500 hover:text-slate-900 flex items-center gap-1 transition-colors"
+                          className="text-xs text-text-secondary hover:text-text-primary flex items-center gap-1 transition-colors"
                         >
                           {tx.category || 'Autre'}
                           <ChevronDown className="h-3 w-3" />
                         </button>
                         {showCategoryMenu === tx.id && (
-                          <div className="absolute left-0 top-full mt-1 z-10 bg-white border border-stone-200 rounded-xl shadow-lg py-1 w-44">
+                          <div className="absolute left-0 top-full mt-1 z-10 bg-bg-elevated border border-border-light rounded-xl shadow-lg py-1 w-44">
                             {CATEGORIES.map((cat) => (
                               <button
                                 key={cat}
-                                className="w-full text-left px-4 py-2 text-sm text-slate-900 hover:bg-stone-50 transition-colors"
+                                className="w-full text-left px-4 py-2 text-sm text-text-primary hover:bg-bg-card transition-colors"
                                 onClick={() => handleCategorize([tx.id], cat)}
                               >
                                 {cat}

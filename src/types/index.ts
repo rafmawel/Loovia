@@ -49,10 +49,20 @@ export interface Property {
   purchase_date?: string | null;
   notary_fees?: number | null;
   lot_id?: string | null;
+  ownership_regime?: string | null;
+  sci_id?: string | null;
   image_url?: string | null;
   images: string[];
   created_at: string;
   updated_at: string;
+}
+
+export interface SciEntity {
+  id: string;
+  user_id: string;
+  name: string;
+  regime: string;
+  created_at: string;
 }
 
 export interface PropertyLot {
@@ -153,6 +163,7 @@ export interface BankConnection {
   access_token: string;
   item_id: string;
   cursor?: string | null;
+  property_id?: string | null;
   created_at: string;
 }
 
@@ -248,7 +259,7 @@ export interface Notification {
 }
 
 // Types pour les abonnements Stripe
-export type SubscriptionPlan = 'free' | 'pro';
+export type SubscriptionPlan = 'free' | 'premium' | 'pro';
 export type SubscriptionStatus = 'inactive' | 'active' | 'past_due' | 'canceled' | 'trialing';
 
 export interface Subscription {

@@ -10,7 +10,7 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import MaintenanceRequestModal from '@/components/maintenance/MaintenanceRequestModal';
 import {
-  Wrench, Filter, Plus, Play, CheckCircle, XCircle, ChevronDown,
+  Wrench, Filter, Plus, Play, CheckCircle, XCircle, ChevronDown, Hammer, Clock, ArrowRight,
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import Link from 'next/link';
@@ -109,7 +109,7 @@ export default function MaintenancePage() {
       <div>
         <PageHeader title="Travaux & Maintenance" description="Suivi des demandes de travaux" />
         <div className="flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-stone-200 border-t-terracotta" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border-light border-t-accent" />
         </div>
       </div>
     );
@@ -133,23 +133,45 @@ export default function MaintenancePage() {
         </Button>
       </PageHeader>
 
+      {/* Bannière fonctionnalité à venir */}
+      <Card className="mb-6">
+        <div className="flex items-start gap-4">
+          <div className="rounded-full bg-accent/10 p-3 shrink-0">
+            <Hammer className="h-6 w-6 text-accent" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="text-sm font-bold text-text-primary">Mise en relation avec des artisans</h3>
+              <span className="text-[10px] font-semibold text-accent bg-accent/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <Clock className="h-3 w-3" /> Bientôt disponible
+              </span>
+            </div>
+            <p className="text-sm text-text-secondary leading-relaxed">
+              Bientôt, vous pourrez directement trouver et contacter des artisans qualifiés depuis Loovia.
+              Demande de devis, suivi des interventions, facturation — tout sera centralisé dans l&apos;application
+              pour une gestion des travaux 100&nbsp;% intégrée, sans quitter votre tableau de bord.
+            </p>
+          </div>
+        </div>
+      </Card>
+
       {/* Compteurs rapides */}
       <div className="flex items-center gap-4 mb-6">
         {urgentCount > 0 && (
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 border border-red-200">
-            <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-            <span className="text-xs font-medium text-red-700">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20">
+            <div className="h-2 w-2 rounded-full bg-red-400 animate-pulse" />
+            <span className="text-xs font-medium text-red-400">
               {urgentCount} urgente{urgentCount > 1 ? 's' : ''}
             </span>
           </div>
         )}
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-200">
-          <span className="text-xs font-medium text-blue-700">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20">
+          <span className="text-xs font-medium text-blue-400">
             {openCount} ouverte{openCount > 1 ? 's' : ''}
           </span>
         </div>
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-200">
-          <span className="text-xs font-medium text-amber-700">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+          <span className="text-xs font-medium text-amber-400">
             {inProgressCount} en cours
           </span>
         </div>
@@ -158,8 +180,8 @@ export default function MaintenancePage() {
       {/* Tableau */}
       <Card padding="p-0">
         {/* Toolbar */}
-        <div className="p-4 border-b border-stone-100 flex flex-wrap items-center gap-3">
-          <Filter className="h-4 w-4 text-stone-400" />
+        <div className="p-4 border-b border-border flex flex-wrap items-center gap-3">
+          <Filter className="h-4 w-4 text-text-muted" />
 
           {/* Filtre par statut */}
           <div className="flex items-center gap-1">
@@ -178,7 +200,7 @@ export default function MaintenancePage() {
                 className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                   statusFilter === btn.value
                     ? 'bg-terracotta text-white'
-                    : 'text-stone-500 hover:bg-stone-100'
+                    : 'text-text-secondary hover:bg-bg-card'
                 }`}
               >
                 {btn.label}
@@ -190,7 +212,7 @@ export default function MaintenancePage() {
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value as FilterPriorityType)}
-            className="text-xs border border-stone-200 rounded-lg px-2 py-1.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+            className="text-xs border border-border-light rounded-lg px-2 py-1.5 text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
           >
             <option value="all">Toutes priorités</option>
             <option value="urgent">Urgente</option>
@@ -203,7 +225,7 @@ export default function MaintenancePage() {
           <select
             value={propertyFilter}
             onChange={(e) => setPropertyFilter(e.target.value)}
-            className="text-xs border border-stone-200 rounded-lg px-2 py-1.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta"
+            className="text-xs border border-border-light rounded-lg px-2 py-1.5 text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
           >
             <option value="all">Tous les biens</option>
             {properties.map((p) => (
@@ -237,26 +259,26 @@ export default function MaintenancePage() {
           ) : (
             <table className="w-full">
               <thead>
-                <tr className="bg-stone-50">
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                <tr className="bg-bg-card">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Demande
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Bien
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Locataire
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Priorité
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Statut
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -265,14 +287,14 @@ export default function MaintenancePage() {
                 {filteredRequests.map((req) => (
                   <tr
                     key={req.id}
-                    className="border-b border-stone-100 hover:bg-stone-50/50 transition-colors"
+                    className="border-b border-border hover:bg-bg-card/50 transition-colors"
                   >
                     <td className="px-4 py-3">
-                      <p className="text-sm font-medium text-slate-900">
+                      <p className="text-sm font-medium text-text-primary">
                         {req.title}
                       </p>
                       {req.description && (
-                        <p className="text-xs text-stone-400 truncate max-w-xs mt-0.5">
+                        <p className="text-xs text-text-muted truncate max-w-xs mt-0.5">
                           {req.description}
                         </p>
                       )}
@@ -294,7 +316,7 @@ export default function MaintenancePage() {
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                          priorityColors[req.priority]?.bg || 'bg-stone-100'
+                          priorityColors[req.priority]?.bg || 'bg-bg-card'
                         } ${priorityColors[req.priority]?.text || 'text-stone-600'}`}
                       >
                         {priorityLabels[req.priority] || req.priority}
@@ -303,7 +325,7 @@ export default function MaintenancePage() {
                     <td className="px-4 py-3">
                       <StatusBadge variant="maintenance" status={req.status} />
                     </td>
-                    <td className="px-4 py-3 text-sm text-stone-500 whitespace-nowrap">
+                    <td className="px-4 py-3 text-sm text-text-secondary whitespace-nowrap">
                       {formatDate(req.created_at)}
                     </td>
                     <td className="px-4 py-3">
@@ -311,7 +333,7 @@ export default function MaintenancePage() {
                         {req.status === 'open' && (
                           <button
                             onClick={() => handleUpdateStatus(req.id, 'in_progress')}
-                            className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                            className="p-1.5 text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors"
                             title="Passer en cours"
                           >
                             <Play className="h-3.5 w-3.5" />
@@ -320,7 +342,7 @@ export default function MaintenancePage() {
                         {(req.status === 'open' || req.status === 'in_progress') && (
                           <button
                             onClick={() => handleUpdateStatus(req.id, 'resolved')}
-                            className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                            className="p-1.5 text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
                             title="Marquer résolu"
                           >
                             <CheckCircle className="h-3.5 w-3.5" />
@@ -329,7 +351,7 @@ export default function MaintenancePage() {
                         {req.status === 'resolved' && (
                           <button
                             onClick={() => handleUpdateStatus(req.id, 'closed')}
-                            className="p-1.5 text-stone-500 hover:bg-stone-200 rounded-lg transition-colors"
+                            className="p-1.5 text-text-secondary hover:bg-bg-card rounded-lg transition-colors"
                             title="Fermer"
                           >
                             <XCircle className="h-3.5 w-3.5" />

@@ -23,11 +23,11 @@ export function PageHeader({ title, description, children }: PageHeaderProps) {
     <div className="flex items-start justify-between animate-in mb-8">
       {/* Zone titre et description */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+        <h1 className="text-2xl font-bold tracking-tight text-text-primary">
           {title}
         </h1>
         {description && (
-          <p className="text-sm text-stone-500 mt-1">
+          <p className="text-sm text-text-secondary mt-1">
             {description}
           </p>
         )}

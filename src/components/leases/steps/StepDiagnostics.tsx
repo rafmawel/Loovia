@@ -117,7 +117,7 @@ export default function StepDiagnostics({ data, onChange }: Props) {
 
   return (
     <div className="space-y-6">
-      <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider text-opacity-70">
+      <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wider text-opacity-70">
         Diagnostics techniques (DDT)
       </h3>
 
@@ -172,8 +172,8 @@ export default function StepDiagnostics({ data, onChange }: Props) {
                 'flex items-start gap-3 p-3 rounded-xl border transition-colors',
                 checked
                   ? 'border-emerald-200 bg-emerald-50/50'
-                  : 'border-stone-200 bg-white',
-                isLocked ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-stone-50',
+                  : 'border-border-light bg-bg-elevated',
+                isLocked ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-bg-card',
               ].join(' ')}
             >
               <input
@@ -188,8 +188,8 @@ export default function StepDiagnostics({ data, onChange }: Props) {
                 className="mt-0.5 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500/30 disabled:opacity-70"
               />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-900">{diag.label}</p>
-                <p className="text-xs text-stone-500 mt-0.5">{diag.reason}</p>
+                <p className="text-sm font-medium text-text-primary">{diag.label}</p>
+                <p className="text-xs text-text-secondary mt-0.5">{diag.reason}</p>
               </div>
               {checked && (
                 <span className="text-xs font-medium text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full shrink-0">
@@ -202,16 +202,16 @@ export default function StepDiagnostics({ data, onChange }: Props) {
       </div>
 
       {/* Assurance habitation */}
-      <label className="flex items-center gap-3 p-3 rounded-xl border border-stone-200 cursor-pointer hover:bg-stone-50 transition-colors">
+      <label className="flex items-center gap-3 p-3 rounded-xl border border-border-light cursor-pointer hover:bg-bg-card transition-colors">
         <input
           type="checkbox"
           checked={data.insurance_required}
           onChange={(e) => onChange({ insurance_required: e.target.checked })}
-          className="rounded border-stone-300 text-terracotta focus:ring-terracotta/30"
+          className="rounded border-stone-300 text-terracotta focus:ring-accent/30"
         />
         <div>
-          <p className="text-sm font-medium text-slate-900">Assurance habitation obligatoire</p>
-          <p className="text-xs text-stone-500">Le locataire devra fournir une attestation</p>
+          <p className="text-sm font-medium text-text-primary">Assurance habitation obligatoire</p>
+          <p className="text-xs text-text-secondary">Le locataire devra fournir une attestation</p>
         </div>
       </label>
 
@@ -232,13 +232,13 @@ export default function StepDiagnostics({ data, onChange }: Props) {
 
       {/* Clauses particulières */}
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-slate-900">Clauses particulières</label>
+        <label className="text-sm font-medium text-text-primary">Clauses particulières</label>
         <textarea
           value={data.special_clauses}
           onChange={(e) => onChange({ special_clauses: e.target.value })}
           rows={4}
           placeholder="Saisissez ici les clauses spécifiques au contrat (optionnel)..."
-          className="w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-stone-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta resize-none"
+          className="w-full rounded-xl border border-border-light bg-bg-elevated px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent resize-none"
         />
       </div>
     </div>

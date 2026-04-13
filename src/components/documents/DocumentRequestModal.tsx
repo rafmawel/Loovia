@@ -75,18 +75,18 @@ export default function DocumentRequestModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-xl border border-stone-200/50 w-full max-w-md mx-4 p-6">
+      <div className="relative bg-bg-elevated rounded-2xl shadow-xl border border-border-light/50 w-full max-w-md mx-4 p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-text-primary">
               Demander un document
             </h2>
-            <p className="text-sm text-stone-500 mt-0.5">{tenantName}</p>
+            <p className="text-sm text-text-secondary mt-0.5">{tenantName}</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-stone-400 hover:text-slate-900 hover:bg-stone-100 rounded-xl transition-colors"
+            className="p-2 text-text-muted hover:text-text-primary hover:bg-bg-card rounded-xl transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -96,13 +96,13 @@ export default function DocumentRequestModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Type de document */}
           <div>
-            <label className="block text-sm font-medium text-slate-900 mb-1.5">
+            <label className="block text-sm font-medium text-text-primary mb-1.5">
               Type de document
             </label>
             <select
               value={documentType}
               onChange={(e) => setDocumentType(e.target.value)}
-              className="w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta transition-colors"
+              className="w-full rounded-xl border border-border-light bg-bg-elevated px-4 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors"
             >
               {DOCUMENT_TYPES.map((type) => (
                 <option key={type} value={type}>
@@ -115,7 +115,7 @@ export default function DocumentRequestModal({
           {/* Champ personnalisé si "Autre" */}
           {documentType === 'Autre' && (
             <div>
-              <label className="block text-sm font-medium text-slate-900 mb-1.5">
+              <label className="block text-sm font-medium text-text-primary mb-1.5">
                 Précisez le document
               </label>
               <input
@@ -123,7 +123,7 @@ export default function DocumentRequestModal({
                 value={customType}
                 onChange={(e) => setCustomType(e.target.value)}
                 placeholder="Ex : Attestation d'assurance habitation"
-                className="w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta transition-colors"
+                className="w-full rounded-xl border border-border-light bg-bg-elevated px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors"
                 required
               />
             </div>
@@ -131,16 +131,16 @@ export default function DocumentRequestModal({
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-slate-900 mb-1.5">
+            <label className="block text-sm font-medium text-text-primary mb-1.5">
               Notes / Instructions
-              <span className="text-stone-400 font-normal ml-1">(optionnel)</span>
+              <span className="text-text-muted font-normal ml-1">(optionnel)</span>
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Instructions particulières pour le locataire..."
               rows={3}
-              className="w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta transition-colors resize-none"
+              className="w-full rounded-xl border border-border-light bg-bg-elevated px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors resize-none"
             />
           </div>
 

@@ -138,13 +138,13 @@ export default async function DashboardPage() {
               return (
                 <div
                   key={payment.id}
-                  className="flex items-center justify-between bg-white rounded-xl p-4 border border-red-100"
+                  className="flex items-center justify-between bg-bg-elevated rounded-xl p-4 border border-red-100"
                 >
                   <div>
-                    <p className="text-sm font-medium text-slate-900">
+                    <p className="text-sm font-medium text-text-primary">
                       {tenant ? fullName(tenant.first_name, tenant.last_name) : 'Locataire inconnu'}
                     </p>
-                    <p className="text-xs text-stone-500">
+                    <p className="text-xs text-text-secondary">
                       {property?.name || 'Bien inconnu'} — Échéance : {formatDate(payment.period_end)}
                     </p>
                   </div>
@@ -179,18 +179,18 @@ export default async function DashboardPage() {
             {openMaintenance.map((req) => (
               <div
                 key={req.id}
-                className="flex items-center justify-between bg-white rounded-xl p-4 border border-amber-100"
+                className="flex items-center justify-between bg-bg-elevated rounded-xl p-4 border border-amber-100"
               >
                 <div>
-                  <p className="text-sm font-medium text-slate-900">{req.title}</p>
-                  <p className="text-xs text-stone-500">
+                  <p className="text-sm font-medium text-text-primary">{req.title}</p>
+                  <p className="text-xs text-text-secondary">
                     {req.property?.name || '—'} — {formatDate(req.created_at)}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span
                     className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                      priorityColors[req.priority]?.bg || 'bg-stone-100'
+                      priorityColors[req.priority]?.bg || 'bg-bg-card'
                     } ${priorityColors[req.priority]?.text || 'text-stone-600'}`}
                   >
                     {priorityLabels[req.priority] || req.priority}
@@ -214,13 +214,13 @@ export default async function DashboardPage() {
         {/* Derniers paiements reçus */}
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-slate-900">Derniers paiements</h2>
+            <h2 className="text-lg font-bold text-text-primary">Derniers paiements</h2>
             <Link href="/finances" className="text-xs font-medium text-terracotta hover:text-terracotta/80">
               Voir tous →
             </Link>
           </div>
           {recentPayments.length === 0 ? (
-            <p className="text-sm text-stone-500">Aucun paiement reçu pour le moment.</p>
+            <p className="text-sm text-text-secondary">Aucun paiement reçu pour le moment.</p>
           ) : (
             <div className="space-y-3">
               {recentPayments.map((payment) => {
@@ -229,10 +229,10 @@ export default async function DashboardPage() {
                 return (
                   <div key={payment.id} className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-slate-900">
+                      <p className="text-sm font-medium text-text-primary">
                         {tenant ? fullName(tenant.first_name, tenant.last_name) : '—'}
                       </p>
-                      <p className="text-xs text-stone-500">
+                      <p className="text-xs text-text-secondary">
                         {payment.payment_date ? formatDate(payment.payment_date) : '—'}
                       </p>
                     </div>
@@ -249,22 +249,22 @@ export default async function DashboardPage() {
         {/* Derniers baux créés */}
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-slate-900">Derniers baux</h2>
+            <h2 className="text-lg font-bold text-text-primary">Derniers baux</h2>
             <Link href="/baux" className="text-xs font-medium text-terracotta hover:text-terracotta/80">
               Voir tous →
             </Link>
           </div>
           {recentLeases.length === 0 ? (
-            <p className="text-sm text-stone-500">Aucun bail créé pour le moment.</p>
+            <p className="text-sm text-text-secondary">Aucun bail créé pour le moment.</p>
           ) : (
             <div className="space-y-3">
               {recentLeases.map((lease) => (
-                <Link key={lease.id} href={`/baux/${lease.id}`} className="flex items-center justify-between hover:bg-stone-50 rounded-lg p-1 -m-1 transition-colors">
+                <Link key={lease.id} href={`/baux/${lease.id}`} className="flex items-center justify-between hover:bg-bg-card rounded-lg p-1 -m-1 transition-colors">
                   <div>
-                    <p className="text-sm font-medium text-slate-900">
+                    <p className="text-sm font-medium text-text-primary">
                       {lease.property?.name || '—'}
                     </p>
-                    <p className="text-xs text-stone-500">
+                    <p className="text-xs text-text-secondary">
                       {lease.tenant
                         ? fullName(lease.tenant.first_name, lease.tenant.last_name)
                         : '—'}

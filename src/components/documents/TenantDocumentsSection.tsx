@@ -66,7 +66,7 @@ export default function TenantDocumentsSection({
     <>
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
             <FileText className="h-5 w-5 text-terracotta" />
             Documents
           </h2>
@@ -82,10 +82,10 @@ export default function TenantDocumentsSection({
 
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-stone-200 border-t-terracotta" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-border-light border-t-accent" />
           </div>
         ) : documents.length === 0 ? (
-          <p className="text-sm text-stone-500">
+          <p className="text-sm text-text-secondary">
             Aucun document demandé pour ce locataire.
           </p>
         ) : (
@@ -93,24 +93,24 @@ export default function TenantDocumentsSection({
             {documents.map((doc) => (
               <div
                 key={doc.id}
-                className="flex items-center justify-between p-3 rounded-xl bg-stone-50"
+                className="flex items-center justify-between p-3 rounded-xl bg-bg-card"
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-900">
+                  <p className="text-sm font-medium text-text-primary">
                     {doc.document_type}
                   </p>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-xs text-stone-500">
+                    <span className="text-xs text-text-secondary">
                       Demandé le {formatDate(doc.requested_at)}
                     </span>
                     {doc.received_at && (
-                      <span className="text-xs text-stone-400">
+                      <span className="text-xs text-text-muted">
                         · Reçu le {formatDate(doc.received_at)}
                       </span>
                     )}
                   </div>
                   {doc.notes && (
-                    <p className="text-xs text-stone-400 mt-0.5 truncate">
+                    <p className="text-xs text-text-muted mt-0.5 truncate">
                       {doc.notes}
                     </p>
                   )}

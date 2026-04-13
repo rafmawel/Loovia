@@ -83,7 +83,7 @@ const STATE_OPTIONS: { value: ElementState; label: string; color: string }[] = [
   { value: 'bon', label: '🔵 Bon', color: 'bg-blue-50 text-blue-700 border-blue-200' },
   { value: 'use', label: '🟡 Usé', color: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
   { value: 'mauvais', label: '🔴 Mauvais', color: 'bg-red-50 text-red-700 border-red-200' },
-  { value: 'na', label: '⚪ Non applicable', color: 'bg-stone-50 text-stone-500 border-stone-200' },
+  { value: 'na', label: '⚪ Non applicable', color: 'bg-bg-card text-text-secondary border-border-light' },
 ];
 
 const stateColor = (s: ElementState) =>
@@ -274,18 +274,18 @@ export default function EdlForm({
     <div className="space-y-6">
       {/* En-tête */}
       <Card>
-        <h2 className="text-lg font-bold text-slate-900 mb-4">Informations générales</h2>
+        <h2 className="text-lg font-bold text-text-primary mb-4">Informations générales</h2>
 
         {/* Toggle Entrée / Sortie */}
         <div className="mb-4">
-          <p className="text-xs text-stone-500 mb-2">Type d&apos;état des lieux</p>
-          <div className="inline-flex rounded-xl border border-stone-200 overflow-hidden">
+          <p className="text-xs text-text-secondary mb-2">Type d&apos;état des lieux</p>
+          <div className="inline-flex rounded-xl border border-border-light overflow-hidden">
             <button
               type="button"
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 type === 'entrance'
                   ? 'bg-terracotta text-white'
-                  : 'bg-white text-stone-600 hover:bg-stone-50'
+                  : 'bg-bg-elevated text-stone-600 hover:bg-bg-card'
               }`}
               onClick={() => setType('entrance')}
             >
@@ -296,7 +296,7 @@ export default function EdlForm({
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 type === 'exit'
                   ? 'bg-terracotta text-white'
-                  : 'bg-white text-stone-600 hover:bg-stone-50'
+                  : 'bg-bg-elevated text-stone-600 hover:bg-bg-card'
               }`}
               onClick={() => setType('exit')}
             >
@@ -308,24 +308,24 @@ export default function EdlForm({
         {/* Infos auto-remplies */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <p className="text-xs text-stone-500 mb-1 flex items-center gap-1">
+            <p className="text-xs text-text-secondary mb-1 flex items-center gap-1">
               <Home className="h-3 w-3" /> Bien
             </p>
-            <p className="text-sm font-medium text-slate-900">
+            <p className="text-sm font-medium text-text-primary">
               {property.address}, {property.city}
             </p>
           </div>
           <div>
-            <p className="text-xs text-stone-500 mb-1 flex items-center gap-1">
+            <p className="text-xs text-text-secondary mb-1 flex items-center gap-1">
               <User className="h-3 w-3" /> Propriétaire
             </p>
-            <p className="text-sm font-medium text-slate-900">{landlordName}</p>
+            <p className="text-sm font-medium text-text-primary">{landlordName}</p>
           </div>
           <div>
-            <p className="text-xs text-stone-500 mb-1 flex items-center gap-1">
+            <p className="text-xs text-text-secondary mb-1 flex items-center gap-1">
               <User className="h-3 w-3" /> Locataire
             </p>
-            <p className="text-sm font-medium text-slate-900">
+            <p className="text-sm font-medium text-text-primary">
               {tenant.first_name} {tenant.last_name}
             </p>
           </div>
@@ -344,19 +344,19 @@ export default function EdlForm({
       {/* Pièces */}
       <Card>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-slate-900">Pièces</h2>
+          <h2 className="text-lg font-bold text-text-primary">Pièces</h2>
         </div>
 
         {/* Suggestions rapides */}
         {availableRooms.length > 0 && (
           <div className="mb-4">
-            <p className="text-xs text-stone-500 mb-2">Ajouter une pièce</p>
+            <p className="text-xs text-text-secondary mb-2">Ajouter une pièce</p>
             <div className="flex flex-wrap gap-2">
               {availableRooms.map((room) => (
                 <button
                   key={room}
                   type="button"
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium bg-stone-100 text-stone-700 hover:bg-terracotta/10 hover:text-terracotta transition-colors"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium bg-bg-card text-stone-700 hover:bg-terracotta/10 hover:text-terracotta transition-colors"
                   onClick={() => addRoom(room)}
                 >
                   <Plus className="h-3 w-3" />
@@ -372,30 +372,30 @@ export default function EdlForm({
           {rooms.map((room, roomIdx) => (
             <div
               key={roomIdx}
-              className="border border-stone-200 rounded-xl overflow-hidden"
+              className="border border-border-light rounded-xl overflow-hidden"
             >
               {/* Header de la pièce */}
               <button
                 type="button"
-                className="w-full flex items-center justify-between px-4 py-3 bg-stone-50 hover:bg-stone-100 transition-colors text-left"
+                className="w-full flex items-center justify-between px-4 py-3 bg-bg-card hover:bg-bg-card transition-colors text-left"
                 onClick={() => toggleRoom(roomIdx)}
               >
                 <div className="flex items-center gap-2">
                   {room.expanded ? (
-                    <ChevronDown className="h-4 w-4 text-stone-400" />
+                    <ChevronDown className="h-4 w-4 text-text-muted" />
                   ) : (
-                    <ChevronRight className="h-4 w-4 text-stone-400" />
+                    <ChevronRight className="h-4 w-4 text-text-muted" />
                   )}
-                  <span className="text-sm font-semibold text-slate-900">
+                  <span className="text-sm font-semibold text-text-primary">
                     {room.name}
                   </span>
-                  <span className="text-xs text-stone-400">
+                  <span className="text-xs text-text-muted">
                     ({room.elements.length} élément{room.elements.length !== 1 ? 's' : ''})
                   </span>
                 </div>
                 <button
                   type="button"
-                  className="p-1 text-stone-400 hover:text-red-500 transition-colors"
+                  className="p-1 text-text-muted hover:text-red-500 transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
                     removeRoom(roomIdx);
@@ -420,7 +420,7 @@ export default function EdlForm({
                             <p className="text-sm font-medium">{el.name}</p>
                             <button
                               type="button"
-                              className="p-1 text-stone-400 hover:text-red-500 transition-colors"
+                              className="p-1 text-text-muted hover:text-red-500 transition-colors"
                               onClick={() => removeElement(roomIdx, elIdx)}
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -435,7 +435,7 @@ export default function EdlForm({
                                 className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
                                   el.state === opt.value
                                     ? `${opt.color} ring-2 ring-offset-1 ring-current`
-                                    : 'bg-white text-stone-500 border-stone-200 hover:border-stone-300'
+                                    : 'bg-bg-elevated text-text-secondary border-border-light hover:border-stone-300'
                                 }`}
                                 onClick={() =>
                                   updateElement(roomIdx, elIdx, 'state', opt.value)
@@ -447,7 +447,7 @@ export default function EdlForm({
                           </div>
 
                           <textarea
-                            className="w-full text-xs text-slate-700 bg-white/60 border border-stone-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-terracotta/30"
+                            className="w-full text-xs text-slate-700 bg-bg-elevated/60 border border-border-light rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-accent/30"
                             rows={2}
                             placeholder="Observations (optionnel)"
                             value={el.observations}
@@ -467,7 +467,7 @@ export default function EdlForm({
 
                   {/* Suggestions d'éléments */}
                   <div>
-                    <p className="text-xs text-stone-500 mb-2">
+                    <p className="text-xs text-text-secondary mb-2">
                       + Ajouter un élément
                     </p>
                     <div className="flex flex-wrap gap-1.5">
@@ -477,7 +477,7 @@ export default function EdlForm({
                         <button
                           key={name}
                           type="button"
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-white border border-stone-200 text-stone-600 hover:border-terracotta hover:text-terracotta transition-colors"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-bg-elevated border border-border-light text-stone-600 hover:border-terracotta hover:text-terracotta transition-colors"
                           onClick={() => addElement(roomIdx, name)}
                         >
                           <Plus className="h-3 w-3" />
@@ -493,7 +493,7 @@ export default function EdlForm({
         </div>
 
         {rooms.length === 0 && (
-          <p className="text-sm text-stone-500 text-center py-8">
+          <p className="text-sm text-text-secondary text-center py-8">
             Aucune pièce ajoutée. Cliquez sur une suggestion ci-dessus pour commencer.
           </p>
         )}
@@ -501,7 +501,7 @@ export default function EdlForm({
 
       {/* Signatures */}
       <Card>
-        <h2 className="text-lg font-bold text-slate-900 mb-4">Signatures</h2>
+        <h2 className="text-lg font-bold text-text-primary mb-4">Signatures</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <SignaturePad
             label="Signature du propriétaire"

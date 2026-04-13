@@ -1,24 +1,22 @@
 import Stripe from 'stripe';
 
-// Initialisation lazy : Stripe n'est instancié que quand on l'utilise,
-// pour éviter de crasher au build si STRIPE_SECRET_KEY n'est pas encore défini.
 let _stripe: Stripe | null = null;
 
 export function getStripe(): Stripe {
   if (!_stripe) {
-    const key = process.env.STRIPE_SECRET_KEY;
-    if (!key) {
-      throw new Error('STRIPE_SECRET_KEY non défini dans les variables d\'environnement');
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('STRIPE_SECRET_KEY is not set');
     }
-    _stripe = new Stripe(key, { typescript: true });
+    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      typescript: true,
+    });
   }
   return _stripe;
 }
 
-// Re-export pour compatibilité (usage : import { stripe } from '@/lib/stripe')
-// Utilise un Proxy pour différer l'initialisation au moment de l'appel réel
+/** @deprecated Use getStripe() instead */
 export const stripe = new Proxy({} as Stripe, {
-  get(_target, prop) {
+  get(_, prop) {
     return (getStripe() as unknown as Record<string | symbol, unknown>)[prop];
   },
 });

@@ -99,15 +99,15 @@ export default function MaintenanceRequestModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-xl border border-stone-200/50 w-full max-w-lg mx-4 p-6 max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-bg-elevated rounded-2xl shadow-xl border border-border-light/50 w-full max-w-lg mx-4 p-6 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-slate-900">
+          <h2 className="text-lg font-bold text-text-primary">
             Nouvelle demande de travaux
           </h2>
           <button
             onClick={onClose}
-            className="p-2 text-stone-400 hover:text-slate-900 hover:bg-stone-100 rounded-xl transition-colors"
+            className="p-2 text-text-muted hover:text-text-primary hover:bg-bg-card rounded-xl transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -118,13 +118,13 @@ export default function MaintenanceRequestModal({
           {/* Bien (select si pas pré-sélectionné) */}
           {!propertyId && properties && (
             <div>
-              <label className="block text-sm font-medium text-slate-900 mb-1.5">
+              <label className="block text-sm font-medium text-text-primary mb-1.5">
                 Bien concerné
               </label>
               <select
                 value={selectedPropertyId}
                 onChange={(e) => setSelectedPropertyId(e.target.value)}
-                className="w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta transition-colors"
+                className="w-full rounded-xl border border-border-light bg-bg-elevated px-4 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors"
                 required
               >
                 <option value="">Sélectionner un bien</option>
@@ -139,7 +139,7 @@ export default function MaintenanceRequestModal({
 
           {/* Titre */}
           <div>
-            <label className="block text-sm font-medium text-slate-900 mb-1.5">
+            <label className="block text-sm font-medium text-text-primary mb-1.5">
               Titre
             </label>
             <input
@@ -147,29 +147,29 @@ export default function MaintenanceRequestModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ex : Fuite robinet cuisine"
-              className="w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta transition-colors"
+              className="w-full rounded-xl border border-border-light bg-bg-elevated px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors"
               required
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-slate-900 mb-1.5">
+            <label className="block text-sm font-medium text-text-primary mb-1.5">
               Description détaillée
-              <span className="text-stone-400 font-normal ml-1">(optionnel)</span>
+              <span className="text-text-muted font-normal ml-1">(optionnel)</span>
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Décrivez le problème en détail..."
               rows={4}
-              className="w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta transition-colors resize-none"
+              className="w-full rounded-xl border border-border-light bg-bg-elevated px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors resize-none"
             />
           </div>
 
           {/* Priorité */}
           <div>
-            <label className="block text-sm font-medium text-slate-900 mb-1.5">
+            <label className="block text-sm font-medium text-text-primary mb-1.5">
               Priorité
             </label>
             <div className="flex items-center gap-2">
@@ -186,8 +186,8 @@ export default function MaintenanceRequestModal({
                         ? 'bg-orange-50 text-orange-700 border-orange-200'
                         : p.value === 'medium'
                         ? 'bg-blue-50 text-blue-700 border-blue-200'
-                        : 'bg-stone-100 text-stone-600 border-stone-200'
-                      : 'bg-white text-stone-500 border-stone-200 hover:bg-stone-50'
+                        : 'bg-bg-card text-stone-600 border-border-light'
+                      : 'bg-bg-elevated text-text-secondary border-border-light hover:bg-bg-card'
                   }`}
                 >
                   {p.label}
@@ -198,9 +198,9 @@ export default function MaintenanceRequestModal({
 
           {/* Photos (URLs) */}
           <div>
-            <label className="block text-sm font-medium text-slate-900 mb-1.5">
+            <label className="block text-sm font-medium text-text-primary mb-1.5">
               Photos
-              <span className="text-stone-400 font-normal ml-1">(URLs)</span>
+              <span className="text-text-muted font-normal ml-1">(URLs)</span>
             </label>
             <div className="flex items-center gap-2 mb-2">
               <input
@@ -208,7 +208,7 @@ export default function MaintenanceRequestModal({
                 value={photoUrl}
                 onChange={(e) => setPhotoUrl(e.target.value)}
                 placeholder="https://..."
-                className="flex-1 rounded-xl border border-stone-200 bg-white px-4 py-2 text-sm text-slate-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta transition-colors"
+                className="flex-1 rounded-xl border border-border-light bg-bg-elevated px-4 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors"
               />
               <Button
                 type="button"
@@ -225,7 +225,7 @@ export default function MaintenanceRequestModal({
                 {photos.map((url, i) => (
                   <div
                     key={i}
-                    className="flex items-center gap-2 p-2 rounded-lg bg-stone-50 text-sm"
+                    className="flex items-center gap-2 p-2 rounded-lg bg-bg-card text-sm"
                   >
                     <span className="flex-1 truncate text-stone-600">{url}</span>
                     <button

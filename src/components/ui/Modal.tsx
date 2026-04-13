@@ -87,7 +87,7 @@ export default function Modal({
       {/* Conteneur de contenu */}
       <div
         className={[
-          'relative w-full bg-white rounded-2xl shadow-xl p-6',
+          'relative w-full bg-bg-elevated rounded-2xl shadow-xl p-6',
           'animate-fade-in',
           sizeClasses[size],
           className,
@@ -100,14 +100,14 @@ export default function Modal({
           <div className="flex items-center justify-between mb-4">
             <h2
               id="modal-title"
-              className="text-lg font-semibold text-slate-900"
+              className="text-lg font-semibold text-text-primary"
             >
               {title}
             </h2>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-1.5 text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors duration-150"
+              className="rounded-lg p-1.5 text-text-muted hover:text-text-secondary hover:bg-bg-card transition-colors duration-150"
               aria-label="Fermer"
             >
               <svg
@@ -134,7 +134,7 @@ export default function Modal({
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 rounded-lg p-1.5 text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors duration-150"
+            className="absolute top-4 right-4 rounded-lg p-1.5 text-text-muted hover:text-text-secondary hover:bg-bg-card transition-colors duration-150"
             aria-label="Fermer"
           >
             <svg

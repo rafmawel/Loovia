@@ -57,7 +57,7 @@ export default async function LocataireDetailPage({ params }: Props) {
     <div>
       <Link
         href="/locataires"
-        className="inline-flex items-center gap-2 text-sm text-stone-500 hover:text-slate-900 mb-4 transition-colors"
+        className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary mb-4 transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
         Retour aux locataires
@@ -79,53 +79,53 @@ export default async function LocataireDetailPage({ params }: Props) {
         <div className="lg:col-span-2 space-y-6">
           {/* Informations personnelles */}
           <Card>
-            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
               <User className="h-5 w-5 text-terracotta" />
               Informations personnelles
             </h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-stone-400" />
+                <Mail className="h-4 w-4 text-text-muted" />
                 <div>
-                  <p className="text-xs text-stone-500">Email</p>
-                  <p className="text-sm font-medium text-slate-900">{tenant.email}</p>
+                  <p className="text-xs text-text-secondary">Email</p>
+                  <p className="text-sm font-medium text-text-primary">{tenant.email}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-stone-400" />
+                <Phone className="h-4 w-4 text-text-muted" />
                 <div>
-                  <p className="text-xs text-stone-500">Téléphone</p>
-                  <p className="text-sm font-medium text-slate-900">{tenant.phone || '—'}</p>
+                  <p className="text-xs text-text-secondary">Téléphone</p>
+                  <p className="text-sm font-medium text-text-primary">{tenant.phone || '—'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-stone-400" />
+                <Calendar className="h-4 w-4 text-text-muted" />
                 <div>
-                  <p className="text-xs text-stone-500">Date de naissance</p>
-                  <p className="text-sm font-medium text-slate-900">
+                  <p className="text-xs text-text-secondary">Date de naissance</p>
+                  <p className="text-sm font-medium text-text-primary">
                     {tenant.date_of_birth ? formatDate(tenant.date_of_birth) : '—'}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-stone-400" />
+                <Globe className="h-4 w-4 text-text-muted" />
                 <div>
-                  <p className="text-xs text-stone-500">Nationalité</p>
-                  <p className="text-sm font-medium text-slate-900">{tenant.nationality || '—'}</p>
+                  <p className="text-xs text-text-secondary">Nationalité</p>
+                  <p className="text-sm font-medium text-text-primary">{tenant.nationality || '—'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Briefcase className="h-4 w-4 text-stone-400" />
+                <Briefcase className="h-4 w-4 text-text-muted" />
                 <div>
-                  <p className="text-xs text-stone-500">Profession</p>
-                  <p className="text-sm font-medium text-slate-900">{tenant.profession || '—'}</p>
+                  <p className="text-xs text-text-secondary">Profession</p>
+                  <p className="text-sm font-medium text-text-primary">{tenant.profession || '—'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-stone-400" />
+                <CreditCard className="h-4 w-4 text-text-muted" />
                 <div>
-                  <p className="text-xs text-stone-500">IBAN connu</p>
-                  <p className="text-sm font-medium text-slate-900 font-mono">
+                  <p className="text-xs text-text-secondary">IBAN connu</p>
+                  <p className="text-sm font-medium text-text-primary font-mono">
                     {tenant.last_known_iban || '—'}
                   </p>
                 </div>
@@ -136,21 +136,21 @@ export default async function LocataireDetailPage({ params }: Props) {
           {/* Co-locataires */}
           {tenant.co_tenants && tenant.co_tenants.length > 0 && (
             <Card>
-              <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
                 <Users className="h-5 w-5 text-terracotta" />
                 Co-locataires
               </h2>
               <div className="space-y-3">
                 {tenant.co_tenants.map((co, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-stone-50">
+                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-bg-card">
                     <div className="flex items-center justify-center h-9 w-9 rounded-full bg-terracotta/10 text-terracotta text-sm font-semibold shrink-0">
                       {co.first_name.charAt(0)}{co.last_name.charAt(0)}
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-slate-900">
+                      <p className="text-sm font-medium text-text-primary">
                         {co.first_name} {co.last_name}
                       </p>
-                      <div className="flex items-center gap-3 text-xs text-stone-500">
+                      <div className="flex items-center gap-3 text-xs text-text-secondary">
                         {co.relationship_type && (
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-stone-200 text-stone-600 text-xs">
                             {co.relationship_type}
@@ -167,25 +167,25 @@ export default async function LocataireDetailPage({ params }: Props) {
 
           {/* Baux associés */}
           <Card>
-            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
               <FileText className="h-5 w-5 text-terracotta" />
               Baux ({tenantLeases.length})
             </h2>
             {tenantLeases.length === 0 ? (
-              <p className="text-sm text-stone-500">Aucun bail associé.</p>
+              <p className="text-sm text-text-secondary">Aucun bail associé.</p>
             ) : (
               <div className="space-y-3">
                 {tenantLeases.map((lease) => (
                   <Link
                     key={lease.id}
                     href={`/baux/${lease.id}`}
-                    className="flex items-center justify-between p-3 rounded-xl bg-stone-50 hover:bg-stone-100 transition-colors"
+                    className="flex items-center justify-between p-3 rounded-xl bg-bg-card hover:bg-bg-card transition-colors"
                   >
                     <div>
-                      <p className="text-sm font-medium text-slate-900">
+                      <p className="text-sm font-medium text-text-primary">
                         {lease.property?.name || '—'}
                       </p>
-                      <p className="text-xs text-stone-500">
+                      <p className="text-xs text-text-secondary">
                         {formatDate(lease.start_date)}{lease.end_date ? ` — ${formatDate(lease.end_date)}` : ' — En cours'}
                         {' · '}{formatCurrency(lease.monthly_rent)}/mois
                       </p>
@@ -199,26 +199,26 @@ export default async function LocataireDetailPage({ params }: Props) {
 
           {/* Historique des paiements */}
           <Card>
-            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
               <Wallet className="h-5 w-5 text-terracotta" />
               Historique des paiements
             </h2>
             {tenantPayments.length === 0 ? (
-              <p className="text-sm text-stone-500">Aucun paiement enregistré.</p>
+              <p className="text-sm text-text-secondary">Aucun paiement enregistré.</p>
             ) : (
               <div className="space-y-3">
                 {tenantPayments.slice(0, 12).map((payment) => (
-                  <div key={payment.id} className="flex items-center justify-between p-3 rounded-xl bg-stone-50">
+                  <div key={payment.id} className="flex items-center justify-between p-3 rounded-xl bg-bg-card">
                     <div>
-                      <p className="text-sm font-medium text-slate-900">
+                      <p className="text-sm font-medium text-text-primary">
                         {formatDate(payment.period_start)} — {formatDate(payment.period_end)}
                       </p>
-                      <p className="text-xs text-stone-500">
+                      <p className="text-xs text-text-secondary">
                         {payment.payment_date ? `Payé le ${formatDate(payment.payment_date)}` : 'Non payé'}
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-sm font-bold tabular-nums text-slate-900">
+                      <span className="text-sm font-bold tabular-nums text-text-primary">
                         {formatCurrency(payment.amount_paid)} / {formatCurrency(payment.amount_expected)}
                       </span>
                       <StatusBadge variant="payment" status={payment.status} />
@@ -240,22 +240,22 @@ export default async function LocataireDetailPage({ params }: Props) {
               </div>
               <StatusBadge variant="payment" status={tenant.payment_status} className="mb-2" />
               {!isActive && (
-                <p className="text-xs text-stone-400 mt-1">Bail terminé</p>
+                <p className="text-xs text-text-muted mt-1">Bail terminé</p>
               )}
-              <div className="mt-4 pt-4 border-t border-stone-100">
-                <p className="text-xs text-stone-500">Loyer mensuel</p>
-                <p className="text-2xl font-bold tabular-nums text-slate-900">
+              <div className="mt-4 pt-4 border-t border-border">
+                <p className="text-xs text-text-secondary">Loyer mensuel</p>
+                <p className="text-2xl font-bold tabular-nums text-text-primary">
                   {formatCurrency(tenant.rent_amount)}
                 </p>
               </div>
-              <div className="mt-3 pt-3 border-t border-stone-100 grid grid-cols-2 gap-3">
+              <div className="mt-3 pt-3 border-t border-border grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-xs text-stone-500">Entrée</p>
-                  <p className="text-sm font-medium text-slate-900">{formatDate(tenant.start_date)}</p>
+                  <p className="text-xs text-text-secondary">Entrée</p>
+                  <p className="text-sm font-medium text-text-primary">{formatDate(tenant.start_date)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-stone-500">Sortie</p>
-                  <p className="text-sm font-medium text-slate-900">
+                  <p className="text-xs text-text-secondary">Sortie</p>
+                  <p className="text-sm font-medium text-text-primary">
                     {tenant.end_date ? formatDate(tenant.end_date) : '—'}
                   </p>
                 </div>
@@ -265,27 +265,27 @@ export default async function LocataireDetailPage({ params }: Props) {
 
           {/* Bien associé */}
           <Card>
-            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
               <Building2 className="h-5 w-5 text-terracotta" />
               Bien occupé
             </h2>
             {property ? (
-              <Link href={`/biens/${property.id}`} className="block p-3 rounded-xl hover:bg-stone-50 transition-colors group">
-                <p className="text-sm font-medium text-slate-900 group-hover:text-terracotta transition-colors">{property.name}</p>
-                <p className="text-xs text-stone-500">{property.address}, {property.postal_code} {property.city}</p>
+              <Link href={`/biens/${property.id}`} className="block p-3 rounded-xl hover:bg-bg-card transition-colors group">
+                <p className="text-sm font-medium text-text-primary group-hover:text-terracotta transition-colors">{property.name}</p>
+                <p className="text-xs text-text-secondary">{property.address}, {property.postal_code} {property.city}</p>
                 {property.surface && (
-                  <p className="text-xs text-stone-400 mt-1">{property.surface} m² — {property.property_type}</p>
+                  <p className="text-xs text-text-muted mt-1">{property.surface} m² — {property.property_type}</p>
                 )}
               </Link>
             ) : (
-              <p className="text-sm text-stone-500">Aucun bien associé.</p>
+              <p className="text-sm text-text-secondary">Aucun bien associé.</p>
             )}
           </Card>
 
           {/* État des lieux */}
           {property && (
             <Card>
-              <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
                 <ClipboardList className="h-5 w-5 text-terracotta" />
                 État des lieux
               </h2>

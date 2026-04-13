@@ -1,45 +1,23 @@
 'use client'
-
 import Link from 'next/link'
 import { ArrowRight, Check } from 'lucide-react'
-import { useInView } from '../hooks'
+import { useInView } from '../useInView'
 
 const plans = [
   {
-    name: 'Bêta gratuite',
-    price: '0',
-    period: 'pour toujours',
-    description: 'Accès complet pendant la bêta — votre feedback est bienvenu',
-    features: [
-      'Tous vos biens',
-      'Gestion des locataires',
-      'Suivi des paiements',
-      'Quittances de loyer',
-      'Coffre-fort documentaire',
-      'Notifications in-app',
-      'App mobile (PWA)',
-    ],
-    cta: 'Rejoindre la bêta',
-    href: '/register',
-    highlighted: false,
+    name: 'Gratuit', price: '0', period: '/mois', description: 'Pour démarrer sereinement',
+    features: ['Jusqu\'à 3 biens', 'Gestion des locataires', 'Suivi des paiements', 'Quittances de loyer', 'Signature électronique', 'Notifications in-app', 'Application mobile'],
+    cta: 'Commencer gratuitement', href: '/register', highlighted: false,
   },
   {
-    name: 'Pro',
-    price: '—',
-    period: 'bientôt',
-    description: 'Tarif défini avec les premiers utilisateurs',
-    features: [
-      'Tout le plan gratuit',
-      'Analytique avancée',
-      'Révision IRL automatique',
-      'Signature électronique',
-      'Sans publicité',
-      'Support prioritaire',
-      'Export comptable',
-    ],
-    cta: 'Être notifié du lancement',
-    href: '/register',
-    highlighted: true,
+    name: 'Premium', price: '9,90', period: '/mois', description: 'Pour les propriétaires exigeants',
+    features: ['Biens illimités', 'Tout le plan Gratuit', 'Analytique avancée', 'Révision IRL automatique', 'Sans publicité', 'Support prioritaire'],
+    cta: 'Passer au Premium', href: '/register', highlighted: true,
+  },
+  {
+    name: 'Pro', price: '14,90', period: '/mois', description: 'Pour gérer plusieurs biens et structures',
+    features: ['Tout le plan Premium', 'Comptes bancaires multiples', 'SCI multiples (IR, IS…)', 'Basculer entre vos structures', 'Analytique par SCI', 'Vision globale consolidée', 'Comparatif financier'],
+    cta: 'Passer au Pro', href: '/register', highlighted: false,
   },
 ]
 
@@ -47,67 +25,48 @@ export function PricingSection() {
   const { ref, inView } = useInView(0.1)
 
   return (
-    <section id="tarifs" ref={ref} className="landing-section bg-bg-primary relative">
-      <div className="absolute inset-0 bg-dot-grid opacity-15" />
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
-        <div className={`text-center mb-16 ${inView ? 'animate-fade-up' : 'opacity-0'}`}>
-          <span className="text-accent font-mono text-[11px] font-medium tracking-[0.12em] uppercase mb-6 block">
-            // Simple et transparent
-          </span>
-          <h2 className="font-display text-[clamp(32px,4.5vw,56px)] font-bold tracking-[-0.025em]">
-            Gratuit pendant la <span className="text-accent">bêta</span>
+    <section id="tarifs" ref={ref} className="py-24 sm:py-32 bg-bg-cream">
+      <div className="max-w-[1200px] mx-auto px-6">
+        <div className={`text-center mb-14 ${inView ? 'animate-fade-up' : 'opacity-0'}`}>
+          <span className="text-accent text-[13px] font-semibold tracking-wide uppercase">Tarifs</span>
+          <h2 className="mt-4 font-display text-[clamp(28px,4vw,44px)] font-bold tracking-tight text-text-dark">
+            Des prix simples, sans surprise.
           </h2>
-          <p className="mt-4 text-text-secondary max-w-lg mx-auto">
-            Les tarifs seront définis avec les premiers utilisateurs.
-            Pas de surprise, pas d&apos;engagement caché.
-          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-6 max-w-[960px] mx-auto">
           {plans.map((plan, i) => (
-            <div
-              key={plan.name}
-              className={`rounded-2xl p-8 flex flex-col relative overflow-hidden transition-all duration-300 ${
-                plan.highlighted
-                  ? 'bg-bg-card border-2 border-accent shadow-2xl shadow-accent/10'
-                  : 'bg-bg-card border border-border hover:border-border-accent'
-              } ${inView ? `animate-fade-up delay-${(i + 1) * 200}` : 'opacity-0'}`}
-            >
+            <div key={plan.name} className={`rounded-2xl p-8 flex flex-col transition-all ${
+              plan.highlighted
+                ? 'bg-bg-primary text-white ring-1 ring-accent/30 shadow-xl'
+                : 'bg-white border border-stone-200'
+            } ${inView ? `animate-fade-up delay-${(i + 1) * 200}` : 'opacity-0'}`}>
               {plan.highlighted && (
-                <div className="absolute top-0 right-0 bg-accent text-white text-[10px] font-bold font-mono tracking-wider px-4 py-1.5 rounded-bl-xl uppercase">
-                  Bientôt
-                </div>
+                <span className="self-start text-[11px] font-semibold text-accent bg-accent-muted px-3 py-1 rounded-full mb-4">Recommandé</span>
               )}
+              <h3 className={`text-xl font-bold font-display ${plan.highlighted ? '' : 'text-text-dark'}`}>{plan.name}</h3>
+              <p className={`text-[14px] mt-1 ${plan.highlighted ? 'text-text-secondary' : 'text-text-muted'}`}>{plan.description}</p>
 
-              <h3 className="text-xl font-bold font-display">{plan.name}</h3>
-              <p className="text-sm text-text-secondary mt-1">{plan.description}</p>
-
-              <div className="mt-8 mb-8">
-                <span className="text-5xl font-extrabold font-display">
-                  {plan.price === '—' ? '—' : `${plan.price}\u20AC`}
-                </span>
-                <span className="text-sm text-text-muted ml-2">{plan.period}</span>
+              <div className="mt-6 mb-8">
+                <span className={`text-[44px] font-extrabold font-display ${plan.highlighted ? '' : 'text-text-dark'}`}>{plan.price}&euro;</span>
+                <span className={`text-[14px] ml-1 ${plan.highlighted ? 'text-text-muted' : 'text-text-muted'}`}>{plan.period}</span>
               </div>
 
-              <ul className="space-y-3.5 mb-10 flex-1">
-                {plan.features.map((feat) => (
-                  <li key={feat} className="flex items-start gap-3 text-sm">
-                    <Check className="h-4 w-4 mt-0.5 shrink-0 text-accent" />
-                    <span className="text-text-secondary">{feat}</span>
+              <ul className="space-y-3 mb-8 flex-1">
+                {plan.features.map(f => (
+                  <li key={f} className="flex items-start gap-3 text-[14px]">
+                    <Check className={`h-4 w-4 mt-0.5 shrink-0 ${plan.highlighted ? 'text-accent' : 'text-accent'}`} />
+                    <span className={plan.highlighted ? 'text-text-secondary' : 'text-text-dark/70'}>{f}</span>
                   </li>
                 ))}
               </ul>
 
-              <Link
-                href={plan.href}
-                className={`inline-flex items-center justify-center gap-2 w-full px-6 py-3.5 rounded-md font-display font-bold text-[15px] transition-all hover:scale-[1.02] ${
-                  plan.highlighted
-                    ? 'bg-accent text-white border-2 border-accent hover:bg-transparent hover:text-accent'
-                    : 'border-2 border-border text-text-primary hover:border-accent hover:text-accent'
-                }`}
-              >
-                {plan.cta}
-                <ArrowRight className="h-4 w-4" />
+              <Link href={plan.href} className={`inline-flex items-center justify-center gap-2 w-full h-12 rounded-lg font-semibold text-[15px] transition-all ${
+                plan.highlighted
+                  ? 'bg-accent text-white hover:brightness-110'
+                  : 'border border-stone-200 text-text-dark hover:border-accent hover:text-accent'
+              }`}>
+                {plan.cta} <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           ))}

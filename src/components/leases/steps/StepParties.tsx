@@ -127,7 +127,7 @@ export default function StepParties({ data, errors, tenants, userMetadata, onCha
     <div className="space-y-6">
       {/* Section Bailleur */}
       <div>
-        <h3 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wider text-opacity-70">
+        <h3 className="text-sm font-semibold text-text-primary mb-3 uppercase tracking-wider text-opacity-70">
           Bailleur
         </h3>
         <div className="space-y-3">
@@ -157,18 +157,18 @@ export default function StepParties({ data, errors, tenants, userMetadata, onCha
       {/* Section Locataire */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider text-opacity-70">
+          <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wider text-opacity-70">
             Locataire
           </h3>
           {/* Toggle entre existant et nouveau */}
-          <div className="flex items-center gap-1 bg-stone-100 rounded-lg p-0.5">
+          <div className="flex items-center gap-1 bg-bg-card rounded-lg p-0.5">
             <button
               type="button"
               onClick={switchToExisting}
               className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
                 mode === 'existing'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-stone-500 hover:text-stone-700'
+                  ? 'bg-bg-elevated text-text-primary shadow-sm'
+                  : 'text-text-secondary hover:text-stone-700'
               }`}
             >
               Existant
@@ -178,8 +178,8 @@ export default function StepParties({ data, errors, tenants, userMetadata, onCha
               onClick={switchToNewTenant}
               className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
                 mode === 'new'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-stone-500 hover:text-stone-700'
+                  ? 'bg-bg-elevated text-text-primary shadow-sm'
+                  : 'text-text-secondary hover:text-stone-700'
               }`}
             >
               Nouveau
@@ -204,19 +204,19 @@ export default function StepParties({ data, errors, tenants, userMetadata, onCha
               />
 
               {data.tenant_id && (
-                <div className="rounded-xl bg-stone-50 p-4 space-y-2">
+                <div className="rounded-xl bg-bg-card p-4 space-y-2">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <p className="text-xs text-stone-500">Prénom</p>
-                      <p className="text-sm font-medium text-slate-900">{data.tenant_first_name}</p>
+                      <p className="text-xs text-text-secondary">Prénom</p>
+                      <p className="text-sm font-medium text-text-primary">{data.tenant_first_name}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-stone-500">Nom</p>
-                      <p className="text-sm font-medium text-slate-900">{data.tenant_last_name}</p>
+                      <p className="text-xs text-text-secondary">Nom</p>
+                      <p className="text-sm font-medium text-text-primary">{data.tenant_last_name}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-stone-500">Date de naissance</p>
-                      <p className="text-sm font-medium text-slate-900">
+                      <p className="text-xs text-text-secondary">Date de naissance</p>
+                      <p className="text-sm font-medium text-text-primary">
                         {data.tenant_date_of_birth ? formatDate(data.tenant_date_of_birth) : '—'}
                       </p>
                     </div>
@@ -225,8 +225,8 @@ export default function StepParties({ data, errors, tenants, userMetadata, onCha
               )}
 
               {activeTenants.length === 0 && (
-                <div className="rounded-xl bg-stone-50 p-4 text-center">
-                  <p className="text-sm text-stone-500">Aucun locataire enregistré</p>
+                <div className="rounded-xl bg-bg-card p-4 text-center">
+                  <p className="text-sm text-text-secondary">Aucun locataire enregistré</p>
                   <button
                     type="button"
                     onClick={switchToNewTenant}
@@ -283,9 +283,9 @@ export default function StepParties({ data, errors, tenants, userMetadata, onCha
               />
 
               {/* Co-locataires */}
-              <div className="border-t border-stone-100 pt-4">
+              <div className="border-t border-border pt-4">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-slate-900">Co-locataires</span>
+                  <span className="text-sm font-medium text-text-primary">Co-locataires</span>
                   <button
                     type="button"
                     onClick={addCotenant}
@@ -299,7 +299,7 @@ export default function StepParties({ data, errors, tenants, userMetadata, onCha
                 {data.cotenants.length > 0 && (
                   <div className="space-y-3">
                     {data.cotenants.map((co, i) => (
-                      <div key={i} className="p-3 rounded-xl bg-stone-50 space-y-2">
+                      <div key={i} className="p-3 rounded-xl bg-bg-card space-y-2">
                         <div className="flex items-start gap-2">
                           <div className="flex-1 grid grid-cols-2 gap-2">
                             <Input
@@ -361,30 +361,30 @@ export default function StepParties({ data, errors, tenants, userMetadata, onCha
 
           {/* Co-locataires en mode existant */}
           {mode === 'existing' && data.has_cotenants && data.cotenants.length > 0 && (
-            <div className="rounded-xl border border-stone-200 p-4">
+            <div className="rounded-xl border border-border-light p-4">
               <div className="flex items-center gap-2 mb-3">
                 <input
                   type="checkbox"
                   checked={data.has_cotenants}
                   readOnly
-                  className="rounded border-stone-300 text-terracotta focus:ring-terracotta/30"
+                  className="rounded border-stone-300 text-terracotta focus:ring-accent/30"
                 />
-                <span className="text-sm font-medium text-slate-900">
+                <span className="text-sm font-medium text-text-primary">
                   Plusieurs locataires (colocation)
                 </span>
               </div>
               <div className="space-y-2">
                 {data.cotenants.map((co, i) => (
-                  <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-stone-50">
+                  <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-bg-card">
                     <div className="flex items-center justify-center h-7 w-7 rounded-full bg-terracotta/10 text-terracotta text-xs font-semibold">
                       {co.first_name.charAt(0)}{co.last_name.charAt(0)}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-900">
+                      <p className="text-sm font-medium text-text-primary">
                         {co.first_name} {co.last_name}
                       </p>
                       {co.date_of_birth && (
-                        <p className="text-xs text-stone-500">
+                        <p className="text-xs text-text-secondary">
                           Né(e) le {formatDate(co.date_of_birth)}
                         </p>
                       )}

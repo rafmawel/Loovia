@@ -106,7 +106,7 @@ export default function AddressAutocomplete({
   return (
     <div ref={containerRef} className="relative flex flex-col gap-1.5">
       {label && (
-        <label htmlFor={inputId} className="text-sm font-medium text-slate-900">
+        <label htmlFor={inputId} className="text-sm font-medium text-text-primary">
           {label}
         </label>
       )}
@@ -121,10 +121,10 @@ export default function AddressAutocomplete({
         autoComplete="off"
         aria-invalid={!!error}
         className={[
-          'rounded-xl border bg-white px-4 py-2.5 text-sm text-slate-900',
-          'placeholder:text-stone-400 transition-all duration-200',
-          'focus:outline-none focus:ring-2 focus:ring-terracotta/30 focus:border-terracotta',
-          error ? 'border-red-400 focus:ring-red-200 focus:border-red-500' : 'border-stone-200',
+          'rounded-xl border bg-bg-elevated px-4 py-2.5 text-sm text-text-primary',
+          'placeholder:text-text-muted transition-all duration-200',
+          'focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent',
+          error ? 'border-red-400 focus:ring-red-200 focus:border-red-500' : 'border-border-light',
         ].join(' ')}
       />
       {error && (
@@ -132,12 +132,12 @@ export default function AddressAutocomplete({
       )}
 
       {open && suggestions.length > 0 && (
-        <ul className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-stone-200 rounded-xl shadow-lg overflow-hidden">
+        <ul className="absolute top-full left-0 right-0 z-50 mt-1 bg-bg-elevated border border-border-light rounded-xl shadow-lg overflow-hidden">
           {suggestions.map((s, i) => (
             <li
               key={i}
               className={`px-4 py-2.5 text-sm cursor-pointer transition-colors ${
-                i === activeIndex ? 'bg-terracotta/10 text-terracotta' : 'text-slate-900 hover:bg-stone-50'
+                i === activeIndex ? 'bg-terracotta/10 text-terracotta' : 'text-text-primary hover:bg-bg-card'
               }`}
               onMouseDown={() => handleSelect(s)}
               onMouseEnter={() => setActiveIndex(i)}

@@ -1,49 +1,31 @@
 'use client'
-
-import { useInView } from '../hooks'
-import { AntMini } from '../AntMascot'
-import { Star4 } from '../Decorations'
+import { useInView } from '../useInView'
 
 const steps = [
-  { number: '01', title: 'Ajoutez votre bien et votre locataire', description: 'Renseignez les informations de base : adresse, loyer, charges, coordonnées du locataire.' },
-  { number: '02', title: 'Configurez votre bail', description: 'Créez votre bail personnalisé, définissez les échéances et les conditions de location.' },
-  { number: '03', title: 'Loovia gère le reste', description: 'Suivi des paiements, quittances automatiques, alertes. Vous gardez le contrôle, sans la corvée.' },
+  { n: '01', title: 'Créez votre compte', description: 'Inscription gratuite en 2 minutes, sans engagement ni carte bancaire.' },
+  { n: '02', title: 'Ajoutez vos biens & locataires', description: 'Renseignez vos biens immobiliers, ajoutez vos locataires et créez vos baux.' },
+  { n: '03', title: 'Pilotez votre patrimoine', description: 'Suivez vos loyers, envoyez vos quittances, analysez votre rentabilité.' },
 ]
 
 export function StepsSection() {
   const { ref, inView } = useInView(0.1)
 
   return (
-    <section id="comment-ca-marche" ref={ref} className="landing-section bg-pastel-lavender/30 relative overflow-hidden">
-      <Star4 className="absolute top-20 right-[10%] w-4 h-4 animate-twinkle hidden lg:block" color="#E8622A" />
-      <Star4 className="absolute bottom-16 left-[15%] w-3 h-3 animate-twinkle-d2 hidden lg:block" color="#0D0F1A" />
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className={`flex items-end justify-between ${inView ? 'animate-fade-up' : 'opacity-0'}`}>
-          <div>
-            <span className="text-accent font-mono text-[11px] font-medium tracking-[0.12em] uppercase mb-6 block">
-              // 3 minutes pour démarrer
-            </span>
-            <h2 className="font-display text-[clamp(32px,4.5vw,56px)] font-bold leading-[1.05] tracking-[-0.025em] text-text-dark max-w-xl">
-              Simple comme <span className="text-accent">bonjour.</span>
-            </h2>
-          </div>
-          <AntMini className="w-8 h-8 hidden md:block opacity-50" />
+    <section id="comment-ca-marche" ref={ref} className="py-24 sm:py-32 bg-bg-primary">
+      <div className="max-w-[1200px] mx-auto px-6">
+        <div className={inView ? 'animate-fade-up' : 'opacity-0'}>
+          <span className="text-accent text-[13px] font-semibold tracking-wide uppercase">Comment ça marche</span>
+          <h2 className="mt-4 font-display text-[clamp(28px,4vw,44px)] font-bold tracking-tight text-white">
+            Commencez en <span className="gradient-text">3 étapes</span>
+          </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-14">
+        <div className="mt-14 grid md:grid-cols-3 gap-5">
           {steps.map((s, i) => (
-            <div key={s.number} className={`relative ${inView ? `animate-fade-up delay-${(i + 1) * 200}` : 'opacity-0'}`}>
-              {i < 2 && (
-                <div className="hidden md:block absolute top-10 left-full w-full">
-                  <div className="h-px bg-gradient-to-r from-accent/30 to-transparent ml-4 mr-4" />
-                </div>
-              )}
-              <div className="bg-white rounded-2xl border border-stone-200 p-8 hover:shadow-lg hover:border-accent/20 transition-all h-full">
-                <span className="font-display text-5xl font-extrabold text-accent/15">{s.number}</span>
-                <h3 className="text-lg font-bold text-text-dark mt-3 mb-3 font-display">{s.title}</h3>
-                <p className="text-sm text-text-muted leading-[1.75]">{s.description}</p>
-              </div>
+            <div key={s.n} className={`glass-card rounded-2xl p-8 ${inView ? `animate-fade-up delay-${(i + 1) * 200}` : 'opacity-0'}`}>
+              <span className="font-display text-[48px] font-extrabold gradient-text leading-none">{s.n}</span>
+              <h3 className="mt-5 text-[17px] font-semibold text-white">{s.title}</h3>
+              <p className="mt-3 text-[14px] text-text-secondary leading-[1.7]">{s.description}</p>
             </div>
           ))}
         </div>

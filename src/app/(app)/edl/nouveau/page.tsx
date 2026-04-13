@@ -46,7 +46,7 @@ export default async function NouvelEdlPage({ searchParams }: Props) {
     <div>
       <Link
         href={`/biens/${property_id}`}
-        className="inline-flex items-center gap-2 text-sm text-stone-500 hover:text-slate-900 mb-4 transition-colors"
+        className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary mb-4 transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
         Retour au bien

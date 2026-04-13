@@ -20,7 +20,7 @@ export function SubscriptionProvider({
   subscription: Subscription | null;
   children: React.ReactNode;
 }) {
-  const isPro = subscription?.plan === 'pro' && subscription?.status === 'active';
+  const isPro = (subscription?.plan === 'premium' || subscription?.plan === 'pro') && subscription?.status === 'active';
 
   return (
     <SubscriptionContext.Provider value={{ subscription, isPro }}>

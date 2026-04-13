@@ -67,7 +67,7 @@ export default function PropertyMaintenanceSection({
     <>
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
             <Wrench className="h-5 w-5 text-terracotta" />
             Demandes de travaux ({requests.length})
           </h2>
@@ -83,37 +83,37 @@ export default function PropertyMaintenanceSection({
 
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-stone-200 border-t-terracotta" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-border-light border-t-accent" />
           </div>
         ) : requests.length === 0 ? (
-          <p className="text-sm text-stone-500">Aucune demande de travaux pour ce bien.</p>
+          <p className="text-sm text-text-secondary">Aucune demande de travaux pour ce bien.</p>
         ) : (
           <div className="space-y-3">
             {requests.map((req) => (
               <div
                 key={req.id}
-                className="p-3 rounded-xl bg-stone-50"
+                className="p-3 rounded-xl bg-bg-card"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <p className="text-sm font-medium text-slate-900 truncate">
+                      <p className="text-sm font-medium text-text-primary truncate">
                         {req.title}
                       </p>
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                          priorityColors[req.priority]?.bg || 'bg-stone-100'
+                          priorityColors[req.priority]?.bg || 'bg-bg-card'
                         } ${priorityColors[req.priority]?.text || 'text-stone-600'}`}
                       >
                         {priorityLabels[req.priority] || req.priority}
                       </span>
                     </div>
                     {req.description && (
-                      <p className="text-xs text-stone-500 line-clamp-2 mb-1">
+                      <p className="text-xs text-text-secondary line-clamp-2 mb-1">
                         {req.description}
                       </p>
                     )}
-                    <p className="text-xs text-stone-400">
+                    <p className="text-xs text-text-muted">
                       {formatDate(req.created_at)}
                     </p>
                   </div>
@@ -141,7 +141,7 @@ export default function PropertyMaintenanceSection({
                     {req.status === 'resolved' && (
                       <button
                         onClick={() => handleUpdateStatus(req.id, 'closed')}
-                        className="p-1.5 text-stone-500 hover:bg-stone-200 rounded-lg transition-colors"
+                        className="p-1.5 text-text-secondary hover:bg-stone-200 rounded-lg transition-colors"
                         title="Fermer"
                       >
                         <XCircle className="h-3.5 w-3.5" />
@@ -158,7 +158,7 @@ export default function PropertyMaintenanceSection({
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="h-12 w-12 rounded-lg overflow-hidden border border-stone-200 shrink-0"
+                        className="h-12 w-12 rounded-lg overflow-hidden border border-border-light shrink-0"
                       >
                         <img
                           src={url}
@@ -168,7 +168,7 @@ export default function PropertyMaintenanceSection({
                       </a>
                     ))}
                     {req.photos.length > 3 && (
-                      <span className="text-xs text-stone-400">
+                      <span className="text-xs text-text-muted">
                         +{req.photos.length - 3}
                       </span>
                     )}

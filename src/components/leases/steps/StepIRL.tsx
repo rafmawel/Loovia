@@ -19,17 +19,17 @@ interface Props {
 export default function StepIRL({ data, onChange }: Props) {
   return (
     <div className="space-y-6">
-      <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider text-opacity-70">
+      <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wider text-opacity-70">
         Clause d'indexation IRL
       </h3>
 
       {/* Toggle */}
-      <label className="flex items-center justify-between p-4 rounded-xl border border-stone-200 cursor-pointer hover:bg-stone-50 transition-colors">
+      <label className="flex items-center justify-between p-4 rounded-xl border border-border-light cursor-pointer hover:bg-bg-card transition-colors">
         <div>
-          <p className="text-sm font-medium text-slate-900">
+          <p className="text-sm font-medium text-text-primary">
             Activer la clause d'indexation du loyer (IRL)
           </p>
-          <p className="text-xs text-stone-500 mt-0.5">
+          <p className="text-xs text-text-secondary mt-0.5">
             Indice de Référence des Loyers publié par l'INSEE
           </p>
         </div>
@@ -45,7 +45,7 @@ export default function StepIRL({ data, onChange }: Props) {
         >
           <span
             className={[
-              'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition-transform duration-200',
+              'pointer-events-none inline-block h-5 w-5 rounded-full bg-bg-elevated shadow transform ring-0 transition-transform duration-200',
               data.irl_enabled ? 'translate-x-5' : 'translate-x-0',
             ].join(' ')}
           />
@@ -84,8 +84,8 @@ export default function StepIRL({ data, onChange }: Props) {
       )}
 
       {!data.irl_enabled && (
-        <div className="rounded-xl bg-stone-50 border border-stone-200 p-4">
-          <p className="text-sm text-stone-500">
+        <div className="rounded-xl bg-bg-card border border-border-light p-4">
+          <p className="text-sm text-text-secondary">
             Sans clause d'indexation, le loyer restera fixe pendant toute la durée du bail.
           </p>
         </div>

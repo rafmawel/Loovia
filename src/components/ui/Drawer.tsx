@@ -101,7 +101,7 @@ export default function Drawer({
       {/* Panneau de contenu — glisse depuis la droite */}
       <div
         className={[
-          'relative w-full max-w-xl h-full bg-white shadow-xl flex flex-col',
+          'relative w-full max-w-xl h-full bg-bg-elevated shadow-xl flex flex-col',
           closing
             ? 'animate-[slide-out-to-right_0.2s_ease-in_forwards]'
             : 'animate-[slide-in-from-right_0.3s_ease-out]',
@@ -111,11 +111,11 @@ export default function Drawer({
           .join(' ')}
       >
         {/* En-tête avec titre et bouton de fermeture */}
-        <div className="flex items-center justify-between p-6 pb-4 border-b border-stone-200/50">
+        <div className="flex items-center justify-between p-6 pb-4 border-b border-border-light/50">
           {title && (
             <h2
               id="drawer-title"
-              className="text-lg font-semibold text-slate-900"
+              className="text-lg font-semibold text-text-primary"
             >
               {title}
             </h2>
@@ -123,7 +123,7 @@ export default function Drawer({
           <button
             type="button"
             onClick={handleClose}
-            className="ml-auto rounded-lg p-1.5 text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors duration-150"
+            className="ml-auto rounded-lg p-1.5 text-text-muted hover:text-text-secondary hover:bg-bg-card transition-colors duration-150"
             aria-label="Fermer"
           >
             <svg

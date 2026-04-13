@@ -112,8 +112,8 @@ export default function SignaturePad({ label, value, onChange }: SignaturePadPro
 
   return (
     <div>
-      <p className="text-sm font-medium text-slate-900 mb-2">{label}</p>
-      <div className="border border-stone-200 rounded-xl overflow-hidden bg-white">
+      <p className="text-sm font-medium text-text-primary mb-2">{label}</p>
+      <div className="border border-border-light rounded-xl overflow-hidden bg-bg-elevated">
         <canvas
           ref={canvasRef}
           className="w-full cursor-crosshair touch-none"

@@ -1,7 +1,7 @@
 'use client';
 
 import type { LeaseWizardData, LeaseType } from '../LeaseWizard';
-import { Home, Sofa, Users, GraduationCap, Plane } from 'lucide-react';
+import { Home, Sofa, Users, GraduationCap, Plane, CalendarDays, Clock } from 'lucide-react';
 
 interface Props {
   data: LeaseWizardData;
@@ -98,10 +98,10 @@ export default function StepTypeBail({ data, onChange }: Props) {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider text-opacity-70">
+      <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wider text-opacity-70">
         Type de bail
       </h3>
-      <p className="text-sm text-stone-500">
+      <p className="text-sm text-text-secondary">
         Choisissez le type de bail adapté à votre situation. Les clauses, la durée et les conditions financières seront adaptées automatiquement.
       </p>
 
@@ -117,34 +117,34 @@ export default function StepTypeBail({ data, onChange }: Props) {
               className={[
                 'w-full text-left p-4 rounded-xl border-2 transition-all',
                 selected
-                  ? 'border-terracotta bg-terracotta/5'
-                  : 'border-stone-200 hover:border-stone-300 bg-white',
+                  ? 'border-accent bg-accent/5'
+                  : 'border-border-light hover:border-accent/30 bg-bg-elevated',
               ].join(' ')}
             >
               <div className="flex items-start gap-3">
                 <div
                   className={[
                     'flex items-center justify-center h-10 w-10 rounded-lg shrink-0',
-                    selected ? 'bg-terracotta/10 text-terracotta' : 'bg-stone-100 text-stone-500',
+                    selected ? 'bg-accent/10 text-accent' : 'bg-bg-card text-text-secondary',
                   ].join(' ')}
                 >
                   <Icon className="h-5 w-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className={`text-sm font-semibold ${selected ? 'text-terracotta' : 'text-slate-900'}`}>
+                    <p className={`text-sm font-semibold ${selected ? 'text-accent' : 'text-text-primary'}`}>
                       {type.label}
                     </p>
-                    <span className="text-xs text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full shrink-0">
+                    <span className="text-xs text-text-muted bg-bg-card px-2 py-0.5 rounded-full shrink-0">
                       {type.duration}
                     </span>
                   </div>
-                  <p className="text-xs text-stone-500 mt-1 leading-relaxed">
+                  <p className="text-xs text-text-secondary mt-1 leading-relaxed">
                     {type.description}
                   </p>
                 </div>
                 {selected && (
-                  <div className="flex items-center justify-center h-5 w-5 rounded-full bg-terracotta text-white shrink-0 mt-0.5">
+                  <div className="flex items-center justify-center h-5 w-5 rounded-full bg-accent text-white shrink-0 mt-0.5">
                     <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
@@ -154,6 +154,28 @@ export default function StepTypeBail({ data, onChange }: Props) {
             </button>
           );
         })}
+
+        {/* Location saisonnière — à venir */}
+        <div className="w-full text-left p-4 rounded-xl border-2 border-dashed border-border-light bg-bg-elevated/50 opacity-60 cursor-not-allowed">
+          <div className="flex items-start gap-3">
+            <div className="flex items-center justify-center h-10 w-10 rounded-lg shrink-0 bg-bg-card text-text-muted">
+              <CalendarDays className="h-5 w-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-semibold text-text-muted">
+                  Location saisonnière (Airbnb)
+                </p>
+                <span className="text-[10px] font-semibold text-accent bg-accent/10 px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0">
+                  <Clock className="h-3 w-3" /> À venir
+                </span>
+              </div>
+              <p className="text-xs text-text-muted mt-1 leading-relaxed">
+                Gestion des locations courte durée, calendrier de réservations, tarification dynamique et contrats saisonniers.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

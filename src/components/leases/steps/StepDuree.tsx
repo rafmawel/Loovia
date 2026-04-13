@@ -104,7 +104,7 @@ export default function StepDuree({ data, errors, onChange }: Props) {
 
   return (
     <div className="space-y-6">
-      <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider text-opacity-70">
+      <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wider text-opacity-70">
         Durée du bail
       </h3>
 
@@ -134,25 +134,25 @@ export default function StepDuree({ data, errors, onChange }: Props) {
           helperText="Bail mobilité : entre 1 et 10 mois"
         />
       ) : (
-        <div className="rounded-xl bg-stone-50 p-4">
-          <p className="text-xs text-stone-500 mb-1">Durée du bail</p>
-          <p className="text-lg font-bold text-slate-900">{durationLabel}</p>
-          <p className="text-xs text-stone-400 mt-1">{durationReason}</p>
+        <div className="rounded-xl bg-bg-card p-4">
+          <p className="text-xs text-text-secondary mb-1">Durée du bail</p>
+          <p className="text-lg font-bold text-text-primary">{durationLabel}</p>
+          <p className="text-xs text-text-muted mt-1">{durationReason}</p>
         </div>
       )}
 
       {/* Dates récapitulatives */}
       {data.start_date && (
-        <div className="grid grid-cols-2 gap-4 rounded-xl border border-stone-200 p-4">
+        <div className="grid grid-cols-2 gap-4 rounded-xl border border-border-light p-4">
           <div>
-            <p className="text-xs text-stone-500">Début</p>
-            <p className="text-sm font-semibold text-slate-900">
+            <p className="text-xs text-text-secondary">Début</p>
+            <p className="text-sm font-semibold text-text-primary">
               {formatDate(data.start_date)}
             </p>
           </div>
           <div>
-            <p className="text-xs text-stone-500">Fin</p>
-            <p className="text-sm font-semibold text-slate-900">
+            <p className="text-xs text-text-secondary">Fin</p>
+            <p className="text-sm font-semibold text-text-primary">
               {data.end_date ? formatDate(data.end_date) : '—'}
             </p>
           </div>

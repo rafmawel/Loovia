@@ -13,11 +13,20 @@ import AddressAutocomplete from '@/components/ui/AddressAutocomplete';
 import { toast } from 'sonner';
 import {
   Home, MapPin, Utensils, Warehouse, Thermometer, Shield, Wallet,
-  ImageIcon, Save, X, Upload, Trash2, Building2, Car, Box, Landmark,
+  ImageIcon, Save, X, Upload, Trash2, Building2, Car, Box, Landmark, Briefcase, Plus,
 } from 'lucide-react';
 import type { Property, PropertyLot } from '@/types';
 
 const MAX_PHOTOS_FREE = 3;
+
+// Régimes de détention
+const OWNERSHIP_REGIMES = [
+  { value: 'nom_propre_nu', label: 'Nom propre — Location nue' },
+  { value: 'nom_propre_meuble', label: 'Nom propre — LMNP / LMP' },
+  { value: 'sci_ir', label: 'SCI à l\'IR' },
+  { value: 'sci_is', label: 'SCI à l\'IS' },
+  { value: 'autre', label: 'Autre' },
+] as const;
 
 interface PropertyFormProps {
   property?: Property | null;
@@ -162,9 +171,29 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
   const [creatingLot, setCreatingLot] = useState(false);
   const [newLotName, setNewLotName] = useState('');
 
+  // Détention / SCI
+  const [ownershipRegime, setOwnershipRegime] = useState('');
+  const [sciList, setSciList] = useState<{ id: string; name: string }[]>([]);
+  const [selectedSciId, setSelectedSciId] = useState('');
+  const [creatingSci, setCreatingSci] = useState(false);
+  const [newSciName, setNewSciName] = useState('');
+  const isSciRegime = ownershipRegime === 'sci_ir' || ownershipRegime === 'sci_is';
+
+  // Charger les SCI existantes
+  useState(() => {
+    supabase
+      .from('sci_entities')
+      .select('id, name')
+      .order('name')
+      .then(({ data }) => {
+        if (data) setSciList(data);
+      });
+  });
+
   // Dynamic sections based on property type
   const sections = useMemo(() => {
     const base = [
+      { icon: Briefcase, label: 'Détention' },
       { icon: Home, label: 'Type de bien' },
       { icon: MapPin, label: 'Localisation' },
       { icon: Home, label: 'Description' },
@@ -369,6 +398,22 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('Vous devez être connecté pour ajouter un bien');
 
+        // Créer une SCI si demandé
+        let sciId: string | null = selectedSciId || null;
+        if (isSciRegime && (creatingSci || sciList.length === 0) && newSciName.trim()) {
+          const { data: sci, error: sciError } = await supabase
+            .from('sci_entities')
+            .insert({
+              user_id: user.id,
+              name: newSciName.trim(),
+              regime: ownershipRegime,
+            })
+            .select()
+            .single();
+          if (sciError) throw new Error(sciError.message);
+          sciId = sci.id;
+        }
+
         // Créer un lot si demandé
         let lotId = result.data.lot_id;
         if (creatingLot && newLotName.trim()) {
@@ -392,7 +437,13 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
 
         const { data, error } = await supabase
           .from('properties')
-          .insert({ ...result.data, user_id: user.id, lot_id: lotId })
+          .insert({
+            ...result.data,
+            user_id: user.id,
+            lot_id: lotId,
+            ownership_regime: ownershipRegime || null,
+            sci_id: sciId,
+          })
           .select()
           .single();
 
@@ -414,7 +465,7 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
   return (
     <form onSubmit={handleSubmit} className="max-h-[80vh] overflow-hidden flex flex-col">
       {/* Navigation des sections */}
-      <div className="flex gap-1 overflow-x-auto pb-4 mb-4 border-b border-stone-100 shrink-0">
+      <div className="flex gap-1 overflow-x-auto pb-4 mb-4 border-b border-border shrink-0">
         {sections.map((section, index) => {
           const Icon = section.icon;
           return (
@@ -425,7 +476,7 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
                 activeSection === index
                   ? 'bg-terracotta/10 text-terracotta'
-                  : 'text-stone-500 hover:bg-stone-50 hover:text-slate-900'
+                  : 'text-text-secondary hover:bg-bg-card hover:text-text-primary'
               }`}
             >
               <Icon className="h-3.5 w-3.5" />
@@ -437,10 +488,113 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
 
       {/* Contenu de la section active */}
       <div className="overflow-y-auto flex-1 px-1">
+        {/* Section : Détention */}
+        {sectionKey === 'Détention' && (
+          <div className="space-y-5 animate-in">
+            <div>
+              <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wider mb-1">
+                Mode de détention
+              </h3>
+              <p className="text-sm text-text-secondary">
+                Comment détenez-vous ce bien ? Cela adapte la comptabilité et les exports fiscaux.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              {OWNERSHIP_REGIMES.map((regime) => (
+                <button
+                  key={regime.value}
+                  type="button"
+                  onClick={() => {
+                    setOwnershipRegime(regime.value);
+                    if (regime.value !== 'sci_ir' && regime.value !== 'sci_is') {
+                      setSelectedSciId('');
+                      setCreatingSci(false);
+                      setNewSciName('');
+                    }
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
+                    ownershipRegime === regime.value
+                      ? 'bg-accent/10 border border-accent/30'
+                      : 'bg-bg-card border border-border-light hover:border-accent/20'
+                  }`}
+                >
+                  <div className={`h-4 w-4 rounded-full border-2 shrink-0 flex items-center justify-center ${
+                    ownershipRegime === regime.value ? 'border-accent' : 'border-border-light'
+                  }`}>
+                    {ownershipRegime === regime.value && (
+                      <div className="h-2 w-2 rounded-full bg-accent" />
+                    )}
+                  </div>
+                  <span className={`text-sm font-medium ${ownershipRegime === regime.value ? 'text-accent' : 'text-text-primary'}`}>
+                    {regime.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* Sélection / création SCI */}
+            {isSciRegime && (
+              <div className="p-5 rounded-xl border border-accent/20 bg-accent/5 space-y-4">
+                <h4 className="text-sm font-semibold text-text-primary flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-accent" />
+                  Quelle SCI ?
+                </h4>
+
+                {sciList.length > 0 && !creatingSci && (
+                  <>
+                    <select
+                      value={selectedSciId}
+                      onChange={(e) => setSelectedSciId(e.target.value)}
+                      className="w-full px-3 py-2.5 text-sm border border-border-light rounded-xl bg-bg-card text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
+                    >
+                      <option value="">Sélectionner une SCI existante</option>
+                      {sciList.map((sci) => (
+                        <option key={sci.id} value={sci.id}>{sci.name}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setCreatingSci(true)}
+                      className="flex items-center gap-1.5 text-xs text-accent hover:underline"
+                    >
+                      <Plus className="h-3 w-3" /> Créer une nouvelle SCI
+                    </button>
+                  </>
+                )}
+
+                {(creatingSci || sciList.length === 0) && (
+                  <>
+                    <Input
+                      label="Nom de la SCI"
+                      placeholder="Ex: SCI Patrimoine Dupont"
+                      value={newSciName}
+                      onChange={(e) => setNewSciName(e.target.value)}
+                    />
+                    {creatingSci && sciList.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => { setCreatingSci(false); setNewSciName(''); }}
+                        className="text-xs text-text-secondary hover:underline"
+                      >
+                        Choisir une SCI existante
+                      </button>
+                    )}
+                  </>
+                )}
+
+                <p className="text-xs text-text-muted">
+                  La SCI sera réutilisable pour vos autres biens détenus par la même structure.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Section : Type de bien */}
         {sectionKey === 'Type de bien' && (
           <div className="space-y-5 animate-in">
-            <p className="text-sm text-stone-500">Quel type de bien souhaitez-vous ajouter ?</p>
+            <p className="text-sm text-text-secondary">Quel type de bien souhaitez-vous ajouter ?</p>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
               {propertyTypes.map((type) => (
                 <button
@@ -452,7 +606,7 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
                     form.property_type === type
                       ? 'border-terracotta bg-terracotta/5 text-terracotta'
-                      : 'border-stone-200 text-stone-600 hover:border-stone-300 hover:bg-stone-50'
+                      : 'border-border-light text-stone-600 hover:border-stone-300 hover:bg-bg-card'
                   }`}
                 >
                   {typeIcons[type] || <Home className="h-5 w-5" />}
@@ -462,13 +616,17 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
             </div>
 
             {!isStorageType && !isCommercialType && (
-              <div className="pt-2">
+              <div className="pt-2 space-y-3">
                 <Select
                   label="Type de location"
                   options={furnishedTypes.map((t) => ({ value: t, label: t }))}
                   value={form.furnished_type}
                   onChange={(e) => updateField('furnished_type', e.target.value)}
                 />
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-bg-card/50 border border-dashed border-border-light opacity-60">
+                  <span className="text-xs text-text-muted">Location saisonnière (Airbnb)</span>
+                  <span className="text-[9px] font-semibold text-accent bg-accent/10 px-1.5 py-0.5 rounded-full">À venir</span>
+                </div>
               </div>
             )}
           </div>
@@ -602,10 +760,10 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
               onChange={(e) => updateField('kitchen_type', e.target.value)}
             />
             <div>
-              <p className="text-sm font-medium text-slate-900 mb-3">Équipements de cuisine</p>
+              <p className="text-sm font-medium text-text-primary mb-3">Équipements de cuisine</p>
               <div className="grid grid-cols-2 gap-2">
                 {['Réfrigérateur', 'Four', 'Micro-ondes', 'Lave-vaisselle', 'Plaques de cuisson', 'Hotte', 'Congélateur', 'Lave-linge'].map((equip) => (
-                  <label key={equip} className="flex items-center gap-2.5 p-2.5 rounded-lg hover:bg-stone-50 cursor-pointer">
+                  <label key={equip} className="flex items-center gap-2.5 p-2.5 rounded-lg hover:bg-bg-card cursor-pointer">
                     <input
                       type="checkbox"
                       checked={form.kitchen_equipment.includes(equip)}
@@ -616,9 +774,9 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
                           updateField('kitchen_equipment', form.kitchen_equipment.filter((i) => i !== equip));
                         }
                       }}
-                      className="rounded border-stone-300 text-terracotta focus:ring-terracotta"
+                      className="rounded border-stone-300 text-terracotta focus:ring-accent"
                     />
-                    <span className="text-sm text-slate-900">{equip}</span>
+                    <span className="text-sm text-text-primary">{equip}</span>
                   </label>
                 ))}
               </div>
@@ -629,11 +787,11 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
         {/* Section : Annexes */}
         {sectionKey === 'Annexes' && (
           <div className="space-y-4 animate-in">
-            <div className="p-5 rounded-xl border border-stone-200">
+            <div className="p-5 rounded-xl border border-border-light">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={form.has_cellar} onChange={() => toggleField('has_cellar')}
-                  className="rounded border-stone-300 text-terracotta focus:ring-terracotta" />
-                <span className="text-sm font-medium text-slate-900">Cave</span>
+                  className="rounded border-stone-300 text-terracotta focus:ring-accent" />
+                <span className="text-sm font-medium text-text-primary">Cave</span>
               </label>
               {form.has_cellar && (
                 <div className="mt-4 pl-7">
@@ -642,11 +800,11 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
               )}
             </div>
 
-            <div className="p-5 rounded-xl border border-stone-200">
+            <div className="p-5 rounded-xl border border-border-light">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={form.has_parking} onChange={() => toggleField('has_parking')}
-                  className="rounded border-stone-300 text-terracotta focus:ring-terracotta" />
-                <span className="text-sm font-medium text-slate-900">Parking</span>
+                  className="rounded border-stone-300 text-terracotta focus:ring-accent" />
+                <span className="text-sm font-medium text-text-primary">Parking</span>
               </label>
               {form.has_parking && (
                 <div className="mt-4 pl-7 grid grid-cols-2 gap-4">
@@ -657,11 +815,11 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
               )}
             </div>
 
-            <div className="p-5 rounded-xl border border-stone-200">
+            <div className="p-5 rounded-xl border border-border-light">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={form.has_balcony} onChange={() => toggleField('has_balcony')}
-                  className="rounded border-stone-300 text-terracotta focus:ring-terracotta" />
-                <span className="text-sm font-medium text-slate-900">Balcon</span>
+                  className="rounded border-stone-300 text-terracotta focus:ring-accent" />
+                <span className="text-sm font-medium text-text-primary">Balcon</span>
               </label>
               {form.has_balcony && (
                 <div className="mt-4 pl-7">
@@ -670,11 +828,11 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
               )}
             </div>
 
-            <div className="p-5 rounded-xl border border-stone-200">
+            <div className="p-5 rounded-xl border border-border-light">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={form.has_terrace} onChange={() => toggleField('has_terrace')}
-                  className="rounded border-stone-300 text-terracotta focus:ring-terracotta" />
-                <span className="text-sm font-medium text-slate-900">Terrasse</span>
+                  className="rounded border-stone-300 text-terracotta focus:ring-accent" />
+                <span className="text-sm font-medium text-text-primary">Terrasse</span>
               </label>
               {form.has_terrace && (
                 <div className="mt-4 pl-7">
@@ -683,11 +841,11 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
               )}
             </div>
 
-            <div className="p-5 rounded-xl border border-stone-200">
+            <div className="p-5 rounded-xl border border-border-light">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={form.has_garden} onChange={() => toggleField('has_garden')}
-                  className="rounded border-stone-300 text-terracotta focus:ring-terracotta" />
-                <span className="text-sm font-medium text-slate-900">Jardin</span>
+                  className="rounded border-stone-300 text-terracotta focus:ring-accent" />
+                <span className="text-sm font-medium text-text-primary">Jardin</span>
               </label>
               {form.has_garden && (
                 <div className="mt-4 pl-7 grid grid-cols-2 gap-4">
@@ -698,11 +856,11 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
               )}
             </div>
 
-            <div className="p-5 rounded-xl border border-stone-200">
+            <div className="p-5 rounded-xl border border-border-light">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={form.has_attic} onChange={() => toggleField('has_attic')}
-                  className="rounded border-stone-300 text-terracotta focus:ring-terracotta" />
-                <span className="text-sm font-medium text-slate-900">Grenier</span>
+                  className="rounded border-stone-300 text-terracotta focus:ring-accent" />
+                <span className="text-sm font-medium text-text-primary">Grenier</span>
               </label>
             </div>
           </div>
@@ -748,15 +906,15 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
               ]} value={form.shutters_type || ''} onChange={(e) => updateField('shutters_type', e.target.value)} />
             </div>
             <div className="space-y-3">
-              <label className="flex items-center gap-3 p-4 rounded-xl border border-stone-200 cursor-pointer hover:bg-stone-50 transition-colors">
+              <label className="flex items-center gap-3 p-4 rounded-xl border border-border-light cursor-pointer hover:bg-bg-card transition-colors">
                 <input type="checkbox" checked={form.has_intercom} onChange={() => toggleField('has_intercom')}
-                  className="rounded border-stone-300 text-terracotta focus:ring-terracotta" />
-                <span className="text-sm font-medium text-slate-900">Interphone / Digicode</span>
+                  className="rounded border-stone-300 text-terracotta focus:ring-accent" />
+                <span className="text-sm font-medium text-text-primary">Interphone / Digicode</span>
               </label>
-              <label className="flex items-center gap-3 p-4 rounded-xl border border-stone-200 cursor-pointer hover:bg-stone-50 transition-colors">
+              <label className="flex items-center gap-3 p-4 rounded-xl border border-border-light cursor-pointer hover:bg-bg-card transition-colors">
                 <input type="checkbox" checked={form.has_fiber} onChange={() => toggleField('has_fiber')}
-                  className="rounded border-stone-300 text-terracotta focus:ring-terracotta" />
-                <span className="text-sm font-medium text-slate-900">Fibre optique disponible</span>
+                  className="rounded border-stone-300 text-terracotta focus:ring-accent" />
+                <span className="text-sm font-medium text-text-primary">Fibre optique disponible</span>
               </label>
             </div>
             <Input
@@ -772,7 +930,7 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
         {sectionKey === 'Finances' && (
           <div className="space-y-5 animate-in">
             {/* Location */}
-            <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Location</h3>
+            <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wider">Location</h3>
             <Input
               label={isStorageType ? 'Loyer mensuel *' : 'Loyer mensuel HC *'}
               type="number"
@@ -803,7 +961,7 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
             />
             {(form.rent_amount > 0 || form.charges_amount > 0) && (
               <div className="p-5 rounded-xl bg-terracotta/5 border border-terracotta/20">
-                <p className="text-sm text-stone-500">Total mensuel</p>
+                <p className="text-sm text-text-secondary">Total mensuel</p>
                 <p className="text-xl font-bold tabular-nums text-terracotta">
                   {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(
                     (form.rent_amount || 0) + (form.charges_amount || 0)
@@ -813,8 +971,8 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
             )}
 
             {/* Achat */}
-            <div className="border-t border-stone-100 pt-5">
-              <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Achat</h3>
+            <div className="border-t border-border pt-5">
+              <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wider mb-4">Achat</h3>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <Input
@@ -867,7 +1025,7 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
                 </div>
 
                 {/* Achat en lot */}
-                <div className="p-5 rounded-xl border border-stone-200">
+                <div className="p-5 rounded-xl border border-border-light">
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input
                       type="checkbox"
@@ -883,11 +1041,11 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
                           setCreatingLot(true);
                         }
                       }}
-                      className="rounded border-stone-300 text-terracotta focus:ring-terracotta"
+                      className="rounded border-stone-300 text-terracotta focus:ring-accent"
                     />
                     <div>
-                      <span className="text-sm font-medium text-slate-900">Achat en lot</span>
-                      <p className="text-xs text-stone-500">Les infos d&apos;achat seront partagées entre tous les biens du lot</p>
+                      <span className="text-sm font-medium text-text-primary">Achat en lot</span>
+                      <p className="text-xs text-text-secondary">Les infos d&apos;achat seront partagées entre tous les biens du lot</p>
                     </div>
                   </label>
 
@@ -925,7 +1083,7 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
                         <button
                           type="button"
                           onClick={() => { setCreatingLot(false); setNewLotName(''); }}
-                          className="text-xs text-stone-500 hover:underline"
+                          className="text-xs text-text-secondary hover:underline"
                         >
                           Choisir un lot existant
                         </button>
@@ -943,8 +1101,8 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
           <div className="space-y-5 animate-in">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-slate-900">Photos du bien</p>
-                <p className="text-xs text-stone-500 mt-1">
+                <p className="text-sm font-medium text-text-primary">Photos du bien</p>
+                <p className="text-xs text-text-secondary mt-1">
                   {totalPhotos}/{MAX_PHOTOS_FREE} photos (max {MAX_PHOTOS_FREE} sans abonnement)
                 </p>
               </div>
@@ -952,7 +1110,7 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
                 type="button"
                 disabled={totalPhotos >= MAX_PHOTOS_FREE}
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-slate-900 hover:bg-stone-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border-light text-sm font-medium text-text-primary hover:bg-bg-card transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Upload className="h-4 w-4" />
                 Ajouter
@@ -970,12 +1128,12 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
             {(form.images || []).length > 0 && (
               <div className="grid grid-cols-3 gap-3">
                 {(form.images || []).map((url, i) => (
-                  <div key={url} className="relative group rounded-xl overflow-hidden border border-stone-200">
+                  <div key={url} className="relative group rounded-xl overflow-hidden border border-border-light">
                     <img src={url} alt={`Photo ${i + 1}`} className="w-full h-28 object-cover" />
                     <button
                       type="button"
                       onClick={() => removeExistingImage(i)}
-                      className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-lg text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-2 right-2 p-1.5 bg-bg-elevated/90 rounded-lg text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -986,7 +1144,7 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
 
             {photoFiles.length > 0 && (
               <div>
-                <p className="text-xs text-stone-500 mb-2">Nouvelles photos (seront uploadées à la sauvegarde)</p>
+                <p className="text-xs text-text-secondary mb-2">Nouvelles photos (seront uploadées à la sauvegarde)</p>
                 <div className="grid grid-cols-3 gap-3">
                   {photoFiles.map((pf, i) => (
                     <div key={i} className="relative group rounded-xl overflow-hidden border border-terracotta/30 border-dashed">
@@ -994,7 +1152,7 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
                       <button
                         type="button"
                         onClick={() => removePhotoFile(i)}
-                        className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-lg text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-2 right-2 p-1.5 bg-bg-elevated/90 rounded-lg text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -1008,7 +1166,7 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full py-12 border-2 border-dashed border-stone-200 rounded-xl text-stone-400 hover:border-terracotta/40 hover:text-terracotta transition-colors flex flex-col items-center gap-2"
+                className="w-full py-12 border-2 border-dashed border-border-light rounded-xl text-text-muted hover:border-terracotta/40 hover:text-terracotta transition-colors flex flex-col items-center gap-2"
               >
                 <ImageIcon className="h-8 w-8" />
                 <span className="text-sm">Cliquez pour ajouter des photos</span>
@@ -1020,12 +1178,12 @@ export default function PropertyForm({ property, lots = [], onClose }: PropertyF
       </div>
 
       {/* Barre d'actions sticky en bas */}
-      <div className="flex items-center justify-between pt-4 mt-4 border-t border-stone-100 shrink-0">
+      <div className="flex items-center justify-between pt-4 mt-4 border-t border-border shrink-0">
         <Button type="button" variant="ghost" onClick={onClose} icon={<X className="h-4 w-4" />}>
           Annuler
         </Button>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-stone-400">
+          <span className="text-xs text-text-muted">
             {activeSection + 1}/{sections.length}
           </span>
           {activeSection < sections.length - 1 ? (

@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import LeaseWizard from './LeaseWizard';
+import ImportLeaseModal from './ImportLeaseModal';
+import { Upload } from 'lucide-react';
 import type { Property, Tenant } from '@/types';
 
 interface BauxPageClientProps {
@@ -14,7 +16,9 @@ interface BauxPageClientProps {
 
 export default function BauxPageClient({ tenants, properties, userMetadata }: BauxPageClientProps) {
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   // Pré-sélection depuis les query params
   const initialPropertyId = searchParams.get('property_id') || undefined;
@@ -29,17 +33,26 @@ export default function BauxPageClient({ tenants, properties, userMetadata }: Ba
 
   return (
     <>
-      {/* Bouton d'ouverture — utilisable depuis l'extérieur via ce composant */}
-      <button
-        type="button"
-        onClick={() => setWizardOpen(true)}
-        className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-terracotta rounded-xl hover:bg-terracotta-dark hover:scale-[1.02] hover:shadow-md transition-all"
-      >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-        </svg>
-        Créer un bail
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setImportOpen(true)}
+          className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-text-secondary border border-border-light rounded-xl hover:border-accent/40 hover:text-text-primary transition-all"
+        >
+          <Upload className="h-4 w-4" />
+          Importer
+        </button>
+        <button
+          type="button"
+          onClick={() => setWizardOpen(true)}
+          className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-accent rounded-xl hover:brightness-110 hover:scale-[1.02] hover:shadow-md transition-all"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          Créer un bail
+        </button>
+      </div>
 
       <LeaseWizard
         open={wizardOpen}
@@ -50,6 +63,15 @@ export default function BauxPageClient({ tenants, properties, userMetadata }: Ba
         initialPropertyId={initialPropertyId}
         initialTenantId={initialTenantId}
       />
+
+      {importOpen && (
+        <ImportLeaseModal
+          properties={properties}
+          tenants={tenants}
+          onClose={() => setImportOpen(false)}
+          onSuccess={() => router.refresh()}
+        />
+      )}
     </>
   );
 }

@@ -10,8 +10,8 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { useRouter } from 'next/navigation';
 import {
-  BarChart3, TrendingUp, TrendingDown, PieChart, Wallet, Building2,
-  Crown, Lock, Calendar, Receipt,
+  BarChart3, TrendingUp, PieChart, Wallet, Building2,
+  Crown, Lock, Calendar,
 } from 'lucide-react';
 import { formatCurrency, formatMonthYear } from '@/lib/utils';
 import {
@@ -21,7 +21,7 @@ import {
   PieChart as RechartsPie, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from 'recharts';
-import type { Payment, Lease, Property, BankTransaction } from '@/types';
+import type { Payment, Lease, Property } from '@/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const fmt = (fn: unknown) => fn as any;
@@ -49,7 +49,6 @@ const COLORS = {
 };
 
 const PIE_COLORS = [COLORS.emerald, COLORS.amber, COLORS.red, COLORS.stone];
-const EXPENSE_COLORS = [COLORS.red, COLORS.amber, COLORS.blue, COLORS.purple, COLORS.stone, COLORS.terracotta];
 
 // ── Page ──────────────────────────────────────────────────────────
 
@@ -61,25 +60,22 @@ export default function AnalytiquePage() {
   const [payments, setPayments] = useState<PaymentWithLease[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
   const [leases, setLeases] = useState<Lease[]>([]);
-  const [transactions, setTransactions] = useState<BankTransaction[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
-      const [paymentsRes, propertiesRes, leasesRes, txRes] = await Promise.all([
+      const [paymentsRes, propertiesRes, leasesRes] = await Promise.all([
         supabase
           .from('payments')
           .select('*, lease:leases(*, property:properties(*), tenant:tenants(first_name, last_name))')
           .order('period_start', { ascending: true }),
         supabase.from('properties').select('*'),
         supabase.from('leases').select('*, property:properties(*), tenant:tenants(first_name, last_name)'),
-        supabase.from('bank_transactions').select('*').order('date', { ascending: true }),
       ]);
 
       setPayments((paymentsRes.data as PaymentWithLease[]) || []);
       setProperties((propertiesRes.data as Property[]) || []);
       setLeases((leasesRes.data as Lease[]) || []);
-      setTransactions((txRes.data as BankTransaction[]) || []);
       setLoading(false);
     }
     fetchData();
@@ -87,10 +83,10 @@ export default function AnalytiquePage() {
 
   // ── Données calculées ─────────────────────────────────────────
 
-  // Revenus et dépenses par mois (12 derniers mois)
+  // Revenus par mois (12 derniers mois)
   const revenueByMonth = useMemo(() => {
     const now = new Date();
-    const months: { month: string; attendu: number; recu: number; depenses: number }[] = [];
+    const months: { month: string; attendu: number; recu: number }[] = [];
 
     for (let i = 11; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -107,19 +103,10 @@ export default function AnalytiquePage() {
         }
       }
 
-      // Dépenses du mois (transactions négatives hors loyer)
-      let depenses = 0;
-      for (const tx of transactions) {
-        const txMonth = tx.date.slice(0, 7);
-        if (txMonth === key && tx.amount < 0 && tx.category !== 'Loyer') {
-          depenses += Math.abs(tx.amount);
-        }
-      }
-
-      months.push({ month: label, attendu, recu, depenses });
+      months.push({ month: label, attendu, recu });
     }
     return months;
-  }, [payments, transactions]);
+  }, [payments]);
 
   // Taux de recouvrement global
   const collectionRate = useMemo(() => {
@@ -141,27 +128,6 @@ export default function AnalytiquePage() {
       { name: 'Partiel', value: counts.partial },
     ].filter((d) => d.value > 0);
   }, [payments]);
-
-  // Répartition des dépenses par catégorie
-  const expensesByCategory = useMemo(() => {
-    const catMap: Record<string, number> = {};
-    for (const tx of transactions) {
-      if (tx.amount < 0 && tx.category !== 'Loyer') {
-        const cat = tx.category || 'Autre';
-        catMap[cat] = (catMap[cat] || 0) + Math.abs(tx.amount);
-      }
-    }
-    return Object.entries(catMap)
-      .map(([name, value]) => ({ name, value: Math.round(value * 100) / 100 }))
-      .sort((a, b) => b.value - a.value);
-  }, [transactions]);
-
-  // Total des dépenses mensuelles (moyenne sur les mois avec données)
-  const monthlyExpenses = useMemo(() => {
-    const monthsWithExpenses = revenueByMonth.filter((m) => m.depenses > 0);
-    if (monthsWithExpenses.length === 0) return 0;
-    return Math.round(monthsWithExpenses.reduce((s, m) => s + m.depenses, 0) / monthsWithExpenses.length);
-  }, [revenueByMonth]);
 
   // Rentabilité par bien
   const profitabilityByProperty = useMemo(() => {
@@ -234,14 +200,10 @@ export default function AnalytiquePage() {
       ? Math.round(((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100)
       : 0;
 
-    // Cashflow réel du mois : revenus reçus - toutes les dépenses (crédit + charges + copro + ...)
-    const thisMonthExpenses = revenueByMonth.length > 0
-      ? revenueByMonth[revenueByMonth.length - 1].depenses
-      : 0;
-    const totalCashflow = thisMonthRevenue - thisMonthExpenses;
+    const totalCashflow = profitabilityByProperty.reduce((s, p) => s + p.cashflow, 0);
 
-    return { thisMonthRevenue, revenueTrend, totalCashflow, monthlyExpenses: thisMonthExpenses, collectionRate };
-  }, [payments, revenueByMonth, collectionRate]);
+    return { thisMonthRevenue, revenueTrend, totalCashflow, collectionRate };
+  }, [payments, profitabilityByProperty, collectionRate]);
 
   // ── Gate Pro (désactivé temporairement pour tests) ───────────────
 
@@ -255,10 +217,10 @@ export default function AnalytiquePage() {
   //           <div className="rounded-full bg-terracotta/10 p-4 mb-4">
   //             <Lock className="h-8 w-8 text-terracotta" />
   //           </div>
-  //           <h2 className="text-lg font-bold text-slate-900 mb-2">
-  //             Fonctionnalité réservée au plan Pro
+  //           <h2 className="text-lg font-bold text-text-primary mb-2">
+  //             Fonctionnalité réservée au plan Premium
   //           </h2>
-  //           <p className="text-sm text-stone-500 max-w-md mb-6">
+  //           <p className="text-sm text-text-secondary max-w-md mb-6">
   //             Accédez à des graphiques détaillés sur vos revenus, votre taux d&apos;occupation,
   //             la rentabilité de vos biens et le suivi de vos paiements.
   //           </p>
@@ -267,7 +229,7 @@ export default function AnalytiquePage() {
   //             icon={<Crown className="h-4 w-4" />}
   //             onClick={() => router.push('/parametres')}
   //           >
-  //             Passer au Pro
+  //             Passer au Premium
   //           </Button>
   //         </div>
   //       </Card>
@@ -282,7 +244,7 @@ export default function AnalytiquePage() {
       <div>
         <PageHeader title="Analytique" description="Tableaux de bord avancés" />
         <div className="flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-stone-200 border-t-terracotta" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border-light border-t-accent" />
         </div>
       </div>
     );
@@ -311,9 +273,9 @@ export default function AnalytiquePage() {
           value={`${kpis.collectionRate}%`}
         />
         <StatCard
-          icon={TrendingDown}
-          label="Dépenses ce mois"
-          value={formatCurrency(kpis.monthlyExpenses)}
+          icon={Building2}
+          label="Biens en portefeuille"
+          value={properties.length}
         />
       </div>
 
@@ -321,11 +283,11 @@ export default function AnalytiquePage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Revenus mensuels */}
         <Card>
-          <h3 className="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+          <h3 className="text-sm font-bold text-text-primary mb-1 flex items-center gap-2">
             <Calendar className="h-4 w-4 text-terracotta" />
-            Revenus &amp; dépenses mensuels
+            Revenus mensuels
           </h3>
-          <p className="text-xs text-stone-500 mb-4">Loyers reçus vs dépenses totales — 12 derniers mois</p>
+          <p className="text-xs text-text-secondary mb-4">Attendu vs reçu — 12 derniers mois</p>
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={revenueByMonth} barGap={2}>
@@ -337,8 +299,8 @@ export default function AnalytiquePage() {
                   contentStyle={{ borderRadius: 12, border: '1px solid #e7e5e0', fontSize: 12 }}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="recu" name="Loyers reçus" fill={COLORS.emerald} radius={[4, 4, 0, 0]} />
-                <Bar dataKey="depenses" name="Dépenses" fill={COLORS.red} radius={[4, 4, 0, 0]} />
+                <Bar dataKey="attendu" name="Attendu" fill={COLORS.stone} radius={[4, 4, 0, 0]} />
+                <Bar dataKey="recu" name="Reçu" fill={COLORS.terracotta} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -346,11 +308,11 @@ export default function AnalytiquePage() {
 
         {/* Taux d'occupation */}
         <Card>
-          <h3 className="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+          <h3 className="text-sm font-bold text-text-primary mb-1 flex items-center gap-2">
             <Building2 className="h-4 w-4 text-terracotta" />
             Taux d&apos;occupation
           </h3>
-          <p className="text-xs text-stone-500 mb-4">Évolution sur 12 mois</p>
+          <p className="text-xs text-text-secondary mb-4">Évolution sur 12 mois</p>
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={occupancyByMonth}>
@@ -376,15 +338,15 @@ export default function AnalytiquePage() {
         </Card>
       </div>
 
-      {/* Graphiques — ligne 2 : pies */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      {/* Graphiques — ligne 2 */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Répartition des paiements */}
         <Card>
-          <h3 className="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+          <h3 className="text-sm font-bold text-text-primary mb-1 flex items-center gap-2">
             <PieChart className="h-4 w-4 text-terracotta" />
             Statut des paiements
           </h3>
-          <p className="text-xs text-stone-500 mb-4">Répartition globale</p>
+          <p className="text-xs text-text-secondary mb-4">Répartition globale</p>
           <div className="h-[240px]">
             {paymentStatusDistribution.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -408,63 +370,20 @@ export default function AnalytiquePage() {
                 </RechartsPie>
               </ResponsiveContainer>
             ) : (
-              <div className="flex items-center justify-center h-full text-xs text-stone-400">
+              <div className="flex items-center justify-center h-full text-xs text-text-muted">
                 Aucun paiement enregistré
               </div>
             )}
           </div>
         </Card>
 
-        {/* Répartition des dépenses par catégorie */}
-        <Card>
-          <h3 className="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
-            <Receipt className="h-4 w-4 text-terracotta" />
-            Dépenses par catégorie
-          </h3>
-          <p className="text-xs text-stone-500 mb-4">Copro, crédit, assurance, travaux...</p>
-          <div className="h-[240px]">
-            {expensesByCategory.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartsPie>
-                  <Pie
-                    data={expensesByCategory}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
-                    paddingAngle={3}
-                    dataKey="value"
-                    label={fmt(({ name, percent }: { name: string; percent: number }) => `${name} ${Math.round(percent * 100)}%`)}
-                    style={{ fontSize: 11 }}
-                  >
-                    {expensesByCategory.map((_, i) => (
-                      <Cell key={i} fill={EXPENSE_COLORS[i % EXPENSE_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={fmt((v: number) => formatCurrency(v))}
-                    contentStyle={{ borderRadius: 12, border: '1px solid #e7e5e0', fontSize: 12 }}
-                  />
-                </RechartsPie>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-full text-xs text-stone-400">
-                Aucune dépense catégorisée
-              </div>
-            )}
-          </div>
-        </Card>
-      </div>
-
-      {/* Graphiques — ligne 3 : rentabilité */}
-      <div className="grid grid-cols-1 gap-6 mb-6">
         {/* Rentabilité par bien */}
-        <Card>
-          <h3 className="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+        <Card className="lg:col-span-2">
+          <h3 className="text-sm font-bold text-text-primary mb-1 flex items-center gap-2">
             <TrendingUp className="h-4 w-4 text-terracotta" />
             Rentabilité par bien
           </h3>
-          <p className="text-xs text-stone-500 mb-4">Cashflow mensuel (loyer - crédit)</p>
+          <p className="text-xs text-text-secondary mb-4">Cashflow mensuel (loyer - crédit)</p>
           {profitabilityByProperty.length > 0 ? (
             <div className="h-[240px]">
               <ResponsiveContainer width="100%" height="100%">
@@ -483,7 +402,7 @@ export default function AnalytiquePage() {
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="flex items-center justify-center h-[240px] text-xs text-stone-400">
+            <div className="flex items-center justify-center h-[240px] text-xs text-text-muted">
               Ajoutez des biens avec un loyer pour voir la rentabilité
             </div>
           )}
@@ -493,14 +412,14 @@ export default function AnalytiquePage() {
       {/* Tableau de rendement */}
       {profitabilityByProperty.length > 0 && (
         <Card>
-          <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <h3 className="text-sm font-bold text-text-primary mb-4 flex items-center gap-2">
             <Wallet className="h-4 w-4 text-terracotta" />
             Détail par bien
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-stone-200 text-left text-xs text-stone-500">
+                <tr className="border-b border-border-light text-left text-xs text-text-secondary">
                   <th className="pb-3 font-medium">Bien</th>
                   <th className="pb-3 font-medium text-right">Loyer mensuel</th>
                   <th className="pb-3 font-medium text-right">Crédit mensuel</th>
@@ -510,8 +429,8 @@ export default function AnalytiquePage() {
               </thead>
               <tbody>
                 {profitabilityByProperty.map((prop) => (
-                  <tr key={prop.name} className="border-b border-stone-100">
-                    <td className="py-3 font-medium text-slate-900">{prop.name}</td>
+                  <tr key={prop.name} className="border-b border-border">
+                    <td className="py-3 font-medium text-text-primary">{prop.name}</td>
                     <td className="py-3 text-right tabular-nums text-emerald-600">
                       {formatCurrency(prop.loyer)}
                     </td>
@@ -521,7 +440,7 @@ export default function AnalytiquePage() {
                     <td className={`py-3 text-right tabular-nums font-medium ${prop.cashflow >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
                       {formatCurrency(prop.cashflow)}
                     </td>
-                    <td className="py-3 text-right tabular-nums text-slate-900">
+                    <td className="py-3 text-right tabular-nums text-text-primary">
                       {prop.rendement !== null ? `${prop.rendement}%` : '—'}
                     </td>
                   </tr>

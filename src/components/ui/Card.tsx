@@ -36,7 +36,7 @@ export default function Card({
       onClick={onClick}
       className={[
         // Style de base
-        'bg-white rounded-2xl shadow-sm border border-stone-200/50',
+        'bg-bg-elevated rounded-2xl border border-border-light',
         // Padding configurable
         padding,
         // Effets interactifs (seulement si activé)

@@ -18,5 +18,5 @@ export async function getUserSubscription(): Promise<Subscription | null> {
 
 export async function isUserPro(): Promise<boolean> {
   const sub = await getUserSubscription();
-  return sub?.plan === 'pro' && sub?.status === 'active';
+  return (sub?.plan === 'premium' || sub?.plan === 'pro') && sub?.status === 'active';
 }

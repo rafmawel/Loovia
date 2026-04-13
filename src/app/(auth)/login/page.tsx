@@ -3,21 +3,12 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Home } from 'lucide-react';
+import { Home, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
 import { createClient } from '@/lib/supabase/client';
 
-/**
- * Page de connexion — Loovia
- *
- * Permet à l'utilisateur de se connecter avec son email et mot de passe
- * via Supabase Auth. Redirige vers le tableau de bord en cas de succès.
- */
 export default function LoginPage() {
-  // --- État du formulaire ---
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,7 +16,6 @@ export default function LoginPage() {
 
   const router = useRouter();
 
-  // --- Soumission du formulaire ---
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
@@ -33,7 +23,6 @@ export default function LoginPage() {
 
     try {
       const supabase = createClient();
-
       const { error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -44,90 +33,103 @@ export default function LoginPage() {
         return;
       }
 
-      // Connexion réussie — notification et redirection
       toast.success('Connexion réussie !');
+      router.refresh();
       router.push('/dashboard');
-    } catch {
-      setError('Une erreur inattendue est survenue. Veuillez réessayer.');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erreur inconnue';
+      console.error('Login error:', err);
+      setError(`Erreur : ${message}`);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="bg-off-white min-h-screen flex items-center justify-center px-4">
-      {/* Carte de connexion */}
-      <div className="bg-white rounded-2xl shadow-sm border border-stone-200/50 p-8 w-full max-w-md">
-        {/* Logo — lien retour vers le site */}
-        <div className="flex items-center justify-center gap-2 mb-6">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <Home className="h-6 w-6 text-terracotta" />
-            <span className="text-2xl font-bold text-terracotta">Loovia</span>
-          </Link>
-        </div>
+    <div className="bg-bg-primary min-h-screen flex flex-col items-center justify-center px-4 relative">
+      {/* Gradient orb */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-accent/5 blur-3xl pointer-events-none" />
 
-        {/* Titre et sous-titre */}
+      {/* Retour au site */}
+      <Link
+        href="/"
+        className="absolute top-6 left-6 flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Retour au site
+      </Link>
+
+      {/* Carte */}
+      <div className="glass-card rounded-2xl p-8 w-full max-w-md relative z-10">
+        {/* Logo */}
+        <Link href="/" className="flex items-center justify-center gap-2 mb-6">
+          <Home className="h-6 w-6 text-accent" />
+          <span className="text-2xl font-bold gradient-text font-[var(--font-syne)]">Loovia</span>
+        </Link>
+
+        {/* Titre */}
         <div className="text-center mb-8">
-          <h1 className="text-xl font-bold text-slate-900">Connexion</h1>
-          <p className="text-sm text-stone-500 mt-1">
+          <h1 className="text-xl font-bold text-text-primary">Connexion</h1>
+          <p className="text-sm text-text-secondary mt-1">
             Accédez à votre espace de gestion
           </p>
         </div>
 
-        {/* Alerte d'erreur */}
+        {/* Erreur */}
         {error && (
-          <div className="mb-6 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          <div className="mb-6 rounded-xl bg-danger/10 border border-danger/20 px-4 py-3 text-sm text-danger">
             {error}
           </div>
         )}
 
-        {/* Formulaire de connexion */}
+        {/* Formulaire */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Input
-            label="Email"
-            type="email"
-            placeholder="vous@exemple.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            autoComplete="email"
-          />
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-text-secondary">Email</label>
+            <input
+              type="email"
+              placeholder="vous@exemple.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+              className="rounded-xl border border-border-light bg-bg-elevated px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
+            />
+          </div>
 
-          <Input
-            label="Mot de passe"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete="current-password"
-          />
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-text-secondary">Mot de passe</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+              className="rounded-xl border border-border-light bg-bg-elevated px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
+            />
+          </div>
 
-          <Button
+          <button
             type="submit"
-            variant="primary"
-            loading={loading}
-            className="w-full mt-2"
+            disabled={loading}
+            className="w-full mt-2 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-accent text-white text-sm font-medium hover:bg-accent-light hover:scale-[1.02] hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
+            {loading && (
+              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            )}
             Se connecter
-          </Button>
+          </button>
         </form>
 
-        {/* Lien vers l'inscription */}
-        <p className="text-sm text-stone-500 text-center mt-6">
+        {/* Lien inscription */}
+        <p className="text-sm text-text-secondary text-center mt-6">
           Pas encore de compte ?{' '}
-          <Link
-            href="/register"
-            className="text-terracotta font-medium hover:underline"
-          >
+          <Link href="/register" className="text-accent font-medium hover:underline">
             Créer un compte
-          </Link>
-        </p>
-
-        {/* Retour au site */}
-        <p className="text-xs text-stone-400 text-center mt-4">
-          <Link href="/" className="hover:text-terracotta transition-colors">
-            &larr; Retour au site
           </Link>
         </p>
       </div>

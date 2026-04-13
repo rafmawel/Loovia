@@ -46,17 +46,17 @@ export default function AdVideo({ onComplete, onCancel }: AdVideoProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden">
+      <div className="bg-bg-elevated rounded-2xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden">
         {/* Zone vidéo — à remplacer par le player pub réel */}
         <div className="aspect-video bg-stone-900 flex items-center justify-center">
-          <div className="text-center text-stone-400">
+          <div className="text-center text-text-muted">
             <p className="text-sm">Espace vidéo publicitaire</p>
             <p className="text-xs mt-1">30 secondes</p>
           </div>
         </div>
 
         <div className="p-4 flex items-center justify-between">
-          <p className="text-xs text-stone-500">
+          <p className="text-xs text-text-secondary">
             {secondsLeft > 0
               ? `Vous pourrez continuer dans ${secondsLeft}s`
               : 'Vous pouvez continuer'}

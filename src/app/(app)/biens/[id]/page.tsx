@@ -61,10 +61,10 @@ export default async function BienDetailPage({ params }: Props) {
   return (
     <div>
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-stone-500 mb-4">
-        <Link href="/biens" className="hover:text-slate-900 transition-colors">Mes Biens</Link>
+      <div className="flex items-center gap-2 text-sm text-text-secondary mb-4">
+        <Link href="/biens" className="hover:text-text-primary transition-colors">Mes Biens</Link>
         <ChevronRight className="h-3.5 w-3.5" />
-        <span className="text-slate-900 font-medium truncate">{property.name}</span>
+        <span className="text-text-primary font-medium truncate">{property.name}</span>
       </div>
 
       {/* En-tête avec actions */}
@@ -103,7 +103,7 @@ export default async function BienDetailPage({ params }: Props) {
         <div className="lg:col-span-2 space-y-6">
           {/* 1. Localisation */}
           <Card>
-            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
               <MapPin className="h-5 w-5 text-terracotta" />
               Localisation
             </h2>
@@ -118,7 +118,7 @@ export default async function BienDetailPage({ params }: Props) {
 
           {/* 2. Description */}
           <Card>
-            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
               <Home className="h-5 w-5 text-terracotta" />
               Description
             </h2>
@@ -133,7 +133,7 @@ export default async function BienDetailPage({ params }: Props) {
           {/* 3. Cuisine */}
           {(property.kitchen_type || (property.kitchen_equipment && property.kitchen_equipment.length > 0)) && (
             <Card>
-              <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
                 <Utensils className="h-5 w-5 text-terracotta" />
                 Cuisine
               </h2>
@@ -141,10 +141,10 @@ export default async function BienDetailPage({ params }: Props) {
                 {property.kitchen_type && <InfoItem label="Type" value={property.kitchen_type} />}
                 {property.kitchen_equipment && property.kitchen_equipment.length > 0 && (
                   <div>
-                    <p className="text-xs text-stone-500 mb-2">Équipements</p>
+                    <p className="text-xs text-text-secondary mb-2">Équipements</p>
                     <div className="flex flex-wrap gap-2">
                       {property.kitchen_equipment.map((equip) => (
-                        <span key={equip} className="text-xs font-medium bg-stone-100 text-stone-700 px-2.5 py-1 rounded-lg">
+                        <span key={equip} className="text-xs font-medium bg-bg-card text-stone-700 px-2.5 py-1 rounded-lg">
                           {equip}
                         </span>
                       ))}
@@ -158,7 +158,7 @@ export default async function BienDetailPage({ params }: Props) {
           {/* 4. Annexes (uniquement si au moins une est true) */}
           {annexes.length > 0 && (
             <Card>
-              <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
                 <Warehouse className="h-5 w-5 text-terracotta" />
                 Annexes
               </h2>
@@ -179,7 +179,7 @@ export default async function BienDetailPage({ params }: Props) {
           {/* 5. Chauffage & Eau chaude */}
           {(property.heating_type || property.hot_water_type) && (
             <Card>
-              <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
                 <Thermometer className="h-5 w-5 text-terracotta" />
                 Chauffage & Eau chaude
               </h2>
@@ -195,7 +195,7 @@ export default async function BienDetailPage({ params }: Props) {
           {/* 6. Confort */}
           {(property.glazing_type || property.shutters_type || property.has_intercom || property.has_fiber) && (
             <Card>
-              <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
                 <Shield className="h-5 w-5 text-terracotta" />
                 Confort
               </h2>
@@ -221,7 +221,7 @@ export default async function BienDetailPage({ params }: Props) {
           {/* 9. Baux associés */}
           <Card>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
                 <FileText className="h-5 w-5 text-terracotta" />
                 Baux associés ({leases.length})
               </h2>
@@ -234,20 +234,20 @@ export default async function BienDetailPage({ params }: Props) {
               </Link>
             </div>
             {leases.length === 0 ? (
-              <p className="text-sm text-stone-500">Aucun bail associé à ce bien.</p>
+              <p className="text-sm text-text-secondary">Aucun bail associé à ce bien.</p>
             ) : (
               <div className="space-y-3">
                 {leases.map((lease) => (
                   <Link
                     key={lease.id}
                     href={`/baux/${lease.id}`}
-                    className="flex items-center justify-between p-3 rounded-xl bg-stone-50 hover:bg-stone-100 transition-colors"
+                    className="flex items-center justify-between p-3 rounded-xl bg-bg-card hover:bg-bg-card transition-colors"
                   >
                     <div>
-                      <p className="text-sm font-medium text-slate-900">
+                      <p className="text-sm font-medium text-text-primary">
                         {lease.tenant ? fullName(lease.tenant.first_name, lease.tenant.last_name) : '—'}
                       </p>
-                      <p className="text-xs text-stone-500">
+                      <p className="text-xs text-text-secondary">
                         {formatDate(lease.start_date)}{lease.end_date ? ` — ${formatDate(lease.end_date)}` : ' — En cours'}
                         {' · '}{formatCurrency(lease.monthly_rent)}/mois
                       </p>
@@ -262,7 +262,7 @@ export default async function BienDetailPage({ params }: Props) {
           {/* 10. États des lieux */}
           <Card>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
                 <ClipboardList className="h-5 w-5 text-terracotta" />
                 États des lieux ({edlReports.length})
               </h2>
@@ -277,20 +277,20 @@ export default async function BienDetailPage({ params }: Props) {
               )}
             </div>
             {edlReports.length === 0 ? (
-              <p className="text-sm text-stone-500">Aucun état des lieux enregistré.</p>
+              <p className="text-sm text-text-secondary">Aucun état des lieux enregistré.</p>
             ) : (
               <div className="space-y-3">
                 {edlReports.map((edl) => (
                   <Link
                     key={edl.id}
                     href={`/edl/${edl.id}`}
-                    className="flex items-center justify-between p-3 rounded-xl bg-stone-50 hover:bg-stone-100 transition-colors"
+                    className="flex items-center justify-between p-3 rounded-xl bg-bg-card hover:bg-bg-card transition-colors"
                   >
                     <div>
-                      <p className="text-sm font-medium text-slate-900">
+                      <p className="text-sm font-medium text-text-primary">
                         {edl.type === 'entrance' ? "État des lieux d'entrée" : 'État des lieux de sortie'}
                       </p>
-                      <p className="text-xs text-stone-500">
+                      <p className="text-xs text-text-secondary">
                         {edl.tenant ? `${edl.tenant.first_name} ${edl.tenant.last_name}` : '—'}
                         {' · '}{formatDate(edl.created_at)}
                       </p>
@@ -301,7 +301,7 @@ export default async function BienDetailPage({ params }: Props) {
                       ) : (
                         <span className="text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Brouillon</span>
                       )}
-                      <ChevronRight className="h-4 w-4 text-stone-400" />
+                      <ChevronRight className="h-4 w-4 text-text-muted" />
                     </div>
                   </Link>
                 ))}
@@ -322,32 +322,32 @@ export default async function BienDetailPage({ params }: Props) {
         <div className="space-y-6">
           {/* 7. Conditions financières */}
           <Card>
-            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
               <Wallet className="h-5 w-5 text-terracotta" />
               Conditions financières
             </h2>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-stone-500">Loyer HC</span>
-                <span className="text-base font-bold tabular-nums text-slate-900">
+                <span className="text-sm text-text-secondary">Loyer HC</span>
+                <span className="text-base font-bold tabular-nums text-text-primary">
                   {formatCurrency(property.rent_amount)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-stone-500">Charges</span>
-                <span className="text-sm font-medium tabular-nums text-slate-900">
+                <span className="text-sm text-text-secondary">Charges</span>
+                <span className="text-sm font-medium tabular-nums text-text-primary">
                   +{formatCurrency(property.charges_amount)}
                 </span>
               </div>
-              <div className="flex justify-between items-center pt-3 border-t border-stone-100">
-                <span className="text-sm font-medium text-slate-900">Total mensuel</span>
+              <div className="flex justify-between items-center pt-3 border-t border-border">
+                <span className="text-sm font-medium text-text-primary">Total mensuel</span>
                 <span className="text-lg font-bold tabular-nums text-terracotta">
                   {formatCurrency(property.rent_amount + property.charges_amount)}
                 </span>
               </div>
-              <div className="flex justify-between items-center pt-2 border-t border-stone-100">
-                <span className="text-sm text-stone-500">Dépôt de garantie</span>
-                <span className="text-sm font-medium tabular-nums text-slate-900">
+              <div className="flex justify-between items-center pt-2 border-t border-border">
+                <span className="text-sm text-text-secondary">Dépôt de garantie</span>
+                <span className="text-sm font-medium tabular-nums text-text-primary">
                   {formatCurrency(property.deposit_amount)}
                 </span>
               </div>
@@ -356,7 +356,7 @@ export default async function BienDetailPage({ params }: Props) {
 
           {/* 8. Locataire actuel */}
           <Card>
-            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
               <User className="h-5 w-5 text-terracotta" />
               Locataire actuel
             </h2>
@@ -375,17 +375,17 @@ export default async function BienDetailPage({ params }: Props) {
                   <Link
                     key={tenant.id}
                     href={`/locataires/${tenant.id}`}
-                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-stone-50 transition-colors"
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-bg-card transition-colors"
                   >
                     <div className="flex items-center justify-center h-10 w-10 rounded-full bg-terracotta/10 text-terracotta text-sm font-semibold shrink-0">
                       {tenant.first_name.charAt(0)}{tenant.last_name.charAt(0)}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-slate-900 truncate">
+                      <p className="text-sm font-medium text-text-primary truncate">
                         {fullName(tenant.first_name, tenant.last_name)}
                       </p>
-                      <p className="text-xs text-stone-500 truncate">{tenant.email}</p>
-                      <p className="text-xs text-stone-400">Depuis le {formatDate(tenant.start_date)}</p>
+                      <p className="text-xs text-text-secondary truncate">{tenant.email}</p>
+                      <p className="text-xs text-text-muted">Depuis le {formatDate(tenant.start_date)}</p>
                     </div>
                     <StatusBadge variant="payment" status={tenant.payment_status} />
                   </Link>
@@ -397,7 +397,7 @@ export default async function BienDetailPage({ params }: Props) {
           {/* Historique des locataires */}
           {pastTenants.length > 0 && (
             <Card>
-              <h2 className="text-lg font-bold text-slate-900 mb-4">
+              <h2 className="text-lg font-bold text-text-primary mb-4">
                 Anciens locataires ({pastTenants.length})
               </h2>
               <div className="space-y-2">
@@ -405,13 +405,13 @@ export default async function BienDetailPage({ params }: Props) {
                   <Link
                     key={tenant.id}
                     href={`/locataires/${tenant.id}`}
-                    className="flex items-center justify-between p-3 rounded-xl hover:bg-stone-50 transition-colors"
+                    className="flex items-center justify-between p-3 rounded-xl hover:bg-bg-card transition-colors"
                   >
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-stone-500 truncate">
+                      <p className="text-sm font-medium text-text-secondary truncate">
                         {fullName(tenant.first_name, tenant.last_name)}
                       </p>
-                      <p className="text-xs text-stone-400">
+                      <p className="text-xs text-text-muted">
                         {formatDate(tenant.start_date)} — {tenant.end_date ? formatDate(tenant.end_date) : '—'}
                       </p>
                     </div>
@@ -430,8 +430,8 @@ export default async function BienDetailPage({ params }: Props) {
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs text-stone-500">{label}</p>
-      <p className="text-sm font-medium text-slate-900">{value}</p>
+      <p className="text-xs text-text-secondary">{label}</p>
+      <p className="text-sm font-medium text-text-primary">{value}</p>
     </div>
   );
 }

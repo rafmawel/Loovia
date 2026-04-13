@@ -57,9 +57,9 @@ export default function StatusBadge<V extends StatusVariant>({
 
   // Récupération des couleurs depuis le design system
   const colors = statusColors[status as keyof typeof statusColors] ?? {
-    bg: 'bg-stone-100',
+    bg: 'bg-bg-card',
     text: 'text-stone-600',
-    border: 'border-stone-200',
+    border: 'border-border-light',
   };
 
   // Libellé français par défaut

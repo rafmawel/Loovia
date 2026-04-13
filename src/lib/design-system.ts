@@ -16,35 +16,35 @@ export const colors = {
 // Mapping des statuts vers les couleurs de badges
 export const statusColors = {
   // Paiements
-  paid: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-  pending: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
-  partial: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
-  late: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
+  paid: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' },
+  pending: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20' },
+  partial: { bg: 'bg-orange-500/10', text: 'text-orange-400', border: 'border-orange-500/20' },
+  late: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/20' },
 
   // Baux
-  draft: { bg: 'bg-stone-100', text: 'text-stone-600', border: 'border-stone-200' },
-  pending_signature: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-  signed: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-  active: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-  terminated: { bg: 'bg-stone-100', text: 'text-stone-500', border: 'border-stone-200' },
+  draft: { bg: 'bg-white/5', text: 'text-text-secondary', border: 'border-border-light' },
+  pending_signature: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20' },
+  signed: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' },
+  active: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' },
+  terminated: { bg: 'bg-white/5', text: 'text-text-muted', border: 'border-border-light' },
 
   // Maintenance
-  open: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-  in_progress: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
-  resolved: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-  closed: { bg: 'bg-stone-100', text: 'text-stone-500', border: 'border-stone-200' },
+  open: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20' },
+  in_progress: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20' },
+  resolved: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' },
+  closed: { bg: 'bg-white/5', text: 'text-text-muted', border: 'border-border-light' },
 
-  // Transactions bancaires
-  unmatched: { bg: 'bg-stone-100', text: 'text-stone-600', border: 'border-stone-200' },
-  suggestion: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-  matched: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-  categorized: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' },
+  // Transactions
+  unmatched: { bg: 'bg-white/5', text: 'text-text-secondary', border: 'border-border-light' },
+  suggestion: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20' },
+  matched: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' },
+  categorized: { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/20' },
 
   // Documents
-  requested: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-  received: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
-  validated: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-  rejected: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
+  requested: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20' },
+  received: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20' },
+  validated: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' },
+  rejected: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/20' },
 } as const;
 
 // Labels français pour les statuts
@@ -90,10 +90,10 @@ export const priorityLabels: Record<string, string> = {
 };
 
 export const priorityColors = {
-  low: { bg: 'bg-stone-100', text: 'text-stone-600' },
-  medium: { bg: 'bg-blue-50', text: 'text-blue-700' },
-  high: { bg: 'bg-orange-50', text: 'text-orange-700' },
-  urgent: { bg: 'bg-red-50', text: 'text-red-700' },
+  low: { bg: 'bg-white/5', text: 'text-text-secondary' },
+  medium: { bg: 'bg-blue-500/10', text: 'text-blue-400' },
+  high: { bg: 'bg-orange-500/10', text: 'text-orange-400' },
+  urgent: { bg: 'bg-red-500/10', text: 'text-red-400' },
 } as const;
 
 // Types de bien

@@ -19,18 +19,16 @@ export function EmptyState({ icon: Icon, title, description, action }: EmptyStat
     <div className="flex flex-col items-center justify-center py-12 text-center">
       {/* Icône dans un cercle arrondi */}
       {Icon && (
-        <div className="rounded-full bg-stone-100 p-4 mb-4 text-stone-400">
+        <div className="rounded-full bg-bg-card p-4 mb-4 text-text-muted">
           <Icon className="h-6 w-6" />
         </div>
       )}
 
-      {/* Titre */}
-      <h3 className="text-lg font-semibold text-slate-900 mb-1">
+      <h3 className="text-lg font-semibold text-text-primary mb-1">
         {title}
       </h3>
 
-      {/* Description */}
-      <p className="text-sm text-stone-500 max-w-sm mb-6">
+      <p className="text-sm text-text-secondary max-w-sm mb-6">
         {description}
       </p>
 
