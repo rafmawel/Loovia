@@ -65,6 +65,9 @@ export async function POST() {
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Erreur inconnue';
     console.error('Erreur Powens connect:', message);
-    return NextResponse.json({ error: 'Erreur lors de la connexion bancaire' }, { status: 500 });
+    console.error('POWENS_DOMAIN:', process.env.POWENS_DOMAIN ? 'set' : 'NOT SET');
+    console.error('POWENS_CLIENT_ID:', process.env.POWENS_CLIENT_ID ? 'set' : 'NOT SET');
+    console.error('POWENS_CLIENT_SECRET:', process.env.POWENS_CLIENT_SECRET ? 'set' : 'NOT SET');
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
