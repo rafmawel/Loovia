@@ -66,7 +66,8 @@ export async function createPowensUser(token: string): Promise<{ id: number; tok
 
 // Obtenir l'URL de la webview de connexion bancaire
 export function getConnectUrl(token: string): string {
-  return `${POWENS_BASE_URL}/auth/webview/connect?client_id=${POWENS_CLIENT_ID}&token=${token}`;
+  const redirectUri = encodeURIComponent(`${process.env.NEXT_PUBLIC_APP_URL}/api/powens/callback`);
+  return `${POWENS_BASE_URL}/auth/webview/connect?client_id=${POWENS_CLIENT_ID}&token=${token}&redirect_uri=${redirectUri}`;
 }
 
 // Lister les connexions d'un utilisateur
