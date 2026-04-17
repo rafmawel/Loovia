@@ -40,14 +40,14 @@ export async function POST() {
     }
 
     let token: string;
+    let connectionId: string;
 
     if (existingConnections && existingConnections.length > 0) {
       token = existingConnections[0].access_token;
-      // Vérifier que le token est valide en essayant d'obtenir un code
+      connectionId = existingConnections[0].id;
       try {
         await getTemporaryCode(token);
       } catch {
-        // Token invalide — supprimer l'ancienne entrée et recréer
         const admin = createAdminClient();
         await admin.from('bank_connections')
           .delete()
@@ -55,27 +55,29 @@ export async function POST() {
 
         const authResult = await getAuthToken();
         token = authResult.auth_token;
-        await admin.from('bank_connections').insert({
+        const { data: inserted } = await admin.from('bank_connections').insert({
           user_id: user.id,
           access_token: token,
           item_id: String(authResult.id_user),
-        });
+        }).select('id').single();
+        connectionId = inserted!.id;
       }
     } else {
       const authResult = await getAuthToken();
       token = authResult.auth_token;
 
       const admin = createAdminClient();
-      await admin.from('bank_connections').insert({
+      const { data: inserted } = await admin.from('bank_connections').insert({
         user_id: user.id,
         access_token: token,
         item_id: String(authResult.id_user),
-      });
+      }).select('id').single();
+      connectionId = inserted!.id;
     }
 
     const connectUrl = await getConnectUrl(token);
 
-    return NextResponse.json({ connect_url: connectUrl });
+    return NextResponse.json({ connect_url: connectUrl, connectionId });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Erreur inconnue';
     console.error('Erreur Powens connect:', message);

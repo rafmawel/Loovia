@@ -154,13 +154,29 @@ export default function FinancesPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      // Ouvrir la webview Powens dans une popup
       const { default: openPowensConnect } = await import('@/lib/powens-connect');
       await openPowensConnect(data.connect_url);
 
-      // Recharger les données après fermeture de la popup
-      toast.success('Connexion bancaire mise à jour');
-      fetchAll();
+      toast.success('Connexion réussie — synchronisation en cours…');
+      await fetchAll();
+
+      // Auto-sync après connexion
+      if (data.connectionId) {
+        setSyncing(true);
+        try {
+          const syncRes = await fetch('/api/finance/sync-bank', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ connectionId: data.connectionId }),
+          });
+          const syncData = await syncRes.json();
+          if (syncRes.ok) {
+            toast.success(`${syncData.added} transactions importées`);
+          }
+        } catch { /* sync error is non-blocking */ }
+        setSyncing(false);
+        fetchAll();
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erreur');
     }
