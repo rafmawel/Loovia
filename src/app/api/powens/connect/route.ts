@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getAuthToken, getConnectUrl } from '@/lib/api/powens';
+import { getAuthToken, getConnectUrl, getTemporaryCode } from '@/lib/api/powens';
 
 export async function POST() {
   try {
@@ -42,14 +42,29 @@ export async function POST() {
     let token: string;
 
     if (existingConnections && existingConnections.length > 0) {
-      // Réutiliser le token permanent existant (même utilisateur Powens)
       token = existingConnections[0].access_token;
+      // Vérifier que le token est valide en essayant d'obtenir un code
+      try {
+        await getTemporaryCode(token);
+      } catch {
+        // Token invalide — supprimer l'ancienne entrée et recréer
+        const admin = createAdminClient();
+        await admin.from('bank_connections')
+          .delete()
+          .eq('id', existingConnections[0].id);
+
+        const authResult = await getAuthToken();
+        token = authResult.auth_token;
+        await admin.from('bank_connections').insert({
+          user_id: user.id,
+          access_token: token,
+          item_id: String(authResult.id_user),
+        });
+      }
     } else {
-      // /auth/init avec client_id + client_secret crée un utilisateur permanent
       const authResult = await getAuthToken();
       token = authResult.auth_token;
 
-      // Sauvegarder le token permanent dans bank_connections
       const admin = createAdminClient();
       await admin.from('bank_connections').insert({
         user_id: user.id,
@@ -58,7 +73,7 @@ export async function POST() {
       });
     }
 
-    const connectUrl = getConnectUrl(token);
+    const connectUrl = await getConnectUrl(token);
 
     return NextResponse.json({ connect_url: connectUrl });
   } catch (err) {

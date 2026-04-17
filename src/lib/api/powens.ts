@@ -64,10 +64,17 @@ export async function createPowensUser(token: string): Promise<{ id: number; tok
   });
 }
 
+// Obtenir un code temporaire à partir du token permanent
+export async function getTemporaryCode(token: string): Promise<string> {
+  const data = await powensRequest<{ code: string }>('/auth/token/code', { token });
+  return data.code;
+}
+
 // Obtenir l'URL de la webview de connexion bancaire
-export function getConnectUrl(token: string): string {
+export async function getConnectUrl(token: string): Promise<string> {
+  const code = await getTemporaryCode(token);
   const redirectUri = encodeURIComponent(`${process.env.NEXT_PUBLIC_APP_URL}/api/powens/callback`);
-  return `${POWENS_BASE_URL}/auth/webview/connect?client_id=${POWENS_CLIENT_ID}&token=${token}&redirect_uri=${redirectUri}`;
+  return `https://webview.powens.com/fr/connect?domain=${POWENS_DOMAIN}&client_id=${POWENS_CLIENT_ID}&redirect_uri=${redirectUri}&code=${code}`;
 }
 
 // Lister les connexions d'un utilisateur
