@@ -172,8 +172,12 @@ export default function FinancesPage() {
           const syncData = await syncRes.json();
           if (syncRes.ok) {
             toast.success(`${syncData.added} transactions importées`);
+          } else {
+            toast.error(`Sync: ${syncData.error || 'Erreur'}`);
           }
-        } catch { /* sync error is non-blocking */ }
+        } catch (syncErr) {
+          toast.error(syncErr instanceof Error ? syncErr.message : 'Erreur de sync');
+        }
         setSyncing(false);
         fetchAll();
       }

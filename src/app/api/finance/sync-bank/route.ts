@@ -37,7 +37,15 @@ export async function POST(request: NextRequest) {
     const token = typedConnection.access_token;
 
     // Récupérer les infos de connexion Powens (nom de banque)
-    const powensConnections = await listConnections(token);
+    let powensConnections;
+    try {
+      powensConnections = await listConnections(token);
+      console.log('Powens connections:', JSON.stringify(powensConnections));
+    } catch (connErr) {
+      console.error('Erreur listConnections:', connErr);
+      powensConnections = [];
+    }
+
     if (powensConnections.length > 0) {
       const bankName = powensConnections[0].connector?.name;
       if (bankName && bankName !== typedConnection.institution_name) {
@@ -60,10 +68,22 @@ export async function POST(request: NextRequest) {
     let totalAdded = 0;
     let hasMore = true;
 
-    while (hasMore) {
-      const result = await listTransactions(token, { offset, limit, min_date: minDate });
+    console.log('Fetching transactions with min_date:', minDate);
 
-      if (result.transactions.length > 0) {
+    while (hasMore) {
+      let result;
+      try {
+        result = await listTransactions(token, { offset, limit, min_date: minDate });
+        console.log('Powens transactions response:', JSON.stringify({
+          count: result.transactions?.length,
+          total: result.total,
+        }));
+      } catch (txErr) {
+        console.error('Erreur listTransactions:', txErr);
+        break;
+      }
+
+      if (result.transactions && result.transactions.length > 0) {
         const transactions = result.transactions.map((tx) => ({
           user_id: user.id,
           connection_id: connectionId,
@@ -159,7 +179,9 @@ export async function POST(request: NextRequest) {
       matched,
       suggestions,
     });
-  } catch {
-    return NextResponse.json({ error: 'Erreur lors de la synchronisation bancaire' }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Erreur inconnue';
+    console.error('Sync-bank error:', message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
