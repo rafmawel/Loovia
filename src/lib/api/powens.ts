@@ -71,10 +71,9 @@ export async function getTemporaryCode(token: string): Promise<string> {
 }
 
 // Obtenir l'URL de la webview de connexion bancaire
-export async function getConnectUrl(token: string): Promise<string> {
-  const code = await getTemporaryCode(token);
+export function getConnectUrl(token: string): string {
   const redirectUri = encodeURIComponent(`${process.env.NEXT_PUBLIC_APP_URL}/api/powens/callback`);
-  return `https://webview.powens.com/fr/connect?domain=${POWENS_DOMAIN}&client_id=${POWENS_CLIENT_ID}&redirect_uri=${redirectUri}&code=${code}`;
+  return `${POWENS_BASE_URL}/auth/webview/connect?client_id=${POWENS_CLIENT_ID}&token=${token}&redirect_uri=${redirectUri}`;
 }
 
 // Lister les connexions d'un utilisateur
