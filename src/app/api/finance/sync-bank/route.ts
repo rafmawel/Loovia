@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     const token = typedConnection.access_token;
 
     // Récupérer les infos de connexion Powens (nom de banque)
-    let powensConnections;
+    let powensConnections: Awaited<ReturnType<typeof listConnections>> = [];
     try {
       powensConnections = await listConnections(token);
       console.log('Powens connections:', JSON.stringify(powensConnections));
