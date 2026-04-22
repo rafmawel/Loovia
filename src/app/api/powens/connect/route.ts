@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getAuthToken, getConnectUrl, listConnections } from '@/lib/api/powens';
+import { getAuthToken, getConnectUrl, getTemporaryCode } from '@/lib/api/powens';
 
 export async function POST() {
   try {
@@ -45,27 +45,6 @@ export async function POST() {
     if (existingConnections && existingConnections.length > 0) {
       token = existingConnections[0].access_token;
       connectionId = existingConnections[0].id;
-
-      // Vérifier que le token est encore valide
-      try {
-        await listConnections(token);
-      } catch {
-        // Token invalide — supprimer et recréer
-        const admin = createAdminClient();
-        for (const conn of existingConnections) {
-          await admin.from('bank_transactions').delete().eq('connection_id', conn.id);
-          await admin.from('bank_connections').delete().eq('id', conn.id);
-        }
-
-        const authResult = await getAuthToken();
-        token = authResult.auth_token;
-        const { data: inserted } = await admin.from('bank_connections').insert({
-          user_id: user.id,
-          access_token: token,
-          item_id: String(authResult.id_user),
-        }).select('id').single();
-        connectionId = inserted!.id;
-      }
     } else {
       const authResult = await getAuthToken();
       token = authResult.auth_token;
@@ -79,7 +58,9 @@ export async function POST() {
       connectionId = inserted!.id;
     }
 
-    const connectUrl = getConnectUrl(token);
+    // Générer un code temporaire pour la webview
+    const code = await getTemporaryCode(token);
+    const connectUrl = getConnectUrl(code);
 
     return NextResponse.json({ connect_url: connectUrl, connectionId });
   } catch (err) {
