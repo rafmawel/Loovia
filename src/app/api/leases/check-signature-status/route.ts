@@ -42,7 +42,6 @@ export async function POST(request: NextRequest) {
 
     // Interroger Firma pour le statut à jour
     const signingStatus = await getSigningStatus(lease.firma_request_id);
-    console.log('Firma signing status response:', JSON.stringify(signingStatus, null, 2));
 
     // Mettre à jour le bail avec les données fraîches
     const admin = createAdminClient();
@@ -90,8 +89,6 @@ export async function POST(request: NextRequest) {
         updates.signature_tenant_status = 'signed';
       }
     }
-
-    console.log('Updating lease with:', JSON.stringify(updates, null, 2));
 
     await admin.from('leases').update(updates).eq('id', lease.id);
 

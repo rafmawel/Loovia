@@ -5,7 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 const BUCKET = 'property-images';
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_PHOTOS_FREE = 3;
+const MAX_PHOTOS_FREE = 20;
 
 // Ensure the storage bucket exists (created once by admin client)
 async function ensureBucket() {
@@ -44,21 +44,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Le fichier dépasse 5 Mo' }, { status: 400 });
     }
 
-    // Check current photo count for this property (if propertyId provided)
+    // Check current photo count across all user properties for free plan users
     if (propertyId) {
-      const { data: property } = await supabase
-        .from('properties')
-        .select('images')
-        .eq('id', propertyId)
+      // Check subscription status — premium and pro users have unlimited photos
+      const { data: subscription } = await supabase
+        .from('subscriptions')
+        .select('plan, status')
+        .eq('user_id', user.id)
         .single();
 
-      const currentCount = (property?.images || []).length;
-      // TODO: check subscription status for 20-photo limit
-      if (currentCount >= MAX_PHOTOS_FREE) {
-        return NextResponse.json(
-          { error: `Maximum ${MAX_PHOTOS_FREE} photos sans abonnement` },
-          { status: 403 }
+      const plan = subscription?.plan ?? 'free';
+      const isActive = subscription?.status === 'active';
+      const isPaid = (plan === 'premium' || plan === 'pro') && isActive;
+
+      if (!isPaid) {
+        // Count total photos across all of the user's properties
+        const { data: properties } = await supabase
+          .from('properties')
+          .select('images')
+          .eq('user_id', user.id);
+
+        const totalPhotos = (properties || []).reduce(
+          (sum, p) => sum + (p.images || []).length,
+          0,
         );
+
+        if (totalPhotos >= MAX_PHOTOS_FREE) {
+          return NextResponse.json(
+            { error: `Limite de ${MAX_PHOTOS_FREE} photos atteinte. Passez à un abonnement Premium ou Pro pour un nombre illimité de photos.` },
+            { status: 403 }
+          );
+        }
       }
     }
 

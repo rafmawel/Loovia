@@ -165,7 +165,8 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (err) {
+    console.error('Firma webhook error:', err);
     return NextResponse.json(
       { error: 'Erreur lors du traitement du webhook' },
       { status: 500 },

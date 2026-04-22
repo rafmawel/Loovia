@@ -205,37 +205,36 @@ export default function AnalytiquePage() {
     return { thisMonthRevenue, revenueTrend, totalCashflow, collectionRate };
   }, [payments, profitabilityByProperty, collectionRate]);
 
-  // ── Gate Pro (désactivé temporairement pour tests) ───────────────
+  // ── Gate Pro (Premium & Pro uniquement) ──────────────────────────
 
-  // TODO: réactiver le gate Pro avant la mise en production
-  // if (!isPro) {
-  //   return (
-  //     <div>
-  //       <PageHeader title="Analytique" description="Tableaux de bord avancés" />
-  //       <Card>
-  //         <div className="flex flex-col items-center justify-center py-16 text-center">
-  //           <div className="rounded-full bg-terracotta/10 p-4 mb-4">
-  //             <Lock className="h-8 w-8 text-terracotta" />
-  //           </div>
-  //           <h2 className="text-lg font-bold text-text-primary mb-2">
-  //             Fonctionnalité réservée au plan Premium
-  //           </h2>
-  //           <p className="text-sm text-text-secondary max-w-md mb-6">
-  //             Accédez à des graphiques détaillés sur vos revenus, votre taux d&apos;occupation,
-  //             la rentabilité de vos biens et le suivi de vos paiements.
-  //           </p>
-  //           <Button
-  //             variant="primary"
-  //             icon={<Crown className="h-4 w-4" />}
-  //             onClick={() => router.push('/parametres')}
-  //           >
-  //             Passer au Premium
-  //           </Button>
-  //         </div>
-  //       </Card>
-  //     </div>
-  //   );
-  // }
+  if (!isPro) {
+    return (
+      <div>
+        <PageHeader title="Analytique" description="Tableaux de bord avancés" />
+        <Card>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="rounded-full bg-terracotta/10 p-4 mb-4">
+              <Lock className="h-8 w-8 text-terracotta" />
+            </div>
+            <h2 className="text-lg font-bold text-text-primary mb-2">
+              Fonctionnalité réservée au plan Premium
+            </h2>
+            <p className="text-sm text-text-secondary max-w-md mb-6">
+              Accédez à des graphiques détaillés sur vos revenus, votre taux d&apos;occupation,
+              la rentabilité de vos biens et le suivi de vos paiements.
+            </p>
+            <Button
+              variant="primary"
+              icon={<Crown className="h-4 w-4" />}
+              onClick={() => router.push('/parametres')}
+            >
+              Passer au Premium
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   // ── Rendu ───────────────────────────────────────────────────────
 

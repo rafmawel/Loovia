@@ -84,7 +84,8 @@ export async function POST(request: NextRequest) {
       email: tenant.email,
       period,
     });
-  } catch {
+  } catch (err) {
+    console.error('Receipt send error:', err);
     return NextResponse.json({ error: 'Erreur lors de l\'envoi de la quittance' }, { status: 500 });
   }
 }

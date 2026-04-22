@@ -67,20 +67,12 @@ export async function POST(request: NextRequest) {
     const limit = 100;
     let totalAdded = 0;
     let hasMore = true;
-    let debugInfo = { connectionsCount: powensConnections.length, minDate: minDate || 'none', rawFirstPage: null as unknown };
-
     while (hasMore) {
       let result;
       try {
         result = await listTransactions(token, { offset, limit, min_date: minDate });
-        if (offset === 0) {
-          debugInfo.rawFirstPage = {
-            txCount: result.transactions?.length ?? 'undefined',
-            total: result.total ?? 'undefined',
-          };
-        }
       } catch (txErr) {
-        debugInfo.rawFirstPage = { error: txErr instanceof Error ? txErr.message : 'unknown' };
+        console.error('Erreur listTransactions:', txErr);
         break;
       }
 
@@ -181,7 +173,6 @@ export async function POST(request: NextRequest) {
       added: totalAdded,
       matched,
       suggestions,
-      debug: debugInfo,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Erreur inconnue';

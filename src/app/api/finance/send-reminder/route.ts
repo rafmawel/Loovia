@@ -62,7 +62,8 @@ export async function POST(request: NextRequest) {
     );
 
     return NextResponse.json({ success: true, email: tenant.email });
-  } catch {
+  } catch (err) {
+    console.error('Reminder send error:', err);
     return NextResponse.json({ error: 'Erreur lors de l\'envoi de la relance' }, { status: 500 });
   }
 }
