@@ -60,26 +60,27 @@ export async function POST(request: NextRequest) {
     const lastSync = typedConnection.cursor;
     const minDate = lastSync
       ? new Date(lastSync).toISOString().split('T')[0]
-      : new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // 90 jours par défaut
+      : undefined; // Pas de filtre date pour la première sync — tout récupérer
 
     // Récupérer les transactions via Powens (avec pagination)
     let offset = 0;
     const limit = 100;
     let totalAdded = 0;
     let hasMore = true;
-
-    console.log('Fetching transactions with min_date:', minDate);
+    let debugInfo = { connectionsCount: powensConnections.length, minDate: minDate || 'none', rawFirstPage: null as unknown };
 
     while (hasMore) {
       let result;
       try {
         result = await listTransactions(token, { offset, limit, min_date: minDate });
-        console.log('Powens transactions response:', JSON.stringify({
-          count: result.transactions?.length,
-          total: result.total,
-        }));
+        if (offset === 0) {
+          debugInfo.rawFirstPage = {
+            txCount: result.transactions?.length ?? 'undefined',
+            total: result.total ?? 'undefined',
+          };
+        }
       } catch (txErr) {
-        console.error('Erreur listTransactions:', txErr);
+        debugInfo.rawFirstPage = { error: txErr instanceof Error ? txErr.message : 'unknown' };
         break;
       }
 
@@ -103,11 +104,13 @@ export async function POST(request: NextRequest) {
       hasMore = result.transactions.length === limit && offset < result.total;
     }
 
-    // Sauvegarder le timestamp de sync
-    await supabase
-      .from('bank_connections')
-      .update({ cursor: new Date().toISOString() })
-      .eq('id', connectionId);
+    // Sauvegarder le timestamp de sync seulement si des transactions ont été trouvées
+    if (totalAdded > 0) {
+      await supabase
+        .from('bank_connections')
+        .update({ cursor: new Date().toISOString() })
+        .eq('id', connectionId);
+    }
 
     // ── Lancer le matching automatique ─────────────────────────────
 
@@ -178,6 +181,7 @@ export async function POST(request: NextRequest) {
       added: totalAdded,
       matched,
       suggestions,
+      debug: debugInfo,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Erreur inconnue';

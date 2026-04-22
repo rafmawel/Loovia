@@ -211,6 +211,14 @@ export default function FinancesPage() {
         totalAdded += data.added;
         totalMatched += data.matched;
         totalSuggestions += data.suggestions;
+
+        // Debug temporaire
+        if (data.debug) {
+          console.log('Sync debug:', JSON.stringify(data.debug));
+          if (totalAdded === 0) {
+            toast.info(`Debug Powens: ${JSON.stringify(data.debug)}`, { duration: 15000 });
+          }
+        }
       }
 
       toast.success(
