@@ -5,7 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 const BUCKET = 'property-images';
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_PHOTOS_FREE = 20;
+const MAX_PHOTOS_FREE_PER_PROPERTY = 3;
 
 // Ensure the storage bucket exists (created once by admin client)
 async function ensureBucket() {
@@ -44,9 +44,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Le fichier dépasse 5 Mo' }, { status: 400 });
     }
 
-    // Check current photo count across all user properties for free plan users
-    if (propertyId) {
-      // Check subscription status — premium and pro users have unlimited photos
+    // Check photo limit per property for free plan users (excluding inventory uploads)
+    const context = formData.get('context') as string | null;
+    if (propertyId && context !== 'etat_des_lieux') {
       const { data: subscription } = await supabase
         .from('subscriptions')
         .select('plan, status')
@@ -58,20 +58,16 @@ export async function POST(request: NextRequest) {
       const isPaid = (plan === 'premium' || plan === 'pro') && isActive;
 
       if (!isPaid) {
-        // Count total photos across all of the user's properties
-        const { data: properties } = await supabase
+        const { data: property } = await supabase
           .from('properties')
           .select('images')
-          .eq('user_id', user.id);
+          .eq('id', propertyId)
+          .single();
 
-        const totalPhotos = (properties || []).reduce(
-          (sum, p) => sum + (p.images || []).length,
-          0,
-        );
-
-        if (totalPhotos >= MAX_PHOTOS_FREE) {
+        const currentCount = (property?.images || []).length;
+        if (currentCount >= MAX_PHOTOS_FREE_PER_PROPERTY) {
           return NextResponse.json(
-            { error: `Limite de ${MAX_PHOTOS_FREE} photos atteinte. Passez à un abonnement Premium ou Pro pour un nombre illimité de photos.` },
+            { error: `Limite de ${MAX_PHOTOS_FREE_PER_PROPERTY} photos par bien atteinte. Passez au Premium pour un nombre illimité.` },
             { status: 403 }
           );
         }
