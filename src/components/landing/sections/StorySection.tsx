@@ -29,25 +29,25 @@ export function StorySection() {
 
           <div className="space-y-6 text-text-secondary text-base leading-[1.85]">
             <p>
-              Comme beaucoup de propriétaires, j&apos;ai longtemps géré mes biens avec les moyens
-              du bord. Un bail téléchargé sur un site, un état des lieux sur un autre, les
-              quittances dans un fichier Word, les factures travaux dans un dossier quelque
-              part sur mon bureau &mdash; ou peut-être dans mes mails, je ne sais plus trop.
+              Avant Loovia, gérer un bien locatif signifiait jongler entre une dizaine
+              d&apos;outils différents. Un bail rédigé ici, un état des lieux signé là,
+              des quittances générées manuellement, des factures éparpillées entre les mails
+              et le bureau.
             </p>
             <p>
-              Le nom de mon locataire ? Quelque part dans mon téléphone. Son RIB ? Dans un
-              email de 2021. La date de révision du loyer ?{' '}
-              <span className="text-pastel-peach font-medium">Bonne question.</span>
+              Le constat était simple : aucune solution existante ne couvrait l&apos;ensemble
+              des besoins d&apos;un propriétaire bailleur. Résultat ?{' '}
+              <span className="text-pastel-peach font-medium">Des heures perdues et des oublis coûteux.</span>
             </p>
             <p>
-              Ce n&apos;est pas de la mauvaise gestion &mdash; c&apos;est juste que rien n&apos;a
-              jamais été conçu pour ça. Vous finissez avec quatre abonnements, trois exports
-              Excel, et autant d&apos;angles morts.
+              Loovia a été conçu pour répondre à cette réalité. Une plateforme unique
+              qui centralise chaque aspect de la gestion locative : baux, locataires,
+              paiements, documents, comptabilité.
             </p>
             <p className="text-white font-medium border-l-2 border-accent pl-6">
-              Loovia est né de cette frustration. Tout ce qu&apos;un propriétaire fait, refait,
-              et oublie de faire &mdash; automatisé, centralisé, accessible. Pas un outil de plus.
-              Un outil à la place de tous les autres.
+              Notre mission : donner aux propriétaires bailleurs un outil à la hauteur
+              de leurs responsabilités &mdash; intuitif, complet et fiable.
+              Pas un outil de plus. Un outil à la place de tous les autres.
             </p>
           </div>
         </div>

@@ -17,31 +17,30 @@ export function ProblemSection() {
         <div className="mt-14 grid md:grid-cols-2 gap-8">
           <div className={`space-y-6 text-[16px] text-text-dark/70 leading-[1.8] ${inView ? 'animate-fade-up delay-200' : 'opacity-0'}`}>
             <p>
-              Un bail téléchargé sur un site, un état des lieux sur un autre.
-              Les quittances dans un fichier Word, les factures travaux quelque
-              part dans vos mails. Le nom de votre locataire ? Dans votre téléphone.
-              Son RIB ? Dans un email de 2021.
+              Baux éparpillés, quittances manuelles, factures introuvables,
+              échéances oubliées. Chaque propriétaire bailleur connaît cette
+              réalité : des heures passées sur des tâches administratives
+              qui pourraient être automatisées.
             </p>
             <p>
-              Ce n&apos;est pas de la mauvaise gestion. C&apos;est simplement que les
-              outils existants n&apos;ont jamais été conçus pour couvrir l&apos;ensemble
-              de vos besoins. Vous finissez avec quatre abonnements, trois exports
-              Excel, et aucune vue d&apos;ensemble.
+              Les solutions existantes ne répondent qu&apos;à une partie du problème.
+              Vous multipliez les outils, les abonnements et les fichiers Excel
+              &mdash; sans jamais avoir de vision globale sur votre patrimoine.
             </p>
           </div>
 
           <div className={`bg-white rounded-2xl border border-stone-200/80 p-8 ${inView ? 'animate-fade-up delay-300' : 'opacity-0'}`}>
             <p className="text-[16px] text-text-dark leading-[1.8] font-medium">
-              &laquo;&nbsp;Loovia est né de cette frustration. L&apos;idée est simple&nbsp;:
-              tout ce qu&apos;un propriétaire fait, refait, et oublie de faire &mdash;
-              automatisé, centralisé, accessible.
+              &laquo;&nbsp;J&apos;ai créé Loovia parce que je vivais ce problème au quotidien.
+              Mon objectif était clair&nbsp;: réunir tout ce dont un propriétaire
+              a besoin dans un seul outil, simple et accessible.
             </p>
             <p className="mt-4 text-[16px] text-text-dark leading-[1.8] font-medium">
-              Pas un outil de plus. Un outil{' '}
-              <span className="text-accent font-bold">à la place de tous les autres.</span>&nbsp;&raquo;
+              Pas un logiciel de plus. Une plateforme{' '}
+              <span className="text-accent font-bold">qui remplace tous les autres.</span>&nbsp;&raquo;
             </p>
             <div className="mt-6 pt-5 border-t border-stone-100">
-              <p className="text-[14px] text-text-dark font-semibold">Rafmawel</p>
+              <p className="text-[14px] text-text-dark font-semibold">Raphaël Da Silva Santos</p>
               <p className="text-[13px] text-text-muted">Fondateur de Loovia</p>
             </div>
           </div>
